@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="110" viewBox="0 0 140 110">
+  <!-- Busch. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="blatt" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#7cc96a"/><stop offset="0.6" stop-color="#3f9142"/><stop offset="1" stop-color="#28662c"/></radialGradient>
+    <radialGradient id="blattDunkel" cx="40%" cy="35%" r="80%"><stop offset="0" stop-color="#3f9142"/><stop offset="1" stop-color="#1f5523"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="70" cy="100" rx="62" ry="9" fill="url(#schatten)"/>
+  <path d="M64.0,76.0 Q63.8,85.1 57.4,92.2 Q50.7,98.9 40.9,100.8 Q30.7,103.2 22.0,97.8 Q12.8,93.5 9.7,84.6 Q6.5,76.0 9.7,67.4 Q13.1,58.7 22.0,54.2 Q30.7,48.9 40.9,51.2 Q51.4,52.1 57.4,59.8 Q64.7,66.6 64.0,76.0 Z" fill="url(#blattDunkel)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M132.0,76.0 Q132.5,85.3 125.4,92.2 Q119.3,99.8 108.9,100.8 Q98.7,102.9 90.0,97.8 Q80.7,93.6 77.7,84.6 Q74.1,76.0 77.7,67.4 Q80.9,58.6 90.0,54.2 Q98.9,49.9 108.9,51.2 Q118.9,52.8 125.4,59.8 Q131.8,66.9 132.0,76.0 Z" fill="url(#blattDunkel)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M100.0,82.0 Q100.0,91.8 93.0,99.4 Q86.2,107.2 75.2,108.6 Q64.5,109.9 55.0,105.4 Q46.1,100.0 41.8,91.2 Q38.4,82.0 41.8,72.8 Q46.1,64.0 55.0,58.6 Q64.5,53.9 75.2,55.4 Q86.4,56.5 93.0,64.6 Q99.4,72.4 100.0,82.0 Z" fill="url(#blattDunkel)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M72.0,64.0 Q71.6,73.1 65.4,80.2 Q58.7,87.0 48.9,88.8 Q38.8,90.4 30.0,85.8 Q21.1,81.3 17.7,72.6 Q13.7,64.0 17.7,55.4 Q20.6,46.3 30.0,42.2 Q38.8,37.5 48.9,39.2 Q59.4,40.0 65.4,47.8 Q72.6,54.6 72.0,64.0 Z" fill="url(#blatt)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M124.0,64.0 Q123.6,73.1 117.4,80.2 Q111.2,87.7 100.9,88.8 Q90.9,90.2 82.0,85.8 Q73.2,81.2 69.7,72.6 Q66.3,64.0 69.7,55.4 Q73.0,46.6 82.0,42.2 Q90.7,37.0 100.9,39.2 Q111.0,40.7 117.4,47.8 Q123.9,54.9 124.0,64.0 Z" fill="url(#blatt)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M104.0,50.0 Q103.3,60.9 96.0,69.7 Q87.7,77.6 75.9,80.1 Q63.7,82.3 53.0,76.5 Q43.1,70.3 38.1,60.5 Q34.7,50.0 38.1,39.5 Q42.5,29.2 53.0,23.5 Q63.8,18.4 75.9,19.9 Q87.7,22.3 96.0,30.3 Q103.5,39.0 104.0,50.0 Z" fill="url(#blatt)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M96.0,78.0 Q96.1,86.6 89.9,93.0 Q84.3,100.3 74.5,101.0 Q65.0,103.4 57.0,98.3 Q48.1,94.5 45.6,86.0 Q42.4,78.0 45.6,70.0 Q48.8,62.0 57.0,57.7 Q65.1,53.0 74.5,55.0 Q83.8,56.5 89.9,63.0 Q95.9,69.5 96.0,78.0 Z" fill="url(#blatt)" stroke="#1a4a1e" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M50,40 Q60,24 77,26" stroke="#ffffff" stroke-opacity="0.35" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M27,56 Q36,43 50,44" stroke="#ffffff" stroke-opacity="0.35" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>

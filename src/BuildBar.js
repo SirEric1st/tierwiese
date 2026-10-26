@@ -1,6 +1,7 @@
 // Die Bau-Leiste am unteren Bildschirmrand. Sie bewegt sich nicht mit,
 // wenn man die Wiese verschiebt. Die Leiste zeichnet nur sich selbst –
 // was beim Antippen und Ziehen passiert, regelt die WorldScene.
+import { screenSize, uiOrigin } from './display.js';
 import { ELEMENTS } from './elements.js';
 
 export const BAR_HEIGHT = 130;
@@ -33,7 +34,9 @@ export class BuildBar {
   }
 
   layout() {
-    const { width, height } = this.scene.scale;
+    const { width, height } = screenSize(this.scene);
+    const origin = uiOrigin(this.scene);
+    this.container.setPosition(origin.x, origin.y);
     const barWidth = Math.min(width - 20, ELEMENTS.length * (SLOT_SIZE + SLOT_GAP) + SLOT_GAP);
     this.barLeft = (width - barWidth) / 2;
     this.barWidth = barWidth;
@@ -64,7 +67,7 @@ export class BuildBar {
     this.drawBackground();
   }
 
-  // Liegt diese Bildschirmposition auf der Leiste?
+  // Liegt diese Bildschirmposition (in normalen Punkten) auf der Leiste?
   contains(screenX, screenY) {
     return screenY >= this.top && screenX >= this.barLeft - 20 && screenX <= this.barLeft + this.barWidth + 20;
   }

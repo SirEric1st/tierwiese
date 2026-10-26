@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="130" viewBox="0 0 130 130">
+  <!-- Gedankenblase. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="wolke" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset="0.7" stop-color="#ffffff"/><stop offset="1" stop-color="#e2ecf5"/></radialGradient>
+  </defs>
+  <path d="M119.9,60.7 Q122.5,82.4 95.9,88.7 Q78.9,107.9 53.9,95.1 Q28.6,94.5 18.3,76.3 Q2.7,61.6 10.1,43.3 Q8.1,21.9 34.1,15.3 Q51.4,-2.8 76.1,8.9 Q103.6,6.9 111.7,27.7 Q128.6,42.3 119.9,60.7 Z" fill="url(#wolke)" stroke="#b9cadb" stroke-width="2.4" stroke-linejoin="round"/>
+  <circle cx="30" cy="106" r="9" fill="url(#wolke)" stroke="#b9cadb" stroke-width="2"/>
+  <circle cx="18" cy="122" r="6" fill="url(#wolke)" stroke="#b9cadb" stroke-width="1.8"/>
+</svg>

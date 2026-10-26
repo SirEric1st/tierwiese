@@ -2,9 +2,12 @@
 
 ## Grafiken
 
-Im Moment gibt es noch keine Bilddateien. Alle Grafiken (Gras, Blumen, Bäume, Teich, Schilf, Laubhaufen, Busch,
-Spielfigur, Tiere, Gedankenblase, Konfetti, Knöpfe) sind Platzhalter, die beim Start per Code gezeichnet
-werden (`src/textures.js`) – eigene Arbeit, Teil dieses Projekts.
+Alle Spielgrafiken sind eigene Arbeit, Teil dieses Projekts:
+
+- `assets/grafik/*.svg` – Tiere, Spielfigur, Landschaft, Gedankenblase.
+  Erzeugt mit dem eigenen Skript `tools/grafik.py`.
+- Konfetti und Knöpfe werden beim Start per Code gezeichnet
+  (`src/textures.js`, `src/scenes/StartScene.js`, `src/BuildBar.js`).
 
 | Datei | Herkunft | Lizenz |
 |-------|----------|--------|

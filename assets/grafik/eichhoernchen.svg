@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="120" viewBox="0 0 110 120">
+  <!-- Eichhörnchen mit Nuss. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="schwanz" cx="45%" cy="40%" r="75%"><stop offset="0" stop-color="#f0954a"/><stop offset="0.6" stop-color="#c95f25"/><stop offset="1" stop-color="#9a4316"/></radialGradient>
+    <radialGradient id="fell" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#e88545"/><stop offset="1" stop-color="#a84a1c"/></radialGradient>
+    <radialGradient id="bauch" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff4e0"/><stop offset="1" stop-color="#efd2a8"/></radialGradient>
+    <radialGradient id="nuss" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#d9a066"/><stop offset="1" stop-color="#8a5428"/></radialGradient>
+    <radialGradient id="nase" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#5a3a28"/><stop offset="1" stop-color="#160c06"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="58" cy="114" rx="42" ry="6" fill="url(#schatten)"/>
+  <!-- Buschiger Schwanz -->
+  <path d="M54.0,58.0 Q56.0,73.2 50.2,84.0 Q47.1,97.5 40.0,101.7 Q33.6,108.3 26.6,105.5 Q19.3,105.0 14.3,94.3 Q7.4,87.0 7.0,71.5 Q2.8,58.0 7.0,44.5 Q8.2,29.9 14.3,21.7 Q19.2,10.6 26.6,10.5 Q33.6,7.9 40.0,14.3 Q46.9,19.1 50.2,32.0 Q57.3,42.0 54.0,58.0 Z" fill="url(#schwanz)" stroke="#7a3410" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M24,30 Q34,50 30,88" stroke="#ffb27a" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.45"/>
+  <!-- Körper -->
+  <path d="M44,104 Q38,80 50,66 Q62,56 76,64 Q86,76 82,100 Q78,112 62,112 Q48,112 44,104 Z" fill="url(#fell)" stroke="#7a3410" stroke-width="1.8"/>
+  <path d="M60,74 Q72,72 76,86 Q78,102 66,106 Q56,104 56,90 Q56,78 60,74 Z" fill="url(#bauch)"/>
+  <!-- Füße -->
+  <ellipse cx="52" cy="111" rx="11" ry="5.5" fill="#b9541f" stroke="#7a3410" stroke-width="1.4"/>
+  <ellipse cx="74" cy="111" rx="11" ry="5.5" fill="#b9541f" stroke="#7a3410" stroke-width="1.4"/>
+  <!-- Nuss in den Pfoten -->
+  <ellipse cx="84" cy="80" rx="8" ry="9" fill="url(#nuss)" stroke="#6a3a14" stroke-width="1.4"/>
+  <path d="M78,75 Q84,70 90,75" stroke="#6a3a14" stroke-width="1.2" fill="none"/>
+  <circle cx="80" cy="83" r="4.5" fill="#d0682b" stroke="#7a3410" stroke-width="1.2"/>
+  <circle cx="88" cy="83" r="4.5" fill="#d0682b" stroke="#7a3410" stroke-width="1.2"/>
+  <!-- Ohren mit Pinseln -->
+  <path d="M62,34 Q60,14 68,6 Q72,18 76,32 Z" fill="url(#fell)" stroke="#7a3410" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M80,30 Q84,10 94,4 Q95,18 92,32 Z" fill="url(#fell)" stroke="#7a3410" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M68,6 Q66,0 70,-2 M94,4 Q94,-2 98,-3" stroke="#7a3410" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <!-- Kopf -->
+  <path d="M58,50 Q56,30 78,28 Q96,28 102,44 Q110,48 108,56 Q104,64 92,66 Q72,70 62,62 Q58,58 58,50 Z" fill="url(#fell)" stroke="#7a3410" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M84,54 Q96,52 106,56 Q102,64 90,64 Q84,62 84,54 Z" fill="url(#bauch)"/>
+  <circle cx="107" cy="52" r="3.6" fill="url(#nase)"/>
+  <circle cx="106" cy="50.8" r="1.1" fill="#fff" opacity="0.8"/>
+  <circle cx="86" cy="44" r="7.0" fill="#fff" stroke="#00000022" stroke-width="1"/>
+  <circle cx="86.8" cy="44.6" r="5.6" fill="#2b1a0e"/>
+  <circle cx="86.8" cy="44.6" r="3.1" fill="#0d0704"/>
+  <circle cx="84.9" cy="42.0" r="2.1" fill="#fff"/>
+  <circle cx="88.8" cy="46.5" r="1.0" fill="#fff" opacity="0.9"/>
+  <ellipse cx="80" cy="58" rx="4.5" ry="2.8" fill="#ff8f8f" opacity="0.5"/>
+</svg>

@@ -1,5 +1,6 @@
 // Ein einzelnes Tier auf der Wiese: laufen, Gedankenblase zeigen, sprechen.
 // Wann ein Tier kommt, einzieht oder geht, entscheidet der AnimalManager.
+import { IMAGE_SCALE } from './display.js';
 import { say } from './speech.js';
 
 const WALK_SPEED = 170; // Pixel pro Sekunde
@@ -16,9 +17,9 @@ export class Animal {
     this.isInWater = isInWater;
     this.state = 'away'; // away | visiting | resident
 
-    this.sprite = scene.add.image(0, 0, def.type).setOrigin(0.5, 1);
+    this.sprite = scene.add.image(0, 0, def.type).setOrigin(0.5, 1).setScale(IMAGE_SCALE);
     this.bubble = scene.add.container(0, 0, [
-      scene.add.image(0, 0, 'gedankenblase').setOrigin(0.14, 0.95),
+      scene.add.image(0, 0, 'gedankenblase').setOrigin(0.14, 0.95).setScale(IMAGE_SCALE),
     ]);
     this.bubble.setVisible(false);
     this.container = scene.add.container(0, 0, [this.sprite, this.bubble]);
@@ -36,11 +37,11 @@ export class Animal {
   // Liegt dieser Punkt auf dem Tier?
   contains(worldX, worldY) {
     if (!this.container.visible) return false;
-    const halfWidth = this.sprite.width / 2;
+    const halfWidth = this.sprite.displayWidth / 2;
     return (
       worldX >= this.x - halfWidth &&
       worldX <= this.x + halfWidth &&
-      worldY >= this.y - this.sprite.height &&
+      worldY >= this.y - this.sprite.displayHeight &&
       worldY <= this.y + 10
     );
   }
@@ -220,7 +221,7 @@ export class Animal {
     const icon = this.scene.add.image(47, -73, elementType);
     icon.setScale(64 / Math.max(icon.width, icon.height));
     this.bubble.add(icon);
-    this.bubble.setPosition(10, -this.sprite.height + 10).setVisible(true);
+    this.bubble.setPosition(10, -this.sprite.displayHeight + 10).setVisible(true);
     this.bubble.setScale(0);
     this.scene.tweens.add({ targets: this.bubble, scale: 1, duration: 300, ease: 'Back.easeOut' });
   }

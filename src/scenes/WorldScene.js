@@ -4,6 +4,7 @@
 // kann man verschieben oder zurück auf die Leiste ziehen (wegräumen).
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
+import { IMAGE_SCALE, screenSize, setupCamera, toScreen } from '../display.js';
 import { getElement } from '../elements.js';
 import { loadGame, saveGame } from '../save.js';
 import { say } from '../speech.js';
@@ -11,7 +12,7 @@ import { say } from '../speech.js';
 const WORLD_WIDTH = 2400;
 const WORLD_HEIGHT = 1600;
 const WALK_SPEED = 260; // Pixel pro Sekunde
-const DRAG_THRESHOLD = 12; // ab so vielen Pixeln Bewegung gilt es als Ziehen
+const DRAG_THRESHOLD = 12; // ab so vielen Punkten Bewegung gilt es als Ziehen
 const EDGE = 60; // Abstand zum Weltrand, den die Figur nicht überschreitet
 const AUTO_SCROLL_ZONE = 70; // beim Ziehen am Bildschirmrand scrollt die Wiese mit
 const AUTO_SCROLL_SPEED = 500; // Pixel pro Sekunde
@@ -31,7 +32,8 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'gras').setOrigin(0);
+    setupCamera(this);
+    this.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'gras').setOrigin(0).setTileScale(IMAGE_SCALE);
     this.scatterFlowers();
 
     const saved = loadGame();
@@ -53,8 +55,8 @@ export class WorldScene extends Phaser.Scene {
       });
 
     const start = saved?.player ?? { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
-    this.shadow = this.add.image(start.x, start.y, 'schatten');
-    this.player = this.add.image(start.x, start.y, 'figur').setOrigin(0.5, 1);
+    this.shadow = this.add.image(start.x, start.y, 'schatten').setScale(IMAGE_SCALE);
+    this.player = this.add.image(start.x, start.y, 'figur').setOrigin(0.5, 1).setScale(IMAGE_SCALE);
     this.updatePlayerDepth();
 
     const camera = this.cameras.main;
@@ -110,7 +112,7 @@ export class WorldScene extends Phaser.Scene {
     for (let i = 0; i < 60; i++) {
       const x = rnd.between(30, WORLD_WIDTH - 30);
       const y = rnd.between(40, WORLD_HEIGHT - 20);
-      this.add.image(x, y, rnd.pick(keys)).setOrigin(0.5, 1).setDepth(DEPTH_FLOWERS);
+      this.add.image(x, y, rnd.pick(keys)).setOrigin(0.5, 1).setScale(IMAGE_SCALE).setDepth(DEPTH_FLOWERS);
     }
   }
 
@@ -126,10 +128,11 @@ export class WorldScene extends Phaser.Scene {
 
     this.input.on('pointerdown', (pointer) => {
       const camera = this.cameras.main;
-      const touch = { x: pointer.x, y: pointer.y, dragging: false };
+      const screen = toScreen(pointer);
+      const touch = { x: screen.x, y: screen.y, dragging: false };
 
-      if (this.bar.contains(pointer.x, pointer.y)) {
-        const slot = this.bar.slotAt(pointer.x, pointer.y);
+      if (this.bar.contains(screen.x, screen.y)) {
+        const slot = this.bar.slotAt(screen.x, screen.y);
         if (!slot) return; // Leiste zwischen den Knöpfen: nichts tun
         Object.assign(touch, { mode: 'bar', slot });
       } else {
@@ -149,7 +152,8 @@ export class WorldScene extends Phaser.Scene {
     this.input.on('pointermove', (pointer) => {
       const touch = this.touch;
       if (!touch || !pointer.isDown) return;
-      if (!touch.dragging && Math.hypot(pointer.x - touch.x, pointer.y - touch.y) > DRAG_THRESHOLD) {
+      const screen = toScreen(pointer);
+      if (!touch.dragging && Math.hypot(screen.x - touch.x, screen.y - touch.y) > DRAG_THRESHOLD) {
         this.startDrag(touch, pointer);
       }
       if (touch.dragging) this.continueDrag(touch, pointer);
@@ -198,16 +202,18 @@ export class WorldScene extends Phaser.Scene {
 
   continueDrag(touch, pointer) {
     if (touch.mode === 'world') {
-      this.cameras.main.setScroll(touch.scrollX - (pointer.x - touch.x), touch.scrollY - (pointer.y - touch.y));
+      const screen = toScreen(pointer);
+      this.cameras.main.setScroll(touch.scrollX - (screen.x - touch.x), touch.scrollY - (screen.y - touch.y));
       return;
     }
     const item = touch.item;
     this.moveItem(item, pointer.worldX + touch.offsetX, pointer.worldY + touch.offsetY);
 
     // Über der Leiste wird das Ding kleiner: Loslassen heißt „wegräumen“
-    const overBar = this.bar.contains(pointer.x, pointer.y);
+    const screen = toScreen(pointer);
+    const overBar = this.bar.contains(screen.x, screen.y);
     this.bar.setHighlight(overBar && !touch.isNew);
-    item.setScale(overBar ? 0.5 : 1);
+    item.setScale(overBar ? IMAGE_SCALE / 2 : IMAGE_SCALE);
   }
 
   endDrag(touch, pointer) {
@@ -215,11 +221,12 @@ export class WorldScene extends Phaser.Scene {
     if (touch.mode === 'world') return;
 
     const item = touch.item;
-    if (this.bar.contains(pointer.x, pointer.y)) {
+    const screen = toScreen(pointer);
+    if (this.bar.contains(screen.x, screen.y)) {
       this.removeItem(item);
       return;
     }
-    item.setAlpha(1).setScale(1);
+    item.setAlpha(1).setScale(IMAGE_SCALE);
     this.moveItem(
       item,
       Phaser.Math.Clamp(item.x, EDGE, WORLD_WIDTH - EDGE),
@@ -247,25 +254,27 @@ export class WorldScene extends Phaser.Scene {
     if (!touch || !touch.dragging || !touch.item) return;
 
     const pointer = this.input.activePointer;
-    const { width } = this.scale;
+    const screen = toScreen(pointer);
+    const { width } = screenSize(this);
     let dx = 0;
     let dy = 0;
-    if (pointer.x < AUTO_SCROLL_ZONE) dx = -1;
-    else if (pointer.x > width - AUTO_SCROLL_ZONE) dx = 1;
-    if (pointer.y < AUTO_SCROLL_ZONE) dy = -1;
+    if (screen.x < AUTO_SCROLL_ZONE) dx = -1;
+    else if (screen.x > width - AUTO_SCROLL_ZONE) dx = 1;
+    if (screen.y < AUTO_SCROLL_ZONE) dy = -1;
     if (dx === 0 && dy === 0) return;
 
     const camera = this.cameras.main;
     const step = (AUTO_SCROLL_SPEED * delta) / 1000;
     camera.setScroll(camera.scrollX + dx * step, camera.scrollY + dy * step);
     // Position des Fingers in der Welt neu berechnen, damit das Ding mitwandert
-    this.moveItem(touch.item, camera.scrollX + pointer.x + touch.offsetX, camera.scrollY + pointer.y + touch.offsetY);
+    const world = camera.getWorldPoint(pointer.x, pointer.y);
+    this.moveItem(touch.item, world.x + touch.offsetX, world.y + touch.offsetY);
   }
 
   // ---------- Dinge auf der Wiese ----------
 
   createItem(element, x, y) {
-    const item = this.add.image(x, y, element.type);
+    const item = this.add.image(x, y, element.type).setScale(IMAGE_SCALE);
     item.setOrigin(0.5, element.flat ? 0.5 : 1);
     item.element = element;
     return item;
@@ -371,8 +380,8 @@ export class WorldScene extends Phaser.Scene {
 
   // Kleiner Hüpfer beim Hinstellen
   pop(item) {
-    item.setScale(0.6);
-    this.tweens.add({ targets: item, scale: 1, duration: 300, ease: 'Back.easeOut' });
+    item.setScale(IMAGE_SCALE * 0.6);
+    this.tweens.add({ targets: item, scale: IMAGE_SCALE, duration: 300, ease: 'Back.easeOut' });
   }
 
   // Wackeln beim Antippen
@@ -414,7 +423,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.bobTween) return;
     this.bobTween = this.tweens.add({
       targets: this.player,
-      scaleY: 0.94,
+      scaleY: IMAGE_SCALE * 0.94,
       angle: { from: -4, to: 4 },
       duration: 180,
       yoyo: true,
@@ -426,7 +435,7 @@ export class WorldScene extends Phaser.Scene {
   stopBobbing() {
     this.bobTween?.stop();
     this.bobTween = null;
-    this.player.setScale(1).setAngle(0);
+    this.player.setScale(IMAGE_SCALE).setAngle(0);
   }
 
   // Ein Kreis zeigt kurz an, wohin getippt wurde

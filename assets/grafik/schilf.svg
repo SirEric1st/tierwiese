@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="150" viewBox="0 0 100 150">
+  <!-- Schilf mit Blütenrispen. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="halm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8cc45a"/><stop offset="1" stop-color="#4e8a35"/></linearGradient>
+    <linearGradient id="blatt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9ed46a"/><stop offset="1" stop-color="#5a9a3c"/></linearGradient>
+    <radialGradient id="rispe" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#f0dcb4"/><stop offset="0.6" stop-color="#c09a68"/><stop offset="1" stop-color="#8a6440"/></radialGradient>
+  </defs>
+  <path d="M20,148 Q18,91 12,52" stroke="url(#halm)" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  <path d="M38,148 Q38,83 38,36" stroke="url(#halm)" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  <path d="M56,148 Q58,87 63,44" stroke="url(#halm)" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  <path d="M76,148 Q80,94 88,58" stroke="url(#halm)" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  <path d="M48,148 Q46,97 42,64" stroke="url(#halm)" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  <path d="M20,140 Q16,104 -10,90 Q10,110 23,140 Z" fill="url(#blatt)" stroke="#3f7a2c" stroke-width="1"/>
+  <path d="M38,140 Q42,88 52,74 Q36,94 41,140 Z" fill="url(#blatt)" stroke="#3f7a2c" stroke-width="1"/>
+  <path d="M56,140 Q67,96 84,82 Q61,102 59,140 Z" fill="url(#blatt)" stroke="#3f7a2c" stroke-width="1"/>
+  <path d="M76,140 Q92,110 114,96 Q86,116 79,140 Z" fill="url(#blatt)" stroke="#3f7a2c" stroke-width="1"/>
+  <path d="M48,140 Q46,116 22,102 Q40,122 51,140 Z" fill="url(#blatt)" stroke="#3f7a2c" stroke-width="1"/>
+  <path d="M12,56 Q3,44 9,32 Q16,26 21,36 Q23,48 12,56 Z" fill="url(#rispe)" stroke="#7a5534" stroke-width="1.2"/>
+  <path d="M12,52 Q12,40 15,34" stroke="#fff4dc" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M38,40 Q29,28 35,16 Q42,10 47,20 Q49,32 38,40 Z" fill="url(#rispe)" stroke="#7a5534" stroke-width="1.2"/>
+  <path d="M38,36 Q38,24 41,18" stroke="#fff4dc" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M63,48 Q54,36 60,24 Q67,18 72,28 Q74,40 63,48 Z" fill="url(#rispe)" stroke="#7a5534" stroke-width="1.2"/>
+  <path d="M63,44 Q63,32 66,26" stroke="#fff4dc" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M88,62 Q79,50 85,38 Q92,32 97,42 Q99,54 88,62 Z" fill="url(#rispe)" stroke="#7a5534" stroke-width="1.2"/>
+  <path d="M88,58 Q88,46 91,40" stroke="#fff4dc" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <path d="M42,68 Q33,56 39,44 Q46,38 51,48 Q53,60 42,68 Z" fill="url(#rispe)" stroke="#7a5534" stroke-width="1.2"/>
+  <path d="M42,64 Q42,52 45,46" stroke="#fff4dc" stroke-width="1.4" fill="none" opacity="0.7"/>
+</svg>

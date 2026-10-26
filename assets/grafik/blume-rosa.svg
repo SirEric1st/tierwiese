@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="36" viewBox="0 0 32 36">
+  <!-- Kleine Wiesenblume. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="blatt" cx="50%" cy="60%" r="70%"><stop offset="0" stop-color="#ffd6e6"/><stop offset="1" stop-color="#f27aa8"/></radialGradient>
+    <radialGradient id="mitte" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#f08a1c"/></radialGradient>
+    <linearGradient id="stiel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6fb05a"/><stop offset="1" stop-color="#3f7f34"/></linearGradient>
+  </defs>
+  <path d="M15,19 Q14,28 16,35" stroke="url(#stiel)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M15.5,29 Q21,24 25,27 Q21,31 15.5,29 Z" fill="#5da24a"/>
+  <ellipse cx="16" cy="7.5" rx="5" ry="7" fill="url(#blatt)" stroke="#f27aa8" stroke-width="0.8" transform="rotate(0 16 14)"/>
+  <ellipse cx="16" cy="7.5" rx="5" ry="7" fill="url(#blatt)" stroke="#f27aa8" stroke-width="0.8" transform="rotate(72 16 14)"/>
+  <ellipse cx="16" cy="7.5" rx="5" ry="7" fill="url(#blatt)" stroke="#f27aa8" stroke-width="0.8" transform="rotate(144 16 14)"/>
+  <ellipse cx="16" cy="7.5" rx="5" ry="7" fill="url(#blatt)" stroke="#f27aa8" stroke-width="0.8" transform="rotate(216 16 14)"/>
+  <ellipse cx="16" cy="7.5" rx="5" ry="7" fill="url(#blatt)" stroke="#f27aa8" stroke-width="0.8" transform="rotate(288 16 14)"/>
+  <circle cx="16" cy="14" r="4.6" fill="url(#mitte)" stroke="#d07418" stroke-width="0.8"/>
+  <circle cx="14.6" cy="12.6" r="1.4" fill="#fff" opacity="0.8"/>
+</svg>

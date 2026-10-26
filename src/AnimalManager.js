@@ -4,6 +4,7 @@
 import { ANIMALS } from './animals.js';
 import { Animal } from './Animal.js';
 import { playCheer } from './sound.js';
+import { IMAGE_SCALE } from './display.js';
 import { CONFETTI_COLORS } from './textures.js';
 
 const CHECK_INTERVAL = 2000; // alle 2 Sekunden nachsehen
@@ -160,6 +161,7 @@ export class AnimalManager {
       lifespan: 1600,
       rotate: { start: 0, end: 540 },
       frame: CONFETTI_COLORS.map((_, i) => i),
+      scale: IMAGE_SCALE,
       emitting: false,
     });
     emitter.setDepth(60000);

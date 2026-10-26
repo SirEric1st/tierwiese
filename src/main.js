@@ -1,21 +1,28 @@
 // Einstiegspunkt: richtet Phaser ein und startet mit dem Startbildschirm.
+import { DPR } from './display.js';
 import { StartScene } from './scenes/StartScene.js';
 import { WorldScene } from './scenes/WorldScene.js';
 
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'spiel',
-  backgroundColor: '#7cc66b',
+  backgroundColor: '#86c96f',
   scale: {
-    // Das Spielfeld füllt immer den ganzen Bildschirm, auch beim Drehen des iPads
-    mode: Phaser.Scale.RESIZE,
-    width: window.innerWidth,
-    height: window.innerHeight,
+    // Zeichenfläche in voller Retina-Auflösung, angezeigt in normaler Größe
+    mode: Phaser.Scale.NONE,
+    width: window.innerWidth * DPR,
+    height: window.innerHeight * DPR,
+    zoom: 1 / DPR,
   },
   input: {
     activePointers: 1,
   },
   scene: [StartScene, WorldScene],
+});
+
+// Das Spielfeld füllt immer den ganzen Bildschirm, auch beim Drehen des iPads
+window.addEventListener('resize', () => {
+  game.scale.resize(window.innerWidth * DPR, window.innerHeight * DPR);
 });
 
 // Offline-Modus einschalten (klappt nur über https, z. B. GitHub Pages)
