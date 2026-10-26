@@ -61,7 +61,7 @@ export class Animal {
     this.walkTo(spot.x, spot.y, WALK_SPEED, () => {
       this.showBubble(missingNeed.type);
       say(`${this.def.hello} ${missingNeed.wish}`);
-      this.scene.time.delayedCall(6000, () => {
+      this.visitTimer = this.scene.time.delayedCall(6000, () => {
         this.hideBubble();
         this.leaveScreen(() => {
           this.state = 'away';
@@ -69,6 +69,16 @@ export class Animal {
         });
       });
     });
+  }
+
+  // Besuch abbrechen (z. B. weil jetzt alles da ist und das Tier gleich einzieht)
+  cancelVisit() {
+    this.visitTimer?.remove();
+    this.visitTimer = null;
+    this.walkTween?.stop();
+    this.stopBobbing();
+    this.hideBubble();
+    this.state = 'away';
   }
 
   // Einziehen: hinlaufen, feiern, ab jetzt auf der Wiese bleiben

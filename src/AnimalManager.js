@@ -61,12 +61,22 @@ export class AnimalManager {
   }
 
   check() {
-    if (this.busy) return;
     const placedTypes = new Set(this.getPlaced().map((item) => item.element.type));
     const status = this.animals.map((animal) => {
       const missing = animal.def.needs.filter((need) => !placedTypes.has(need.type));
       return { animal, missing, fulfilled: animal.def.needs.length - missing.length };
     });
+
+    if (this.busy) {
+      // Ist während eines Besuchs alles fertig geworden, bleibt das Tier gleich da
+      const visitor = status.find((s) => s.animal === this.visitor);
+      if (visitor && visitor.missing.length === 0) {
+        this.visitor.cancelVisit();
+        this.visitor = null;
+        this.startMoveIn(visitor.animal);
+      }
+      return;
+    }
 
     // Reihenfolge: erst Ausflüge, dann Einzüge, dann Besuche
     const leaving = status.find((s) => s.animal.state === 'resident' && s.missing.length > 0);
@@ -79,18 +89,7 @@ export class AnimalManager {
 
     const movingIn = status.find((s) => s.animal.state === 'away' && s.missing.length === 0);
     if (movingIn) {
-      const animal = movingIn.animal;
-      const text = animal.hasLivedHere
-        ? 'Ich bin wieder da!'
-        : `${animal.def.hello} Hurra, hier gefällt es mir! Ich ziehe bei dir ein!`;
-      const spot = this.spotFor(animal);
-      this.start((done) =>
-        animal.moveIn(spot, text, () => this.celebrate(animal), () => {
-          animal.hasLivedHere = true;
-          animal.startWandering(() => this.spotFor(animal));
-          done();
-        })
-      );
+      this.startMoveIn(movingIn.animal);
       return;
     }
 
@@ -104,8 +103,28 @@ export class AnimalManager {
     if (visiting) {
       const animal = visiting.animal;
       this.rememberHint(animal, visiting.fulfilled);
-      this.start((done) => animal.visit(this.spotFor(animal), visiting.missing[0], done));
+      this.visitor = animal;
+      this.start((done) =>
+        animal.visit(this.spotFor(animal), visiting.missing[0], () => {
+          this.visitor = null;
+          done();
+        })
+      );
     }
+  }
+
+  startMoveIn(animal) {
+    const text = animal.hasLivedHere
+      ? 'Ich bin wieder da!'
+      : `${animal.def.hello} Hurra, hier gefällt es mir! Ich ziehe bei dir ein!`;
+    const spot = this.spotFor(animal);
+    this.start((done) =>
+      animal.moveIn(spot, text, () => this.celebrate(animal), () => {
+        animal.hasLivedHere = true;
+        animal.startWandering(() => this.spotFor(animal));
+        done();
+      })
+    );
   }
 
   // Merkt sich, wann und bei welchem Stand das Tier zuletzt gesagt hat, was fehlt
