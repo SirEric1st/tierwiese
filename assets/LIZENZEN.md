@@ -1,0 +1,21 @@
+# Lizenzen und Herkunft
+
+## Grafiken
+
+Im Moment gibt es noch keine Bilddateien. Alle Grafiken (Gras, Blumen,
+Spielfigur, Knöpfe) sind Platzhalter, die beim Start per Code gezeichnet
+werden (`src/textures.js`) – eigene Arbeit, Teil dieses Projekts.
+
+| Datei | Herkunft | Lizenz |
+|-------|----------|--------|
+| – | – | – |
+
+## Sounds
+
+Noch keine.
+
+## Bibliotheken
+
+| Datei | Herkunft | Lizenz |
+|-------|----------|--------|
+| `lib/phaser.min.js` | [Phaser 3.90.0](https://phaser.io), npm-Paket `phaser` | MIT, siehe `lib/phaser-LICENSE.md` |
