@@ -19,7 +19,10 @@ vorher etwas zu GitHub hochzuladen.
    Läuft schon einer aus diesem Projekt, wiederverwenden statt neu starten.
 
 3. **Server starten** (im Hintergrund, `run_in_background: true`):
-   `python3 -m http.server 8080 --bind 0.0.0.0 --directory <spielordner>`
+   `python3 tools/testserver.py`
+   Nicht `python3 -m http.server` verwenden: Der erlaubt Safari, Dateien
+   zwischenzuspeichern, und dann läuft auf dem iPad eine Mischung aus alten
+   und neuen Dateien (z. B. fehlende Grafiken als grünes Gitter).
 
 4. **IP-Adresse des Macs im WLAN ermitteln**:
    `ipconfig getifaddr en0 || ipconfig getifaddr en1`
