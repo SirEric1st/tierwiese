@@ -7,7 +7,7 @@ import { playCheer } from './sound.js';
 import { CONFETTI_COLORS } from './textures.js';
 
 const CHECK_INTERVAL = 2000; // alle 2 Sekunden nachsehen
-const REVISIT_DELAY = 45000; // frühestens nach 45 Sekunden wieder vorbeischauen
+const REVISIT_DELAY = 120000; // frühestens nach 2 Minuten wieder vorbeischauen
 
 export class AnimalManager {
   // getPlaced: liefert alles, was gerade auf der Wiese steht
@@ -36,6 +36,8 @@ export class AnimalManager {
     // Reihenfolge: erst Ausflüge, dann Einzüge, dann Besuche
     const leaving = status.find((s) => s.animal.state === 'resident' && s.missing.length > 0);
     if (leaving) {
+      // Beim Ausflug sagt das Tier schon, was fehlt – das zählt wie ein Besuch
+      this.rememberHint(leaving.animal, leaving.fulfilled);
       this.start((done) => leaving.animal.leave(leaving.missing[0], done));
       return;
     }
@@ -66,10 +68,15 @@ export class AnimalManager {
     );
     if (visiting) {
       const animal = visiting.animal;
-      animal.lastVisitFulfilled = visiting.fulfilled;
-      animal.lastVisitTime = now;
+      this.rememberHint(animal, visiting.fulfilled);
       this.start((done) => animal.visit(this.spotFor(animal), visiting.missing[0], done));
     }
+  }
+
+  // Merkt sich, wann und bei welchem Stand das Tier zuletzt gesagt hat, was fehlt
+  rememberHint(animal, fulfilled) {
+    animal.lastVisitFulfilled = fulfilled;
+    animal.lastVisitTime = this.scene.time.now;
   }
 
   start(action) {
