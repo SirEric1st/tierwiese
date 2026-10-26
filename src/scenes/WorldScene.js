@@ -21,6 +21,9 @@ const AUTO_SCROLL_SPEED = 500; // Pixel pro Sekunde
 const DEPTH_FLOWERS = 1;
 const DEPTH_FLAT = 2;
 const SAVE_DELAY = 500; // kurz warten, damit viele Änderungen auf einmal gespeichert werden
+const SHORE_X = 125; // halbe Breite und Höhe des Teichufers (Wasserrand im Teich-Bild)
+const SHORE_Y = 62;
+const SHORE_REACH = 400; // so nah muss man Schilf an einen Teich ziehen
 
 export class WorldScene extends Phaser.Scene {
   constructor() {
@@ -41,6 +44,13 @@ export class WorldScene extends Phaser.Scene {
       this.updateItemDepth(item);
       this.placed.push(item);
     });
+    this.placed
+      .filter((item) => item.element.shore)
+      .forEach((reed) => {
+        const pond = this.nearestPond(reed.x, reed.y, Infinity);
+        if (pond) this.attachToShore(reed, pond);
+        else this.removeItem(reed);
+      });
 
     const start = saved?.player ?? { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
     this.shadow = this.add.image(start.x, start.y, 'schatten');
@@ -182,6 +192,8 @@ export class WorldScene extends Phaser.Scene {
       touch.item.setAlpha(0.8);
     }
     if (touch.item) touch.item.setDepth(50000); // beim Ziehen immer ganz vorne
+    // Schilf am Teich wird mitgezogen
+    this.reedsOf(touch.item).forEach((reed) => reed.setDepth(50001).setAlpha(0.8));
   }
 
   continueDrag(touch, pointer) {
@@ -190,7 +202,7 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     const item = touch.item;
-    item.setPosition(pointer.worldX + touch.offsetX, pointer.worldY + touch.offsetY);
+    this.moveItem(item, pointer.worldX + touch.offsetX, pointer.worldY + touch.offsetY);
 
     // Über der Leiste wird das Ding kleiner: Loslassen heißt „wegräumen“
     const overBar = this.bar.contains(pointer.x, pointer.y);
@@ -208,9 +220,18 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     item.setAlpha(1).setScale(1);
-    item.x = Phaser.Math.Clamp(item.x, EDGE, WORLD_WIDTH - EDGE);
-    item.y = Phaser.Math.Clamp(item.y, EDGE * 2, WORLD_HEIGHT - 10);
+    this.moveItem(
+      item,
+      Phaser.Math.Clamp(item.x, EDGE, WORLD_WIDTH - EDGE),
+      Phaser.Math.Clamp(item.y, EDGE * 2, WORLD_HEIGHT - 10)
+    );
     this.updateItemDepth(item);
+    this.reedsOf(item).forEach((reed) => {
+      reed.setAlpha(1);
+      this.updateItemDepth(reed);
+    });
+
+    if (item.element.shore && !this.dropAtShore(item, touch.isNew)) return;
 
     if (touch.isNew) {
       this.placed.push(item);
@@ -238,7 +259,7 @@ export class WorldScene extends Phaser.Scene {
     const step = (AUTO_SCROLL_SPEED * delta) / 1000;
     camera.setScroll(camera.scrollX + dx * step, camera.scrollY + dy * step);
     // Position des Fingers in der Welt neu berechnen, damit das Ding mitwandert
-    touch.item.setPosition(camera.scrollX + pointer.x + touch.offsetX, camera.scrollY + pointer.y + touch.offsetY);
+    this.moveItem(touch.item, camera.scrollX + pointer.x + touch.offsetX, camera.scrollY + pointer.y + touch.offsetY);
   }
 
   // ---------- Dinge auf der Wiese ----------
@@ -251,6 +272,8 @@ export class WorldScene extends Phaser.Scene {
   }
 
   removeItem(item) {
+    // Mit dem Teich verschwindet auch sein Schilf
+    this.reedsOf(item).forEach((reed) => this.removeItem(reed));
     this.placed = this.placed.filter((other) => other !== item);
     this.requestSave();
     this.tweens.add({
@@ -261,6 +284,73 @@ export class WorldScene extends Phaser.Scene {
       ease: 'Back.easeIn',
       onComplete: () => item.destroy(),
     });
+  }
+
+  // Verschiebt ein Ding; bei einem Teich wandert das Schilf am Ufer mit
+  moveItem(item, x, y) {
+    item.setPosition(x, y);
+    this.reedsOf(item).forEach((reed) => reed.setPosition(x + reed.shoreOffset.x, y + reed.shoreOffset.y));
+  }
+
+  // ---------- Schilf am Teich ----------
+
+  reedsOf(pond) {
+    if (!pond || pond.element.type !== 'teich') return [];
+    return this.placed.filter((item) => item.pond === pond);
+  }
+
+  nearestPond(x, y, maxDistance) {
+    let best = null;
+    let bestDistance = maxDistance;
+    this.placed.forEach((item) => {
+      if (item.element.type !== 'teich') return;
+      const distance = Phaser.Math.Distance.Between(x, y, item.x, item.y);
+      if (distance <= bestDistance) {
+        best = item;
+        bestDistance = distance;
+      }
+    });
+    return best;
+  }
+
+  // Setzt das Schilf auf den Uferrand, an der Seite, wo es hingezogen wurde
+  attachToShore(reed, pond) {
+    const angle = Math.atan2((reed.y - pond.y) / SHORE_Y, (reed.x - pond.x) / SHORE_X);
+    reed.pond = pond;
+    reed.shoreOffset = { x: Math.cos(angle) * SHORE_X, y: Math.sin(angle) * SHORE_Y };
+    reed.setPosition(pond.x + reed.shoreOffset.x, pond.y + reed.shoreOffset.y);
+    this.updateItemDepth(reed);
+  }
+
+  // Schilf wurde losgelassen: ans Ufer rutschen lassen. Ist kein Teich in der
+  // Nähe, erklärt die Stimme warum, und das Schilf geht zurück.
+  // Gibt false zurück, wenn das Schilf nicht hingestellt wurde.
+  dropAtShore(reed, isNew) {
+    const pond = this.nearestPond(reed.x, reed.y, SHORE_REACH);
+    if (pond) {
+      const from = { x: reed.x, y: reed.y };
+      this.attachToShore(reed, pond);
+      // Kurz vom Loslass-Punkt ans Ufer gleiten
+      this.tweens.add({ targets: reed, x: { from: from.x, to: reed.x }, y: { from: from.y, to: reed.y }, duration: 200 });
+      return true;
+    }
+
+    const anyPond = this.placed.some((item) => item.element.type === 'teich');
+    say(anyPond ? 'Schilf wächst am Wasser. Zieh es an den Teich!' : 'Schilf wächst am Wasser. Stell zuerst einen Teich hin!');
+    if (isNew) {
+      this.removeItem(reed);
+    } else {
+      // Zurück an seinen alten Platz am Ufer
+      this.tweens.add({
+        targets: reed,
+        x: reed.pond.x + reed.shoreOffset.x,
+        y: reed.pond.y + reed.shoreOffset.y,
+        duration: 300,
+        ease: 'Quad.easeOut',
+        onComplete: () => this.updateItemDepth(reed),
+      });
+    }
+    return false;
   }
 
   // Das oberste Ding an dieser Stelle (oder nichts)
