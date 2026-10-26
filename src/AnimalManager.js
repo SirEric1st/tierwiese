@@ -8,6 +8,8 @@ import { CONFETTI_COLORS } from './textures.js';
 
 const CHECK_INTERVAL = 2000; // alle 2 Sekunden nachsehen
 const REVISIT_DELAY = 120000; // frühestens nach 2 Minuten wieder vorbeischauen
+const POND_WATER_X = 120; // halbe Breite und Höhe der Wasserfläche im Teich-Bild
+const POND_WATER_Y = 56;
 
 export class AnimalManager {
   // getPlaced: liefert alles, was gerade auf der Wiese steht
@@ -17,7 +19,7 @@ export class AnimalManager {
     this.getPlaced = getPlaced;
     this.world = world;
     this.onChange = onChange;
-    this.animals = ANIMALS.map((def) => new Animal(scene, def, world));
+    this.animals = ANIMALS.map((def) => new Animal(scene, def, world, (x, y) => this.isInWater(x, y)));
     this.busy = false;
 
     scene.time.addEvent({ delay: CHECK_INTERVAL, loop: true, callback: () => this.check() });
@@ -44,6 +46,14 @@ export class AnimalManager {
         animal.startWandering(() => this.spotFor(animal));
       }
     });
+  }
+
+  // Liegt diese Stelle im Wasser eines Teichs? (Wasserfläche als Ellipse)
+  isInWater(x, y) {
+    return this.getPlaced().some(
+      (item) =>
+        item.element.type === 'teich' && ((x - item.x) / POND_WATER_X) ** 2 + ((y - item.y) / POND_WATER_Y) ** 2 <= 1
+    );
   }
 
   animalAt(worldX, worldY) {

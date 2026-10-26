@@ -16,6 +16,7 @@ export const ANIMALS = [
   },
   {
     type: 'ente',
+    swimTexture: 'ente-schwimmt', // so sieht die Ente im Wasser aus
     hello: 'Hallo, ich bin die Ente!',
     needs: [
       { type: 'teich', wish: 'Ich hätte so gern einen Teich zum Schwimmen!' },

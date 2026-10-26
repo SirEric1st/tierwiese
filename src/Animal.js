@@ -4,14 +4,16 @@ import { say } from './speech.js';
 
 const WALK_SPEED = 170; // Pixel pro Sekunde
 const WANDER_SPEED = 70;
-const POND_RADIUS_X = 90; // Bereich im Teich, in dem die Ente schwimmt
-const POND_RADIUS_Y = 32;
+const POND_RADIUS_X = 85; // Bereich im Teich, in dem die Ente schwimmt
+const POND_RADIUS_Y = 28;
 
 export class Animal {
-  constructor(scene, def, world) {
+  // isInWater(x, y): sagt, ob diese Stelle in einem Teich liegt
+  constructor(scene, def, world, isInWater) {
     this.scene = scene;
     this.def = def;
     this.world = world; // { width, height }
+    this.isInWater = isInWater;
     this.state = 'away'; // away | visiting | resident
 
     this.sprite = scene.add.image(0, 0, def.type).setOrigin(0.5, 1);
@@ -172,6 +174,11 @@ export class Animal {
 
   updateDepth() {
     this.container.setDepth(this.y);
+    // Schwimmende Tiere sehen im Wasser anders aus (z. B. ohne Füße)
+    if (this.def.swimTexture) {
+      const texture = this.isInWater(this.x, this.y) ? this.def.swimTexture : this.def.type;
+      if (this.sprite.texture.key !== texture) this.sprite.setTexture(texture);
+    }
   }
 
   startBobbing() {
@@ -223,7 +230,7 @@ export class Animal {
       const angle = Math.random() * Math.PI * 2;
       const r = Math.random();
       x = item.x + Math.cos(angle) * POND_RADIUS_X * r;
-      y = item.y + 20 + Math.sin(angle) * POND_RADIUS_Y * r;
+      y = item.y + 10 + Math.sin(angle) * POND_RADIUS_Y * r;
     } else {
       x = item.x + Phaser.Math.Between(-90, 90);
       y = item.y + Phaser.Math.Between(10, 40);

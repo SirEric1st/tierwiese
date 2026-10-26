@@ -20,7 +20,8 @@ export function createTextures(scene) {
   drawBush(scene);
 
   drawHedgehog(scene);
-  drawDuck(scene);
+  drawDuck(scene, 'ente', false);
+  drawDuck(scene, 'ente-schwimmt', true);
   drawSquirrel(scene);
   drawThoughtBubble(scene);
   drawConfetti(scene);
@@ -78,18 +79,27 @@ function drawHedgehog(scene) {
   g.destroy();
 }
 
-// Eine Stockente (Erpel): grüner Kopf, weißer Halsring, gelber Schnabel
-function drawDuck(scene) {
+// Eine Stockente (Erpel): grüner Kopf, weißer Halsring, gelber Schnabel.
+// Beim Schwimmen sitzt die Ente tiefer: Der untere Teil des Körpers liegt
+// außerhalb des Bildes (also „unter Wasser“), die Füße sieht man nicht.
+const DUCK_SINK = 20;
+
+function drawDuck(scene, key, swimming) {
   const w = 116;
   const h = 96;
   const g = scene.make.graphics({ add: false });
 
-  g.fillStyle(0x000000, 0.15);
-  g.fillEllipse(52, h - 5, 80, 12);
-  // Füße
-  g.fillStyle(0xf29a2e);
-  g.fillEllipse(44, h - 8, 16, 7);
-  g.fillEllipse(62, h - 8, 16, 7);
+  if (swimming) {
+    g.save();
+    g.translateCanvas(0, DUCK_SINK);
+  } else {
+    g.fillStyle(0x000000, 0.15);
+    g.fillEllipse(52, h - 5, 80, 12);
+    // Füße
+    g.fillStyle(0xf29a2e);
+    g.fillEllipse(44, h - 8, 16, 7);
+    g.fillEllipse(62, h - 8, 16, 7);
+  }
   // Körper und Schwanz
   g.fillStyle(0x9d9a92);
   g.fillTriangle(8, 52, 26, 50, 22, 68);
@@ -116,7 +126,14 @@ function drawDuck(scene) {
   g.fillEllipse(100, 32, 24, 11);
   drawEye(g, 84, 24, 6);
 
-  g.generateTexture('ente', w, h);
+  if (swimming) {
+    g.restore();
+    // Kleine Wellen rund um den Körper
+    g.lineStyle(3, 0xffffff, 0.7);
+    g.strokeEllipse(50, h - 5, 92, 12);
+  }
+
+  g.generateTexture(key, w, h);
   g.destroy();
 }
 
