@@ -2,7 +2,7 @@
 
 ## Grafiken
 
-Im Moment gibt es noch keine Bilddateien. Alle Grafiken (Gras, Blumen,
+Im Moment gibt es noch keine Bilddateien. Alle Grafiken (Gras, Blumen, Bäume, Teich, Schilf, Laubhaufen, Busch,
 Spielfigur, Knöpfe) sind Platzhalter, die beim Start per Code gezeichnet
 werden (`src/textures.js`) – eigene Arbeit, Teil dieses Projekts.
 

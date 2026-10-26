@@ -11,6 +11,160 @@ export function createTextures(scene) {
   drawFlower(scene, 'blume-weiss', 0xffffff);
   drawFigure(scene);
   drawShadow(scene);
+
+  drawTree(scene, 'baum', [0x3f8f3a, 0x52a647, 0x6cc45a], false);
+  drawTree(scene, 'nussbaum', [0x5e7f2e, 0x76963a, 0x91b04c], true);
+  drawPond(scene);
+  drawReed(scene);
+  drawLeafPile(scene);
+  drawBush(scene);
+}
+
+// Bäume: Stamm plus Krone aus überlappenden Kreisen, von dunkel nach hell,
+// das ergibt den weichen „3D-Look“. Der Nussbaum trägt zusätzlich Walnüsse.
+function drawTree(scene, key, greens, withNuts) {
+  const w = 180;
+  const h = 230;
+  const g = scene.make.graphics({ add: false });
+  const cx = w / 2;
+
+  g.fillStyle(0x000000, 0.15);
+  g.fillEllipse(cx, h - 10, 110, 22);
+  g.fillStyle(0x7a4a26);
+  g.fillRoundedRect(cx - 14, 120, 28, h - 128, 10);
+  g.fillStyle(0x93603a);
+  g.fillRoundedRect(cx - 8, 124, 8, h - 136, 4);
+
+  const blobs = [
+    [cx, 75, 62],
+    [cx - 45, 105, 42],
+    [cx + 45, 105, 42],
+    [cx - 30, 55, 40],
+    [cx + 32, 58, 40],
+  ];
+  greens.forEach((color, i) => {
+    g.fillStyle(color);
+    const shrink = i * 7;
+    blobs.forEach(([x, y, r]) => g.fillCircle(x - i * 3, y - i * 4, r - shrink));
+  });
+
+  if (withNuts) {
+    const nuts = [[cx - 40, 95], [cx + 20, 110], [cx + 48, 80], [cx - 10, 60], [cx - 55, 120], [cx + 38, 128]];
+    nuts.forEach(([x, y]) => {
+      g.fillStyle(0x9a6a3c);
+      g.fillCircle(x, y, 8);
+      g.fillStyle(0xc49260);
+      g.fillCircle(x - 2, y - 2, 4);
+    });
+  }
+
+  g.generateTexture(key, w, h);
+  g.destroy();
+}
+
+function drawPond(scene) {
+  const w = 280;
+  const h = 160;
+  const g = scene.make.graphics({ add: false });
+  const cx = w / 2;
+  const cy = h / 2;
+
+  // Steine am Ufer
+  g.fillStyle(0xa9a39a);
+  g.fillEllipse(cx, cy + 4, w - 4, h - 8);
+  g.fillStyle(0x3f8fd8);
+  g.fillEllipse(cx, cy, w - 30, h - 34);
+  g.fillStyle(0x5aa9ec);
+  g.fillEllipse(cx - 6, cy - 6, w - 70, h - 64);
+  // Lichtreflexe
+  g.fillStyle(0xffffff, 0.45);
+  g.fillEllipse(cx - 55, cy - 22, 60, 12);
+  g.fillEllipse(cx + 40, cy + 18, 36, 8);
+  // Seerosenblatt
+  g.fillStyle(0x4f9a45);
+  g.slice(cx + 70, cy - 10, 18, Phaser.Math.DegToRad(30), Phaser.Math.DegToRad(330));
+  g.fillPath();
+
+  g.generateTexture('teich', w, h);
+  g.destroy();
+}
+
+// Schilf mit fedrigen Blütenrispen an der Spitze
+function drawReed(scene) {
+  const w = 100;
+  const h = 150;
+  const g = scene.make.graphics({ add: false });
+
+  const stalks = [
+    [22, 40, -6],
+    [40, 22, 2],
+    [58, 30, 8],
+    [76, 46, 12],
+    [50, 50, -10],
+  ];
+  stalks.forEach(([x, top, lean]) => {
+    g.lineStyle(4, 0x6f9e3c);
+    g.lineBetween(x, h - 4, x + lean, top + 16);
+    // langes Blatt
+    g.lineStyle(5, 0x86b44c);
+    g.lineBetween(x, h - 30, x + lean * 2 + 14, top + 60);
+    // Rispe
+    g.fillStyle(0xb08a5a);
+    g.fillEllipse(x + lean, top + 8, 14, 32);
+    g.fillStyle(0xd3b386);
+    g.fillEllipse(x + lean - 2, top + 4, 7, 20);
+  });
+
+  g.generateTexture('schilf', w, h);
+  g.destroy();
+}
+
+function drawLeafPile(scene) {
+  const w = 140;
+  const h = 90;
+  const g = scene.make.graphics({ add: false });
+  const rnd = new Phaser.Math.RandomDataGenerator(['laub']);
+  const colors = [0xd9762b, 0xe8a23a, 0xb8502a, 0xf0c04a, 0x9c6b30];
+
+  g.fillStyle(0x000000, 0.15);
+  g.fillEllipse(w / 2, h - 8, w - 10, 18);
+  // Von unten nach oben Blätter stapeln, oben werden es weniger → Hügelform
+  for (let row = 0; row < 6; row++) {
+    const y = h - 14 - row * 10;
+    const halfWidth = 60 - row * 9;
+    for (let i = 0; i < 9 - row; i++) {
+      const x = w / 2 + rnd.between(-halfWidth, halfWidth);
+      g.fillStyle(rnd.pick(colors));
+      g.fillEllipse(x, y + rnd.between(-3, 3), 22, 13);
+    }
+  }
+
+  g.generateTexture('laubhaufen', w, h);
+  g.destroy();
+}
+
+function drawBush(scene) {
+  const w = 140;
+  const h = 110;
+  const g = scene.make.graphics({ add: false });
+  const cx = w / 2;
+
+  g.fillStyle(0x000000, 0.15);
+  g.fillEllipse(cx, h - 8, 120, 18);
+  const blobs = [
+    [cx - 35, 70, 30],
+    [cx + 35, 70, 30],
+    [cx, 52, 38],
+    [cx - 18, 78, 28],
+    [cx + 18, 78, 28],
+  ];
+  [0x2f7a34, 0x3f9142, 0x58ad55].forEach((color, i) => {
+    g.fillStyle(color);
+    blobs.forEach(([x, y, r]) => g.fillCircle(x - i * 2, y - i * 4, r - i * 6));
+  });
+
+  g.generateTexture('busch', w, h);
+  g.destroy();
 }
 
 function drawGrass(scene) {
