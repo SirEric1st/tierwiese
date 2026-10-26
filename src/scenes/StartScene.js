@@ -1,6 +1,7 @@
 // Startbildschirm mit großem Spielen-Knopf. Der erste Tipp ist nötig, weil
 // Safari Ton und Sprachausgabe erst nach einer Berührung erlaubt.
 import { createTextures } from '../textures.js';
+import { unlockAudio } from '../sound.js';
 import { say } from '../speech.js';
 
 export class StartScene extends Phaser.Scene {
@@ -46,6 +47,7 @@ export class StartScene extends Phaser.Scene {
     });
 
     button.once('pointerup', () => {
+      unlockAudio();
       say('Hallo! Tipp auf die Wiese, dann laufe ich dorthin.');
       this.scene.start('WorldScene');
     });

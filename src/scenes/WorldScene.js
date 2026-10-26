@@ -2,6 +2,7 @@
 // Tippen → die Figur läuft dorthin. Ziehen → die Ansicht verschiebt sich.
 // Aus der Bau-Leiste zieht man Dinge auf die Wiese; Dinge auf der Wiese
 // kann man verschieben oder zurück auf die Leiste ziehen (wegräumen).
+import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { getElement } from '../elements.js';
 import { say } from '../speech.js';
@@ -38,6 +39,7 @@ export class WorldScene extends Phaser.Scene {
     camera.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     camera.centerOn(this.player.x, this.player.y - 70);
 
+    this.animals = new AnimalManager(this, () => this.placed, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
     this.bar = new BuildBar(this);
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
@@ -66,7 +68,7 @@ export class WorldScene extends Phaser.Scene {
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
   //   'bar'     – ein Knopf der Bau-Leiste
   //   'element' – ein Ding auf der Wiese
-  //   'world'   – freie Wiese
+  //   'world'   – freie Wiese (oder ein Tier: das kann man antippen, aber nicht ziehen)
   setupInput() {
     this.touch = null;
 
@@ -79,8 +81,11 @@ export class WorldScene extends Phaser.Scene {
         if (!slot) return; // Leiste zwischen den Knöpfen: nichts tun
         Object.assign(touch, { mode: 'bar', slot });
       } else {
-        const item = this.itemAt(pointer.worldX, pointer.worldY);
-        if (item) {
+        const animal = this.animals.animalAt(pointer.worldX, pointer.worldY);
+        const item = animal ? null : this.itemAt(pointer.worldX, pointer.worldY);
+        if (animal) {
+          Object.assign(touch, { mode: 'world', animal, scrollX: camera.scrollX, scrollY: camera.scrollY });
+        } else if (item) {
           Object.assign(touch, { mode: 'element', item, offsetX: item.x - pointer.worldX, offsetY: item.y - pointer.worldY });
         } else {
           Object.assign(touch, { mode: 'world', scrollX: camera.scrollX, scrollY: camera.scrollY });
@@ -114,6 +119,8 @@ export class WorldScene extends Phaser.Scene {
     } else if (touch.mode === 'element') {
       this.wiggle(touch.item);
       say(touch.item.element.name);
+    } else if (touch.animal) {
+      touch.animal.onTap();
     } else {
       this.walkTo(pointer.worldX, pointer.worldY);
     }

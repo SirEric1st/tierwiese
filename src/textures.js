@@ -18,6 +18,183 @@ export function createTextures(scene) {
   drawReed(scene);
   drawLeafPile(scene);
   drawBush(scene);
+
+  drawHedgehog(scene);
+  drawDuck(scene);
+  drawSquirrel(scene);
+  drawThoughtBubble(scene);
+  drawConfetti(scene);
+}
+
+// Ein großes Auge mit Glanzpunkt – macht die Tiere freundlich
+function drawEye(g, x, y, r) {
+  g.fillStyle(0xffffff);
+  g.fillCircle(x, y, r);
+  g.fillStyle(0x2a1a10);
+  g.fillCircle(x + r * 0.2, y + r * 0.1, r * 0.7);
+  g.fillStyle(0xffffff);
+  g.fillCircle(x + r * 0.4, y - r * 0.25, r * 0.28);
+}
+
+// Alle Tiere schauen nach rechts. Ursprung unten in der Mitte (Füße).
+function drawHedgehog(scene) {
+  const w = 120;
+  const h = 84;
+  const g = scene.make.graphics({ add: false });
+
+  g.fillStyle(0x000000, 0.15);
+  g.fillEllipse(58, h - 6, 96, 14);
+  // Füßchen
+  g.fillStyle(0x5a3a22);
+  g.fillEllipse(35, h - 10, 16, 10);
+  g.fillEllipse(78, h - 10, 16, 10);
+  // Stacheln: viele kleine Dreiecke rund um den Rücken
+  for (let i = 0; i <= 14; i++) {
+    const angle = Phaser.Math.DegToRad(170 - i * 11);
+    const bx = 52 + Math.cos(angle) * 36;
+    const by = 52 - Math.sin(angle) * 28;
+    const tx = 52 + Math.cos(angle) * 52;
+    const ty = 52 - Math.sin(angle) * 42;
+    const px = -Math.sin(angle) * 8;
+    const py = -Math.cos(angle) * 8;
+    g.fillStyle(i % 2 ? 0x5b3b25 : 0x7a5235);
+    g.fillTriangle(bx - px, by - py, bx + px, by + py, tx, ty);
+  }
+  g.fillStyle(0x6b4529);
+  g.fillEllipse(52, 52, 80, 58);
+  // Gesicht mit spitzer Schnauze
+  g.fillStyle(0xe2bf8f);
+  g.fillEllipse(84, 56, 44, 36);
+  g.fillTriangle(90, 44, 90, 70, 116, 60);
+  g.fillStyle(0x2a1a10);
+  g.fillCircle(114, 59, 5);
+  g.fillStyle(0xc9a070);
+  g.fillCircle(76, 40, 6);
+  drawEye(g, 92, 50, 7);
+  g.fillStyle(0xff9f9f, 0.6);
+  g.fillCircle(90, 64, 4);
+
+  g.generateTexture('igel', w, h);
+  g.destroy();
+}
+
+// Eine Stockente (Erpel): grüner Kopf, weißer Halsring, gelber Schnabel
+function drawDuck(scene) {
+  const w = 116;
+  const h = 96;
+  const g = scene.make.graphics({ add: false });
+
+  g.fillStyle(0x000000, 0.15);
+  g.fillEllipse(52, h - 5, 80, 12);
+  // Füße
+  g.fillStyle(0xf29a2e);
+  g.fillEllipse(44, h - 8, 16, 7);
+  g.fillEllipse(62, h - 8, 16, 7);
+  // Körper und Schwanz
+  g.fillStyle(0x9d9a92);
+  g.fillTriangle(8, 52, 26, 50, 22, 68);
+  g.fillStyle(0xb7b3aa);
+  g.fillEllipse(50, 66, 74, 40);
+  g.fillStyle(0x7a5a44);
+  g.fillEllipse(68, 62, 30, 26);
+  // Flügel mit blauem Streifen
+  g.fillStyle(0x8e8a80);
+  g.fillEllipse(42, 62, 44, 22);
+  g.fillStyle(0x3d63c9);
+  g.fillRoundedRect(36, 62, 18, 6, 3);
+  // Hals, Ring, Kopf
+  g.fillStyle(0x2f7d4a);
+  g.fillRoundedRect(68, 30, 18, 30, 8);
+  g.fillStyle(0xffffff);
+  g.fillRect(68, 50, 18, 4);
+  g.fillStyle(0x2f7d4a);
+  g.fillCircle(80, 28, 18);
+  g.fillStyle(0x4aa36b);
+  g.fillCircle(76, 22, 8);
+  // Schnabel
+  g.fillStyle(0xf2c230);
+  g.fillEllipse(100, 32, 24, 11);
+  drawEye(g, 84, 24, 6);
+
+  g.generateTexture('ente', w, h);
+  g.destroy();
+}
+
+function drawSquirrel(scene) {
+  const w = 110;
+  const h = 120;
+  const g = scene.make.graphics({ add: false });
+
+  g.fillStyle(0x000000, 0.15);
+  g.fillEllipse(56, h - 5, 80, 12);
+  // Buschiger Schwanz, nach oben eingerollt
+  g.fillStyle(0xb5531f);
+  g.fillEllipse(26, 70, 46, 74);
+  g.fillCircle(30, 30, 25);
+  g.fillStyle(0xd06a2a);
+  g.fillEllipse(28, 68, 30, 58);
+  g.fillCircle(32, 32, 16);
+  // Körper und heller Bauch
+  g.fillStyle(0xc9612a);
+  g.fillEllipse(62, 86, 44, 54);
+  g.fillStyle(0xf3dcb8);
+  g.fillEllipse(70, 90, 24, 38);
+  // Füße und Pfötchen
+  g.fillStyle(0xa94f1f);
+  g.fillEllipse(54, h - 9, 20, 10);
+  g.fillEllipse(74, h - 9, 20, 10);
+  g.fillCircle(80, 80, 6);
+  // Kopf mit Pinsel-Ohren
+  g.fillStyle(0xc9612a);
+  g.fillTriangle(62, 32, 70, 8, 78, 34);
+  g.fillTriangle(78, 30, 90, 6, 94, 34);
+  g.fillCircle(80, 48, 22);
+  g.fillEllipse(96, 54, 22, 18);
+  g.fillStyle(0xf3dcb8);
+  g.fillEllipse(94, 60, 16, 10);
+  g.fillStyle(0x2a1a10);
+  g.fillCircle(106, 52, 4);
+  drawEye(g, 88, 44, 7);
+  g.fillStyle(0xff9f9f, 0.6);
+  g.fillCircle(90, 58, 4);
+
+  g.generateTexture('eichhoernchen', w, h);
+  g.destroy();
+}
+
+// Gedankenblase: weiße Wolke mit zwei kleinen Kreisen nach unten
+function drawThoughtBubble(scene) {
+  const w = 130;
+  const h = 130;
+  const g = scene.make.graphics({ add: false });
+
+  g.fillStyle(0x000000, 0.12);
+  g.fillEllipse(66, 54, 120, 98);
+  g.fillStyle(0xffffff);
+  g.fillCircle(40, 50, 32);
+  g.fillCircle(90, 50, 32);
+  g.fillCircle(65, 30, 30);
+  g.fillCircle(65, 66, 30);
+  g.fillCircle(30, 104, 9);
+  g.fillCircle(18, 122, 6);
+
+  g.generateTexture('gedankenblase', w, h);
+  g.destroy();
+}
+
+// Konfetti in fünf Farben, als einzelne Bildausschnitte (Frames 0 bis 4)
+export const CONFETTI_COLORS = [0xff7a59, 0xffd84a, 0x5aa9ec, 0x7cd36b, 0xff9fc4];
+
+function drawConfetti(scene) {
+  const g = scene.make.graphics({ add: false });
+  CONFETTI_COLORS.forEach((color, i) => {
+    g.fillStyle(color);
+    g.fillRect(i * 12, 0, 12, 7);
+  });
+  g.generateTexture('konfetti', CONFETTI_COLORS.length * 12, 7);
+  g.destroy();
+  const texture = scene.textures.get('konfetti');
+  CONFETTI_COLORS.forEach((_, i) => texture.add(i, 0, i * 12, 0, 12, 7));
 }
 
 // Bäume: Stamm plus Krone aus überlappenden Kreisen, von dunkel nach hell,
