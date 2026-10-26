@@ -8,7 +8,7 @@ werden (`src/textures.js`) – eigene Arbeit, Teil dieses Projekts.
 
 | Datei | Herkunft | Lizenz |
 |-------|----------|--------|
-| – | – | – |
+| `icons/icon.svg` und `icons/icon-*.png` | App-Symbol (Igel auf der Wiese), eigene Zeichnung; PNGs daraus erzeugt | eigene Arbeit |
 
 ## Sounds
 

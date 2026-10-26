@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- App-Symbol: Igel auf der Wiese unter blauem Himmel. Eigene Zeichnung. -->
+  <defs>
+    <linearGradient id="himmel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd3ff"/>
+      <stop offset="1" stop-color="#d4f0ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#himmel)"/>
+  <circle cx="410" cy="100" r="50" fill="#ffd84a"/>
+  <ellipse cx="256" cy="520" rx="400" ry="210" fill="#7cc66b"/>
+  <ellipse cx="256" cy="530" rx="330" ry="160" fill="#89d277"/>
+  <!-- Baum -->
+  <rect x="78" y="230" width="30" height="110" rx="12" fill="#7a4a26"/>
+  <circle cx="93" cy="200" r="62" fill="#3f8f3a"/>
+  <circle cx="86" cy="190" r="50" fill="#52a647"/>
+  <circle cx="80" cy="178" r="34" fill="#6cc45a"/>
+  <!-- Igel -->
+  <ellipse cx="270" cy="420" rx="150" ry="22" fill="#000" opacity="0.15"/>
+  <g fill="#5b3b25">
+    <polygon points="140,380 120,300 175,340"/>
+    <polygon points="160,330 150,250 205,300"/>
+    <polygon points="200,300 205,220 245,285"/>
+    <polygon points="245,290 265,210 290,285"/>
+    <polygon points="290,295 325,225 330,300"/>
+    <polygon points="325,310 375,255 360,330"/>
+  </g>
+  <g fill="#7a5235">
+    <polygon points="150,355 115,270 190,320"/>
+    <polygon points="180,315 175,230 225,290"/>
+    <polygon points="222,295 235,212 268,285"/>
+    <polygon points="268,290 300,215 310,292"/>
+    <polygon points="308,300 352,238 348,318"/>
+  </g>
+  <ellipse cx="250" cy="355" rx="125" ry="75" fill="#6b4529"/>
+  <ellipse cx="335" cy="365" rx="62" ry="50" fill="#e2bf8f"/>
+  <polygon points="350,335 350,395 420,375" fill="#e2bf8f"/>
+  <circle cx="418" cy="374" r="12" fill="#2a1a10"/>
+  <circle cx="318" cy="322" r="13" fill="#c9a070"/>
+  <circle cx="350" cy="350" r="17" fill="#fff"/>
+  <circle cx="354" cy="352" r="12" fill="#2a1a10"/>
+  <circle cx="358" cy="346" r="5" fill="#fff"/>
+  <circle cx="345" cy="385" r="9" fill="#ff9f9f" opacity="0.6"/>
+  <ellipse cx="200" cy="425" rx="22" ry="12" fill="#5a3a22"/>
+  <ellipse cx="305" cy="425" rx="22" ry="12" fill="#5a3a22"/>
+</svg>

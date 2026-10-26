@@ -17,3 +17,10 @@ new Phaser.Game({
   },
   scene: [StartScene, WorldScene],
 });
+
+// Offline-Modus einschalten (klappt nur über https, z. B. GitHub Pages)
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.register('sw.js').catch((error) => {
+    console.warn('Offline-Modus nicht verfügbar', error);
+  });
+}
