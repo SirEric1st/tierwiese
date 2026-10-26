@@ -83,6 +83,14 @@ export class Animal {
     });
   }
 
+  // Ohne Auftritt sofort als eingezogenes Tier dastehen (nach dem Laden)
+  placeAsResident(spot) {
+    this.state = 'resident';
+    this.missingNeed = null;
+    this.setPosition(spot.x, spot.y);
+    this.container.setAlpha(1).setVisible(true);
+  }
+
   // Ausziehen, weil etwas fehlt – kein Drama, nur ein kleiner Ausflug
   leave(missingNeed, done) {
     this.stopWandering();

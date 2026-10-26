@@ -11,14 +11,39 @@ const REVISIT_DELAY = 120000; // frühestens nach 2 Minuten wieder vorbeischauen
 
 export class AnimalManager {
   // getPlaced: liefert alles, was gerade auf der Wiese steht
-  constructor(scene, getPlaced, world) {
+  // onChange:  wird aufgerufen, wenn ein Tier ein- oder auszieht (zum Speichern)
+  constructor(scene, getPlaced, world, onChange) {
     this.scene = scene;
     this.getPlaced = getPlaced;
     this.world = world;
+    this.onChange = onChange;
     this.animals = ANIMALS.map((def) => new Animal(scene, def, world));
     this.busy = false;
 
     scene.time.addEvent({ delay: CHECK_INTERVAL, loop: true, callback: () => this.check() });
+  }
+
+  // Für den Spielstand: wer wohnt hier, wer hat schon mal hier gewohnt?
+  getState() {
+    return this.animals.map((animal) => ({
+      type: animal.def.type,
+      resident: animal.state === 'resident',
+      hasLivedHere: Boolean(animal.hasLivedHere),
+    }));
+  }
+
+  // Beim Laden: eingezogene Tiere stehen sofort wieder auf der Wiese
+  restore(savedAnimals = []) {
+    savedAnimals.forEach((saved) => {
+      const animal = this.animals.find((a) => a.def.type === saved.type);
+      if (!animal) return;
+      animal.hasLivedHere = saved.hasLivedHere;
+      const spot = saved.resident ? this.spotFor(animal) : null;
+      if (spot) {
+        animal.placeAsResident(spot);
+        animal.startWandering(() => this.spotFor(animal));
+      }
+    });
   }
 
   animalAt(worldX, worldY) {
@@ -83,7 +108,9 @@ export class AnimalManager {
     this.busy = true;
     action(() => {
       this.busy = false;
+      this.onChange?.();
     });
+    this.onChange?.();
   }
 
   // Ein zufälliger Platz bei einem der Dinge, die das Tier braucht

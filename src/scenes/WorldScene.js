@@ -5,6 +5,7 @@
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { getElement } from '../elements.js';
+import { loadGame, saveGame } from '../save.js';
 import { say } from '../speech.js';
 
 const WORLD_WIDTH = 2400;
@@ -19,6 +20,7 @@ const AUTO_SCROLL_SPEED = 500; // Pixel pro Sekunde
 // seiner Höhe auf dem Bildschirm sortiert (weiter unten = weiter vorne).
 const DEPTH_FLOWERS = 1;
 const DEPTH_FLAT = 2;
+const SAVE_DELAY = 500; // kurz warten, damit viele Änderungen auf einmal gespeichert werden
 
 export class WorldScene extends Phaser.Scene {
   constructor() {
@@ -29,26 +31,66 @@ export class WorldScene extends Phaser.Scene {
     this.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'gras').setOrigin(0);
     this.scatterFlowers();
 
-    this.placed = []; // alles, was auf der Wiese steht
+    const saved = loadGame();
 
-    this.shadow = this.add.image(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 'schatten');
-    this.player = this.add.image(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 'figur').setOrigin(0.5, 1);
+    this.placed = []; // alles, was auf der Wiese steht
+    saved?.items.forEach(({ type, x, y }) => {
+      const element = getElement(type);
+      if (!element) return;
+      const item = this.createItem(element, x, y);
+      this.updateItemDepth(item);
+      this.placed.push(item);
+    });
+
+    const start = saved?.player ?? { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
+    this.shadow = this.add.image(start.x, start.y, 'schatten');
+    this.player = this.add.image(start.x, start.y, 'figur').setOrigin(0.5, 1);
     this.updatePlayerDepth();
 
     const camera = this.cameras.main;
     camera.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     camera.centerOn(this.player.x, this.player.y - 70);
 
-    this.animals = new AnimalManager(this, () => this.placed, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
+    this.animals = new AnimalManager(this, () => this.placed, { width: WORLD_WIDTH, height: WORLD_HEIGHT }, () =>
+      this.requestSave()
+    );
+    if (saved) this.animals.restore(saved.animals);
     this.bar = new BuildBar(this);
+
+    // Beim Wechsel in eine andere App oder beim Schließen sofort speichern
+    this.onHide = () => this.save();
+    document.addEventListener('visibilitychange', this.onHide);
+    window.addEventListener('pagehide', this.onHide);
+
     this.scale.on('resize', this.onResize, this);
-    this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.onResize, this);
+      document.removeEventListener('visibilitychange', this.onHide);
+      window.removeEventListener('pagehide', this.onHide);
+    });
 
     this.setupInput();
   }
 
   onResize() {
     this.bar.layout();
+  }
+
+  // ---------- Speichern ----------
+
+  requestSave() {
+    this.saveTimer?.remove();
+    this.saveTimer = this.time.delayedCall(SAVE_DELAY, () => this.save());
+  }
+
+  save() {
+    this.saveTimer?.remove();
+    this.saveTimer = null;
+    saveGame({
+      items: this.placed.map((item) => ({ type: item.element.type, x: Math.round(item.x), y: Math.round(item.y) })),
+      player: { x: Math.round(this.player.x), y: Math.round(this.player.y) },
+      animals: this.animals.getState(),
+    });
   }
 
   // Blumen als Deko, immer an denselben Stellen
@@ -175,6 +217,7 @@ export class WorldScene extends Phaser.Scene {
       say(item.element.name);
       this.pop(item);
     }
+    this.requestSave();
   }
 
   // Zieht man ein Ding an den Bildschirmrand, wandert die Wiese mit
@@ -209,6 +252,7 @@ export class WorldScene extends Phaser.Scene {
 
   removeItem(item) {
     this.placed = this.placed.filter((other) => other !== item);
+    this.requestSave();
     this.tweens.add({
       targets: item,
       scale: 0,
@@ -267,7 +311,10 @@ export class WorldScene extends Phaser.Scene {
       duration: (distance / WALK_SPEED) * 1000,
       ease: 'Linear',
       onUpdate: () => this.updatePlayerDepth(),
-      onComplete: () => this.stopBobbing(),
+      onComplete: () => {
+        this.stopBobbing();
+        this.requestSave();
+      },
     });
     this.startBobbing();
   }
