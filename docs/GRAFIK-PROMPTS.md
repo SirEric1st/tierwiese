@@ -21,18 +21,21 @@ Midjourney. Die Bilder ersetzen später die einfachen Vektorgrafiken aus
    `assets/LIZENZEN.md`. Bitte vorher kurz in den Nutzungsbedingungen des
    Programms nachsehen, ob man die Bilder in eigenen Projekten verwenden darf.
 
+Manche Programme lehnen Stil-Angaben wie „Pixar“ ab. Ersetze dann
+„Pixar style 3D animation“ durch „3D animated movie style“.
+
 Wichtig: Keine Fotos der Kinder hochladen und keine Namen in die Prompts
 schreiben. Das Repo ist öffentlich.
 
 ## Grund-Stil (immer zuerst einfügen)
 
-> Cute 3D animated movie style illustration for a children's game, soft
+> Cute Pixar style 3D animation illustration for a children's game, soft
 > rounded shapes, big friendly expressive eyes, warm sunny colors, soft
 > studio lighting from the upper left, gentle shading, slightly glossy,
 > clean edges. Single object, centered, full body visible, nothing cut off.
 > Seen from the side with a slight view from above. Transparent background,
-> no ground, no shadow, no text, no frame. Original design, not resembling
-> any existing movie character or brand.
+> no ground, no shadow, no text, no frame. Original character design,
+> not resembling any existing Pixar or Disney character.
 
 ## Bilder
 
