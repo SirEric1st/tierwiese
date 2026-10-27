@@ -1,7 +1,9 @@
 // Das Tier-Album: eine Seite über der Wiese. Für jedes Tier, das schon
 // einmal eingezogen ist, gibt es ein Bild mit Steckbrief zum Vorlesen.
 // Noch nicht entdeckte Tiere erscheinen als dunkler Schatten.
-// Passen nicht alle Karten auf eine Seite, blättert man mit den Pfeilen.
+// Passen nicht alle Karten auf eine Seite, blättert man mit den Pfeilen
+// oder wischt über die Karten. Der Steckbrief steht in einem Textfeld,
+// das man mit dem Finger nach oben und unten schieben kann.
 // Die WorldScene ist so lange angehalten.
 import { DPR, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { ANIMALS } from '../animals.js';
@@ -16,6 +18,9 @@ const ARROW_RADIUS = 34; // Blätter-Pfeile links und rechts
 const ARROW_SPACE = 80; // so viel Platz brauchen die Pfeile am Rand
 const INFO_SPACE = 190; // Platz unter den Karten für den Steckbrief
 const MAX_COLUMNS = 5;
+const SWIPE_DISTANCE = 50; // so weit über die Karten wischen, um zu blättern
+const MOVE_THRESHOLD = 8; // ab so viel Bewegung ist es kein Antippen mehr
+const TEXT_PADDING = 14;
 const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
 
 export class AlbumScene extends Phaser.Scene {
@@ -35,8 +40,14 @@ export class AlbumScene extends Phaser.Scene {
     this.dim = this.add.rectangle(0, 0, 10, 10, 0x1d3b14, 0.55).setOrigin(0);
     this.panel = this.add.graphics();
     this.title = this.text('Mein Tier-Album', 34);
+    // Textfeld für den Steckbrief: Was nicht hineinpasst, wird ausgeblendet
+    this.infoBox = this.add.graphics();
     this.info = this.text('', 22).setOrigin(0.5, 0).setWordWrapWidth(600).setAlign('center');
-    this.ui.add([this.dim, this.panel, this.title, this.info]);
+    this.infoMask = this.make.graphics({ add: false });
+    this.info.setMask(this.infoMask.createGeometryMask());
+    this.scrollBar = this.add.graphics();
+    this.infoScroll = 0;
+    this.ui.add([this.dim, this.panel, this.title, this.infoBox, this.info, this.scrollBar]);
 
     this.cards = ANIMALS.map((def) => this.createCard(def));
     this.closeButton = this.createCloseButton();
@@ -49,7 +60,15 @@ export class AlbumScene extends Phaser.Scene {
     this.scale.on('resize', this.layout, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.layout, this));
 
-    this.input.on('pointerup', (pointer) => this.onTap(toScreen(pointer)));
+    this.input.on('pointerdown', (pointer) => this.onPress(toScreen(pointer)));
+    this.input.on('pointermove', (pointer) => {
+      if (pointer.isDown) this.onMove(toScreen(pointer));
+    });
+    this.input.on('pointerup', (pointer) => {
+      const press = this.press;
+      this.press = null;
+      if (!press?.moved) this.onTap(toScreen(pointer));
+    });
 
     const count = this.discovered.size;
     say(
@@ -165,8 +184,74 @@ export class AlbumScene extends Phaser.Scene {
     const arrowY = gridTop + (rows * rowHeight) / 2;
     this.prevButton.setPosition(panelLeft + ARROW_SPACE / 2, arrowY).setVisible(pages > 1);
     this.nextButton.setPosition(panelLeft + panelWidth - ARROW_SPACE / 2, arrowY).setVisible(pages > 1);
-    this.info.setWordWrapWidth(panelWidth - 60).setPosition(width / 2, gridBottom + 12);
     this.closeButton.setPosition(panelLeft + panelWidth - 30, panelTop + 30);
+
+    // Textfeld: vom Ende der Karten bis kurz vor den unteren Rand
+    const box = {
+      left: panelLeft + 24,
+      top: gridBottom + 6,
+      width: panelWidth - 48,
+      height: Math.max(60, panelTop + panelHeight - 20 - (gridBottom + 6)),
+    };
+    this.infoRect = box;
+    this.infoBox.clear().fillStyle(0xffffff, 0.6).fillRoundedRect(box.left, box.top, box.width, box.height, 18);
+    this.infoMask.clear().fillStyle(0xffffff).fillRect(origin.x + box.left, origin.y + box.top, box.width, box.height);
+    this.info.setWordWrapWidth(box.width - 2 * TEXT_PADDING - 12);
+    this.scrollInfo(this.infoScroll);
+  }
+
+  // Text im Textfeld verschieben (0 = ganz oben) und die Bildlaufleiste zeichnen
+  scrollInfo(scroll) {
+    const box = this.infoRect;
+    const overflow = Math.max(0, this.info.height + 2 * TEXT_PADDING - box.height);
+    this.infoScroll = Phaser.Math.Clamp(scroll, 0, overflow);
+    this.info.setPosition(box.left + box.width / 2, box.top + TEXT_PADDING - this.infoScroll);
+    this.scrollBar.clear();
+    if (overflow === 0) return;
+    // Rechts im Feld zeigt ein Balken, wo man gerade ist
+    const track = box.height - 16;
+    const thumb = Math.max(30, (track * box.height) / (box.height + overflow));
+    const y = box.top + 8 + ((track - thumb) * this.infoScroll) / overflow;
+    this.scrollBar.fillStyle(0xd9b77a, 0.4).fillRoundedRect(box.left + box.width - 12, box.top + 8, 6, track, 3);
+    this.scrollBar.fillStyle(0xb08a4a).fillRoundedRect(box.left + box.width - 12, y, 6, thumb, 3);
+  }
+
+  isInInfo(x, y) {
+    const box = this.infoRect;
+    return x >= box.left && x <= box.left + box.width && y >= box.top && y <= box.top + box.height;
+  }
+
+  onPress({ x, y }) {
+    this.press = { x, y, inInfo: this.isInInfo(x, y), scroll: this.infoScroll, moved: false };
+  }
+
+  // Im Textfeld: Text schieben. Auf den Karten: waagerecht wischen zum Blättern.
+  onMove({ x, y }) {
+    const press = this.press;
+    if (!press) return;
+    const dx = x - press.x;
+    const dy = y - press.y;
+    if (press.inInfo) {
+      if (Math.abs(dy) > MOVE_THRESHOLD) press.moved = true;
+      if (press.moved) this.scrollInfo(press.scroll - dy);
+    } else if (!press.moved && this.pages > 1 && Math.abs(dx) > SWIPE_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      press.moved = true;
+      this.turnPage(dx < 0 ? 1 : -1);
+    } else if (Math.hypot(dx, dy) > MOVE_THRESHOLD * 3) {
+      press.moved = true;
+    }
+  }
+
+  // Nach der letzten Seite kommt wieder die erste
+  turnPage(direction) {
+    this.page = (this.page + direction + this.pages) % this.pages;
+    this.setInfo('');
+    this.layout();
+  }
+
+  setInfo(text) {
+    this.info.setText(text);
+    this.scrollInfo(0);
   }
 
   onTap({ x, y }) {
@@ -178,10 +263,7 @@ export class AlbumScene extends Phaser.Scene {
       (a) => a.visible && Phaser.Math.Distance.Between(x, y, a.x, a.y) <= ARROW_RADIUS + 12
     );
     if (arrow) {
-      // Nach der letzten Seite kommt wieder die erste
-      this.page = (this.page + arrow.direction + this.pages) % this.pages;
-      this.info.setText('');
-      this.layout();
+      this.turnPage(arrow.direction);
       return;
     }
     const card = this.cards.find(
@@ -195,11 +277,11 @@ export class AlbumScene extends Phaser.Scene {
   showCard(card) {
     this.tweens.add({ targets: card, scale: card.baseScale * 1.08, duration: 120, yoyo: true, ease: 'Quad.easeOut' });
     if (!card.found) {
-      this.info.setText('Dieses Tier hast du noch nicht entdeckt.');
+      this.setInfo('Dieses Tier hast du noch nicht entdeckt.');
       say('Dieses Tier hast du noch nicht entdeckt. Vielleicht kommt es bald zu Besuch!');
       return;
     }
-    this.info.setText(card.def.album.join('\n'));
+    this.setInfo(card.def.album.join('\n'));
     say(card.def.album.join(' '));
   }
 

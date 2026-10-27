@@ -27,7 +27,14 @@ export function toScreen(pointer) {
 // Die Kamera vergrößert von der Bildschirmmitte aus. Dinge, die fest am
 // Bildschirm kleben (Bau-Leiste, Startknopf), liegen deshalb in einem
 // Behälter an dieser Position – dann landen sie genau an der richtigen Stelle.
+// Auf der Wiese kann man zoomen; der Behälter wird dann mit uiScale()
+// so vergrößert oder verkleinert, dass Knöpfe immer gleich groß bleiben.
 export function uiOrigin(scene) {
   const { width, height } = scene.scale;
-  return { x: (width / 2) * (1 - 1 / DPR), y: (height / 2) * (1 - 1 / DPR) };
+  const zoom = scene.cameras.main.zoom;
+  return { x: (width / 2) * (1 - 1 / zoom), y: (height / 2) * (1 - 1 / zoom) };
+}
+
+export function uiScale(scene) {
+  return DPR / scene.cameras.main.zoom;
 }

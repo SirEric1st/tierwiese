@@ -4,9 +4,10 @@
 //
 // Es gibt zwei Leisten: „Bauen“ (Dinge für die Wiese) und „Füttern“
 // (Futter für die Tiere). Der orange Knopf ganz rechts schaltet um.
-// Passen nicht alle Knöpfe auf den Bildschirm, blättert man mit den
-// Pfeil-Knöpfen links und rechts weiter.
-import { screenSize, uiOrigin } from './display.js';
+// Passen nicht alle Knöpfe auf den Bildschirm, wischt man auf der Leiste
+// nach links oder rechts zur nächsten Seite. Punkte über der Leiste zeigen,
+// wie viele Seiten es gibt und auf welcher man gerade ist.
+import { screenSize, uiOrigin, uiScale } from './display.js';
 import { ELEMENTS } from './elements.js';
 import { FOODS } from './foods.js';
 
@@ -15,6 +16,9 @@ const SLOT_SIZE = 104; // runde Knöpfe, deutlich größer als 64 pt
 const SLOT_GAP = 14;
 const ICON_SIZE = 80;
 const MIN_SLOT_SCALE = 0.72; // kleiner werden die Knöpfe nicht (dann wird geblättert)
+const DOT_RADIUS = 6; // Seiten-Punkte über der Leiste
+const DOT_GAP = 22;
+const SLIDE = 120; // so weit gleiten die Knöpfe beim Blättern herein
 
 export class BuildBar {
   constructor(scene) {
@@ -22,14 +26,13 @@ export class BuildBar {
     this.container = scene.add.container(0, 0).setScrollFactor(0).setDepth(100000);
 
     this.background = scene.add.graphics();
-    this.container.add(this.background);
+    this.dots = scene.add.graphics();
+    this.container.add([this.background, this.dots]);
 
     this.elementSlots = ELEMENTS.map((element) => Object.assign(this.createSlot(element.type), { element }));
     this.foodSlots = FOODS.map((food) => Object.assign(this.createSlot(food.type), { food }));
     // Der Umschalt-Knopf zeigt, wohin er führt: Korb → Füttern, Schaufel → Bauen
     this.toggleSlot = Object.assign(this.createSlot('korb', 0xffc46b), { toggle: true });
-    this.prevSlot = Object.assign(this.createArrowSlot(-1), { page: -1 });
-    this.nextSlot = Object.assign(this.createArrowSlot(1), { page: 1 });
 
     this.mode = 'build';
     this.page = 0;
@@ -43,18 +46,6 @@ export class BuildBar {
     const slot = this.scene.add.container(0, 0, [circle, icon]);
     slot.icon = icon;
     this.setIcon(slot, texture);
-    this.container.add(slot);
-    return slot;
-  }
-
-  // Ein runder Knopf mit Pfeil zum Weiterblättern (direction: -1 links, 1 rechts)
-  createArrowSlot(direction) {
-    const g = this.scene.add.graphics();
-    g.fillStyle(0xeadfc6, 0.95);
-    g.fillCircle(0, 0, SLOT_SIZE / 2 - 8);
-    g.fillStyle(0x7a5a2a);
-    g.fillTriangle(direction * 22, 0, -direction * 12, -24, -direction * 12, 24);
-    const slot = this.scene.add.container(0, 0, [g]);
     this.container.add(slot);
     return slot;
   }
@@ -81,16 +72,29 @@ export class BuildBar {
     this.popIn();
   }
 
+  get pageCount() {
+    return this.pages || 1;
+  }
+
+  // Zur nächsten (1) oder vorigen (-1) Seite; die Knöpfe gleiten von der Seite herein
   turnPage(direction) {
+    if (this.pageCount < 2) return false;
     this.page += direction;
     this.layout();
-    this.popIn();
+    this.slots.forEach((slot) => {
+      if (slot.toggle) return;
+      const x = slot.x;
+      slot.x += direction * SLIDE;
+      slot.setAlpha(0);
+      this.scene.tweens.add({ targets: slot, x, alpha: 1, duration: 220, ease: 'Quad.easeOut' });
+    });
+    return true;
   }
 
   // Die neuen Knöpfe hüpfen kurz herein
   popIn() {
     this.slots.forEach((slot, i) => {
-      if (slot.toggle || slot.page) return;
+      if (slot.toggle) return;
       slot.setScale(0);
       this.scene.tweens.add({ targets: slot, scale: this.slotScale, duration: 250, delay: i * 40, ease: 'Back.easeOut' });
     });
@@ -99,38 +103,52 @@ export class BuildBar {
   layout() {
     const { width, height } = screenSize(this.scene);
     const origin = uiOrigin(this.scene);
-    this.container.setPosition(origin.x, origin.y);
+    this.container.setPosition(origin.x, origin.y).setScale(uiScale(this.scene));
 
     // Wie viele Knöpfe passen nebeneinander?
     const fits = Math.max(4, Math.floor((width - 20) / ((SLOT_SIZE + SLOT_GAP) * MIN_SLOT_SCALE)));
     const items = this.items;
-    let visible;
-    if (items.length + 1 <= fits) {
-      visible = [...items, this.toggleSlot];
-    } else {
-      const perPage = fits - 3; // Platz für zwei Pfeile und den Umschalt-Knopf
-      const pages = Math.ceil(items.length / perPage);
-      this.page = ((this.page % pages) + pages) % pages; // nach der letzten Seite kommt wieder die erste
-      const shown = items.slice(this.page * perPage, (this.page + 1) * perPage);
-      visible = [this.prevSlot, ...shown, this.nextSlot, this.toggleSlot];
-    }
+    const perPage = fits - 1; // ein Platz bleibt für den Umschalt-Knopf
+    const pages = Math.ceil(items.length / perPage);
+    this.pages = pages;
+    this.page = ((this.page % pages) + pages) % pages; // nach der letzten Seite kommt wieder die erste
+    const visible = [...items.slice(this.page * perPage, (this.page + 1) * perPage), this.toggleSlot];
     this.visible = visible;
 
-    const barWidth = Math.min(width - 20, visible.length * (SLOT_SIZE + SLOT_GAP) + SLOT_GAP);
+    // Beim Blättern bleibt die Leiste gleich breit, der Umschalt-Knopf immer ganz rechts
+    const places = pages > 1 ? perPage + 1 : visible.length;
+    const barWidth = Math.min(width - 20, places * (SLOT_SIZE + SLOT_GAP) + SLOT_GAP);
     this.barLeft = (width - barWidth) / 2;
     this.barWidth = barWidth;
     this.top = height - BAR_HEIGHT;
     this.drawBackground();
 
     // Knöpfe gleichmäßig verteilen; auf schmalen Bildschirmen etwas kleiner
-    const step = barWidth / visible.length;
+    const step = barWidth / places;
     this.step = step;
     this.slotScale = Math.min(1, step / (SLOT_SIZE + SLOT_GAP));
-    [...this.elementSlots, ...this.foodSlots, this.prevSlot, this.nextSlot].forEach((slot) => slot.setVisible(false));
+    [...this.elementSlots, ...this.foodSlots].forEach((slot) => slot.setVisible(false));
     visible.forEach((slot, i) => {
-      slot.setPosition(this.barLeft + step * (i + 0.5), this.top + BAR_HEIGHT / 2);
-      slot.setScale(this.slotScale).setVisible(true);
+      const place = slot.toggle ? places - 1 : i;
+      slot.setPosition(this.barLeft + step * (place + 0.5), this.top + BAR_HEIGHT / 2);
+      slot.setScale(this.slotScale).setAlpha(1).setVisible(true);
     });
+    this.drawDots(width);
+  }
+
+  // Seiten-Punkte: der volle Punkt ist die aktuelle Seite
+  drawDots(width) {
+    const g = this.dots;
+    g.clear();
+    if (this.pages < 2) return;
+    const y = this.top - 4;
+    const left = width / 2 - ((this.pages - 1) * DOT_GAP) / 2;
+    for (let i = 0; i < this.pages; i++) {
+      g.fillStyle(0x000000, 0.18);
+      g.fillCircle(left + i * DOT_GAP, y + 2, DOT_RADIUS);
+      g.fillStyle(0xffffff, i === this.page ? 1 : 0.55);
+      g.fillCircle(left + i * DOT_GAP, y, i === this.page ? DOT_RADIUS + 1 : DOT_RADIUS - 1);
+    }
   }
 
   drawBackground() {

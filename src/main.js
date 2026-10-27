@@ -17,7 +17,7 @@ const game = new Phaser.Game({
     zoom: 1 / DPR,
   },
   input: {
-    activePointers: 1,
+    activePointers: 2, // zwei Finger zum Zoomen
   },
   scene: [StartScene, WorldScene, AlbumScene, FigureScene],
 });

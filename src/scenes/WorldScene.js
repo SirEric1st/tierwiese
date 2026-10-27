@@ -8,7 +8,7 @@
 // Figur, öffnet sich der Figuren-Baukasten.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
-import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
+import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin, uiScale } from '../display.js';
 import { getElement } from '../elements.js';
 import { makeFigureTexture, normalizeFigure } from '../figure.js';
 import { cleanName } from '../parents.js';
@@ -34,6 +34,9 @@ const SHORE_REACH = 400; // so nah muss man Schilf an einen Teich ziehen
 const FOOD_LIFT = 50; // Futter schwebt beim Ziehen so weit über dem Finger
 const ALBUM_RADIUS = 44; // runder Album-Knopf oben rechts
 const ALBUM_MARGIN = 20;
+const SWIPE_DISTANCE = 40; // so weit muss man auf der Leiste wischen, um zu blättern
+const MAX_ZOOM = 1.6; // am weitesten hineinzoomen (1 = normale Größe)
+const MIN_ZOOM = 0.4; // am weitesten herauszoomen (nie kleiner als die ganze Wiese)
 
 // Nur Fotos annehmen, die der Eltern-Bereich selbst erzeugt hat (JPEG-Daten)
 function validPhoto(photo) {
@@ -108,35 +111,96 @@ export class WorldScene extends Phaser.Scene {
   }
 
   onResize() {
+    this.setZoom(this.cameras.main.zoom); // Grenzen hängen von der Bildschirmgröße ab
+    this.layoutHud();
+  }
+
+  // Leiste und Album-Knopf neu ausrichten (z. B. nach dem Zoomen)
+  layoutHud() {
     this.bar.layout();
     this.layoutAlbumButton();
   }
 
+  // ---------- Zoomen ----------
+
+  // Kamera-Zoom setzen, begrenzt auf sinnvolle Werte. Die Kamera hat schon
+  // für die Retina-Schärfe den Zoom DPR – 1 bedeutet hier also „normal“.
+  setZoom(zoom) {
+    const camera = this.cameras.main;
+    const fitWorld = Math.max(camera.width / WORLD_WIDTH, camera.height / WORLD_HEIGHT);
+    const min = Math.max(DPR * MIN_ZOOM, fitWorld);
+    camera.setZoom(Phaser.Math.Clamp(zoom, min, DPR * MAX_ZOOM));
+  }
+
+  // Zoomen, ohne dass der Punkt unter den Fingern wegrutscht.
+  // world: Punkt auf der Wiese; screenX/screenY: wo er auf dem Bildschirm bleiben soll (Pixel)
+  zoomAround(zoom, world, screenX, screenY) {
+    this.setZoom(zoom);
+    const camera = this.cameras.main;
+    const z = camera.zoom;
+    camera.setScroll(
+      world.x - (screenX - camera.width / 2) / z - camera.width / 2,
+      world.y - (screenY - camera.height / 2) / z - camera.height / 2
+    );
+    this.layoutHud();
+  }
+
+  // Welcher Punkt der Wiese liegt unter dieser Bildschirmstelle (Pixel)?
+  worldAt(screenX, screenY) {
+    const camera = this.cameras.main;
+    return {
+      x: camera.scrollX + camera.width / 2 + (screenX - camera.width / 2) / camera.zoom,
+      y: camera.scrollY + camera.height / 2 + (screenY - camera.height / 2) / camera.zoom,
+    };
+  }
+
+  // Zwei Finger liegen auf: ab jetzt wird gezoomt statt gezogen
+  startPinch() {
+    const pointers = this.input.manager.pointers.filter((p) => p.isDown).slice(0, 2);
+    if (pointers.length < 2) return;
+    const touch = this.touch;
+    if (touch?.mode === 'pet') touch.animal.stopPetting();
+    this.touch = null;
+    const [a, b] = pointers;
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    this.pinch = {
+      pointers,
+      distance: Math.max(1, Phaser.Math.Distance.Between(a.x, a.y, b.x, b.y)),
+      zoom: this.cameras.main.zoom,
+      world: this.worldAt(mid.x, mid.y),
+    };
+  }
+
+  continuePinch() {
+    const [a, b] = this.pinch.pointers;
+    const distance = Phaser.Math.Distance.Between(a.x, a.y, b.x, b.y);
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    this.zoomAround((this.pinch.zoom * distance) / this.pinch.distance, this.pinch.world, mid.x, mid.y);
+  }
+
   // ---------- Tier-Album ----------
 
+  // Der Knopf liegt in einem eigenen Behälter, der beim Zoomen gleich groß bleibt
   createAlbumButton() {
     const circle = this.add.circle(0, 0, ALBUM_RADIUS, 0xffffff, 0.9);
     const icon = this.add.image(0, 0, 'album');
     icon.setScale((ALBUM_RADIUS * 1.4) / Math.max(icon.width, icon.height));
-    this.albumButton = this.add.container(0, 0, [circle, icon]).setScrollFactor(0).setDepth(100000);
+    this.albumButton = this.add.container(0, 0, [circle, icon]);
+    this.hud = this.add.container(0, 0, [this.albumButton]).setScrollFactor(0).setDepth(100000);
     this.layoutAlbumButton();
   }
 
   layoutAlbumButton() {
     const { width } = screenSize(this);
     const origin = uiOrigin(this);
-    this.albumButton.setPosition(
-      origin.x + width - ALBUM_RADIUS - ALBUM_MARGIN,
-      origin.y + ALBUM_RADIUS + ALBUM_MARGIN
-    );
+    this.hud.setPosition(origin.x, origin.y).setScale(uiScale(this));
+    this.albumButton.setPosition(width - ALBUM_RADIUS - ALBUM_MARGIN, ALBUM_RADIUS + ALBUM_MARGIN);
   }
 
   // Liegt diese Bildschirmposition auf dem Album-Knopf?
   isOnAlbumButton(screenX, screenY) {
-    const origin = uiOrigin(this);
-    const x = this.albumButton.x - origin.x;
-    const y = this.albumButton.y - origin.y;
-    return Phaser.Math.Distance.Between(screenX, screenY, x, y) <= ALBUM_RADIUS + 10;
+    const button = this.albumButton;
+    return Phaser.Math.Distance.Between(screenX, screenY, button.x, button.y) <= ALBUM_RADIUS + 10;
   }
 
   openAlbum() {
@@ -182,24 +246,35 @@ export class WorldScene extends Phaser.Scene {
   // Ein Fingerdruck wird erst beim Loslassen oder nach etwas Bewegung
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
   //   'album'   – der Album-Knopf
-  //   'bar'     – ein Knopf der Leiste (Ding, Futter, Umschalt- oder Blätter-Knopf)
+  //   'bar'     – die Leiste: ein Knopf (Ding, Futter, Umschalten) oder Wischen zum Blättern
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
   //   'world'   – freie Wiese (oder ein Tier zu Besuch: das kann man nur antippen)
+  //
+  // Kommt ein zweiter Finger dazu, wird gezoomt (Pinch). Danach zählt erst
+  // wieder eine neue Berührung, wenn alle Finger losgelassen haben.
   setupInput() {
     this.touch = null;
+    this.pinch = null;
+    this.waitForRelease = false;
 
     this.input.on('pointerdown', (pointer) => {
       const camera = this.cameras.main;
       const screen = toScreen(pointer);
-      const touch = { x: screen.x, y: screen.y, dragging: false };
+      if (this.pinch || this.waitForRelease) return;
+      if (this.touch && this.touch.pointerId !== pointer.id) {
+        // Zweiter Finger: zoomen – außer man trägt gerade etwas herum
+        const carrying = this.touch.dragging && (this.touch.item || this.touch.food);
+        if (!carrying) this.startPinch();
+        return;
+      }
+      const touch = { x: screen.x, y: screen.y, dragging: false, pointerId: pointer.id };
 
       if (this.isOnAlbumButton(screen.x, screen.y)) {
         Object.assign(touch, { mode: 'album' });
       } else if (this.bar.contains(screen.x, screen.y)) {
-        const slot = this.bar.slotAt(screen.x, screen.y);
-        if (!slot) return; // Leiste zwischen den Knöpfen: nichts tun
-        Object.assign(touch, { mode: 'bar', slot });
+        // Auch zwischen den Knöpfen kann man wischen (dann ist slot leer)
+        Object.assign(touch, { mode: 'bar', slot: this.bar.slotAt(screen.x, screen.y) });
       } else {
         const animal = this.animals.animalAt(pointer.worldX, pointer.worldY);
         const item = animal ? null : this.itemAt(pointer.worldX, pointer.worldY);
@@ -219,9 +294,26 @@ export class WorldScene extends Phaser.Scene {
     });
 
     this.input.on('pointermove', (pointer) => {
+      if (this.pinch) {
+        this.continuePinch();
+        return;
+      }
       const touch = this.touch;
-      if (!touch || !pointer.isDown) return;
+      if (!touch || !pointer.isDown || pointer.id !== touch.pointerId) return;
       const screen = toScreen(pointer);
+      if (!touch.dragging && touch.mode === 'bar' && this.bar.pageCount > 1) {
+        // Auf der Leiste: zur Seite wischen blättert, nach oben ziehen holt etwas heraus
+        const dx = Math.abs(screen.x - touch.x);
+        const dy = Math.abs(screen.y - touch.y);
+        if (dx > dy) {
+          if (dx > SWIPE_DISTANCE) {
+            touch.dragging = true;
+            touch.mode = 'none';
+            this.bar.turnPage(screen.x < touch.x ? 1 : -1);
+          }
+          return;
+        }
+      }
       if (!touch.dragging && Math.hypot(screen.x - touch.x, screen.y - touch.y) > DRAG_THRESHOLD) {
         this.startDrag(touch, pointer);
       }
@@ -229,20 +321,30 @@ export class WorldScene extends Phaser.Scene {
     });
 
     this.input.on('pointerup', (pointer) => {
+      if (this.pinch || this.waitForRelease) {
+        this.pinch = null;
+        this.waitForRelease = this.input.manager.pointers.some((p) => p.isDown);
+        return;
+      }
       const touch = this.touch;
+      if (!touch || pointer.id !== touch.pointerId) return;
       this.touch = null;
-      if (!touch) return;
       if (touch.dragging) this.endDrag(touch, pointer);
       else this.tap(touch, pointer);
     });
+
+    // Am Mac zum Ausprobieren: Mausrad zoomt
+    this.input.on('wheel', (pointer, objects, dx, dy) => {
+      this.zoomAround(this.cameras.main.zoom * (dy > 0 ? 0.9 : 1.1), this.worldAt(pointer.x, pointer.y), pointer.x, pointer.y);
+    });
   }
+
 
   tap(touch, pointer) {
     if (touch.mode === 'album') {
       this.openAlbum();
-    } else if (touch.mode === 'bar' && touch.slot.page) {
-      this.bar.bounce(touch.slot);
-      this.bar.turnPage(touch.slot.page);
+    } else if (touch.mode === 'bar' && !touch.slot) {
+      // zwischen die Knöpfe getippt: nichts tun
     } else if (touch.mode === 'bar' && touch.slot.toggle) {
       this.bar.bounce(touch.slot);
       this.bar.toggleMode();
@@ -268,7 +370,7 @@ export class WorldScene extends Phaser.Scene {
       touch.animal.startPetting();
       return;
     }
-    if (touch.mode === 'album' || (touch.mode === 'bar' && (touch.slot.toggle || touch.slot.page))) {
+    if (touch.mode === 'album' || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
       touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }
@@ -312,8 +414,13 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     if (touch.mode === 'world') {
+      // Beim Hineinzoomen bewegt sich die Wiese entsprechend langsamer unter dem Finger
       const screen = toScreen(pointer);
-      this.cameras.main.setScroll(touch.scrollX - (screen.x - touch.x), touch.scrollY - (screen.y - touch.y));
+      const factor = DPR / this.cameras.main.zoom;
+      this.cameras.main.setScroll(
+        touch.scrollX - (screen.x - touch.x) * factor,
+        touch.scrollY - (screen.y - touch.y) * factor
+      );
       return;
     }
     const item = touch.item;

@@ -25,7 +25,8 @@ die verbindlichen Regeln für die Entwicklung.
 - Alles muss **ohne Lesen** verständlich sein: Symbole, Animationen,
   Sprachausgabe. Text darf nur zusätzlich erscheinen und wird immer
   auch vorgelesen.
-- Touch-Flächen mindestens 64 × 64 pt, nur Tippen und Ziehen als Gesten
+- Touch-Flächen mindestens 64 × 64 pt, nur Tippen und Ziehen (auch Wischen)
+  als Gesten; einzige Ausnahme: Zoomen der Wiese mit zwei Fingern (Pinch)
 - Kein Verlieren, kein „Game Over“, keine Zeitlimits, keine Strafen
 - Tiere werden nie krank, verletzt oder sterben
 - Keine Gewalt, keine gruseligen Inhalte
