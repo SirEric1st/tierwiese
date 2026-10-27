@@ -37,6 +37,7 @@ const GRAPHICS = [
   'wasserpflanze',
   'korb',
   'schaufel',
+  'album',
 ];
 
 // Im preload() einer Szene aufrufen

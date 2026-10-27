@@ -36,6 +36,7 @@ const FILES = [
   'assets/grafik/wasserpflanze.svg',
   'assets/grafik/korb.svg',
   'assets/grafik/schaufel.svg',
+  'assets/grafik/album.svg',
   'assets/grafik/gras.svg',
   'assets/bilder/igel.png',
   'assets/grafik/igel.svg',
@@ -58,6 +59,7 @@ const FILES = [
   'src/BuildBar.js',
   'src/scenes/StartScene.js',
   'src/scenes/WorldScene.js',
+  'src/scenes/AlbumScene.js',
 ];
 
 self.addEventListener('install', (event) => {

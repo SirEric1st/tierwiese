@@ -554,6 +554,21 @@ def schaufel():
     svg('schaufel', 64, 64, defs, body, 'Schaufel (Knopf: Bauen).')
 
 
+def album():
+    defs = '\n'.join([
+        linear('einband', st(('0', '#4fb06a'), ('1', '#2c7a44'))),
+        linear('seiten', st(('0', '#fffaf0'), ('1', '#efe2c8')), x2=1, y2=0),
+    ])
+    toes = ''.join(f'  <ellipse cx="{x}" cy="{y}" rx="3.6" ry="4.6" fill="#fff6d8"/>\n' for x, y in [(26, 25), (33, 21), (40, 25), (43, 32)])
+    body = f'''  <rect x="12" y="10" width="44" height="48" rx="6" fill="url(#seiten)" stroke="#b9a37a" stroke-width="1.6"/>
+  <rect x="8" y="6" width="44" height="50" rx="6" fill="url(#einband)" stroke="#1f5a30" stroke-width="2"/>
+  <rect x="8" y="6" width="9" height="50" rx="4" fill="#24683a"/>
+  <path d="M14,10 L14,52" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2"/>
+  <ellipse cx="33" cy="35" rx="8" ry="7" fill="#fff6d8"/>
+{toes}  <path d="M22,12 Q36,10 48,14" stroke="#fff" stroke-opacity="0.4" stroke-width="3" fill="none" stroke-linecap="round"/>'''
+    svg('album', 64, 64, defs, body, 'Tier-Album (Knopf).')
+
+
 gras()
 blume('blume-gelb', '#fff3a0', '#f2c21c')
 blume('blume-rosa', '#ffd6e6', '#f27aa8')
@@ -578,4 +593,5 @@ koerner()
 wasserpflanze()
 korb()
 schaufel()
+album()
 print('fertig:', len(list(OUT.glob('*.svg'))), 'Dateien')

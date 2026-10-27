@@ -4,9 +4,10 @@
 // kann man verschieben oder zurück auf die Leiste ziehen (wegräumen).
 // Eingezogene Tiere kann man streicheln: Finger über dem Tier hin und her bewegen.
 // Mit dem Korb-Knopf wird die Leiste zum Futterkorb; Futter zieht man zu den Tieren.
+// Der Album-Knopf oben rechts öffnet das Tier-Album.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
-import { IMAGE_SCALE, screenSize, setupCamera, toScreen } from '../display.js';
+import { IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { getElement } from '../elements.js';
 import { loadGame, saveGame } from '../save.js';
 import { say } from '../speech.js';
@@ -28,6 +29,8 @@ const SHORE_X = 125; // halbe Breite und Höhe des Teichufers (Wasserrand im Tei
 const SHORE_Y = 62;
 const SHORE_REACH = 400; // so nah muss man Schilf an einen Teich ziehen
 const FOOD_LIFT = 50; // Futter schwebt beim Ziehen so weit über dem Finger
+const ALBUM_RADIUS = 44; // runder Album-Knopf oben rechts
+const ALBUM_MARGIN = 20;
 
 export class WorldScene extends Phaser.Scene {
   constructor() {
@@ -71,6 +74,7 @@ export class WorldScene extends Phaser.Scene {
     );
     if (saved) this.animals.restore(saved.animals);
     this.bar = new BuildBar(this);
+    this.createAlbumButton();
 
     // Beim Wechsel in eine andere App oder beim Schließen sofort speichern
     this.onHide = () => this.save();
@@ -89,6 +93,42 @@ export class WorldScene extends Phaser.Scene {
 
   onResize() {
     this.bar.layout();
+    this.layoutAlbumButton();
+  }
+
+  // ---------- Tier-Album ----------
+
+  createAlbumButton() {
+    const circle = this.add.circle(0, 0, ALBUM_RADIUS, 0xffffff, 0.9);
+    const icon = this.add.image(0, 0, 'album');
+    icon.setScale((ALBUM_RADIUS * 1.4) / Math.max(icon.width, icon.height));
+    this.albumButton = this.add.container(0, 0, [circle, icon]).setScrollFactor(0).setDepth(100000);
+    this.layoutAlbumButton();
+  }
+
+  layoutAlbumButton() {
+    const { width } = screenSize(this);
+    const origin = uiOrigin(this);
+    this.albumButton.setPosition(
+      origin.x + width - ALBUM_RADIUS - ALBUM_MARGIN,
+      origin.y + ALBUM_RADIUS + ALBUM_MARGIN
+    );
+  }
+
+  // Liegt diese Bildschirmposition auf dem Album-Knopf?
+  isOnAlbumButton(screenX, screenY) {
+    const origin = uiOrigin(this);
+    const x = this.albumButton.x - origin.x;
+    const y = this.albumButton.y - origin.y;
+    return Phaser.Math.Distance.Between(screenX, screenY, x, y) <= ALBUM_RADIUS + 10;
+  }
+
+  openAlbum() {
+    this.tweens.add({ targets: this.albumButton, scale: 1.15, duration: 120, yoyo: true });
+    this.save();
+    const discovered = this.animals.getState().filter((a) => a.hasLivedHere).map((a) => a.type);
+    this.scene.pause();
+    this.scene.launch('AlbumScene', { discovered });
   }
 
   // ---------- Speichern ----------
@@ -123,6 +163,7 @@ export class WorldScene extends Phaser.Scene {
   //
   // Ein Fingerdruck wird erst beim Loslassen oder nach etwas Bewegung
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
+  //   'album'   – der Album-Knopf
   //   'bar'     – ein Knopf der Leiste (Ding, Futter oder Umschalt-Knopf)
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
@@ -135,7 +176,9 @@ export class WorldScene extends Phaser.Scene {
       const screen = toScreen(pointer);
       const touch = { x: screen.x, y: screen.y, dragging: false };
 
-      if (this.bar.contains(screen.x, screen.y)) {
+      if (this.isOnAlbumButton(screen.x, screen.y)) {
+        Object.assign(touch, { mode: 'album' });
+      } else if (this.bar.contains(screen.x, screen.y)) {
         const slot = this.bar.slotAt(screen.x, screen.y);
         if (!slot) return; // Leiste zwischen den Knöpfen: nichts tun
         Object.assign(touch, { mode: 'bar', slot });
@@ -175,7 +218,9 @@ export class WorldScene extends Phaser.Scene {
   }
 
   tap(touch, pointer) {
-    if (touch.mode === 'bar' && touch.slot.toggle) {
+    if (touch.mode === 'album') {
+      this.openAlbum();
+    } else if (touch.mode === 'bar' && touch.slot.toggle) {
       this.bar.bounce(touch.slot);
       this.bar.toggleMode();
       say(this.bar.mode === 'food' ? 'Futter! Zieh es zu einem Tier.' : 'Bauen! Zieh etwas auf die Wiese.');
@@ -198,8 +243,8 @@ export class WorldScene extends Phaser.Scene {
       touch.animal.startPetting();
       return;
     }
-    if (touch.mode === 'bar' && touch.slot.toggle) {
-      touch.mode = 'none'; // den Umschalt-Knopf kann man nicht herausziehen
+    if (touch.mode === 'album' || (touch.mode === 'bar' && touch.slot.toggle)) {
+      touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }
     if (touch.mode === 'bar' && touch.slot.food) {
