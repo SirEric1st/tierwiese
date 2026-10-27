@@ -116,8 +116,29 @@ function hairFront(style, line, light) {
   <path d="M34,18 Q46,12 60,16" stroke="${light}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>`;
 }
 
-// Die ganze Figur als SVG-Text; scale = wie viele Pixel pro Punkt
-export function figureSvg(figure, scale = 1) {
+// Der Kopf: gezeichnet mit Frisur – oder das Foto aus dem Eltern-Bereich
+function head(style, skinLine, hair, hairLine, photo) {
+  if (photo) {
+    return `<clipPath id="kopf"><circle cx="50" cy="44" r="30"/></clipPath>
+  <image href="${photo}" x="20" y="14" width="60" height="60" clip-path="url(#kopf)" preserveAspectRatio="xMidYMid slice"/>
+  <circle cx="50" cy="44" r="30" fill="none" stroke="${skinLine}" stroke-width="2.5"/>`;
+  }
+  return `<circle cx="21" cy="47" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
+  <circle cx="79" cy="47" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
+  <circle cx="50" cy="44" r="30" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.8"/>
+  ${hairFront(style, hairLine, shade(hair, 0.35))}
+  <path d="M33,35 Q38,32 43,34" stroke="${shade(hair, -0.3)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M57,34 Q62,32 67,35" stroke="${shade(hair, -0.3)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  ${eye(39, 46, 6.4)}
+  ${eye(61, 46, 6.4)}
+  <ellipse cx="29" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
+  <ellipse cx="71" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
+  <path d="M43,58 Q50,65 57,58" stroke="#9a3d2b" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+}
+
+// Die ganze Figur als SVG-Text; scale = wie viele Pixel pro Punkt.
+// photo (optional): Foto vom Gesicht als Daten-Adresse, ersetzt den Kopf
+export function figureSvg(figure, scale = 1, photo = null) {
   const f = normalizeFigure(figure);
   const style = HAIR_STYLES[f.hair].id;
   const hair = HAIR_COLORS[f.hairColor].color;
@@ -141,7 +162,7 @@ export function figureSvg(figure, scale = 1) {
   <rect x="52" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="${pantsLine}" stroke-width="1.5"/>
   <path d="M27,146 Q27,135 39,135 Q48,135 48,142 L48,147 Q38,149 27,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
   <path d="M73,146 Q73,135 61,135 Q52,135 52,142 L52,147 Q62,149 73,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
-  ${hairBack(style, hairLine)}
+  ${photo ? '' : hairBack(style, hairLine)}
   <path d="M26,78 Q14,92 18,106" stroke="${shirt}" stroke-width="13" fill="none" stroke-linecap="round"/>
   <path d="M74,78 Q86,92 82,106" stroke="${shirt}" stroke-width="13" fill="none" stroke-linecap="round"/>
   <circle cx="18.5" cy="108" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
@@ -150,17 +171,7 @@ export function figureSvg(figure, scale = 1) {
   <path d="M30,112 Q50,118 70,112" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" fill="none" stroke-linecap="round"/>
   <path d="M33,80 Q40,76 46,78" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3" fill="none" stroke-linecap="round"/>
   <path d="M50,86 L53,93 L60.5,93.5 L54.8,98.2 L56.7,105.5 L50,101.5 L43.3,105.5 L45.2,98.2 L39.5,93.5 L47,93 Z" fill="#ffd84a" stroke="#e0a91f" stroke-width="1.2" stroke-linejoin="round"/>
-  <circle cx="21" cy="47" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
-  <circle cx="79" cy="47" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
-  <circle cx="50" cy="44" r="30" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.8"/>
-  ${hairFront(style, hairLine, shade(hair, 0.35))}
-  <path d="M33,35 Q38,32 43,34" stroke="${shade(hair, -0.3)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  <path d="M57,34 Q62,32 67,35" stroke="${shade(hair, -0.3)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  ${eye(39, 46, 6.4)}
-  ${eye(61, 46, 6.4)}
-  <ellipse cx="29" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <ellipse cx="71" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <path d="M43,58 Q50,65 57,58" stroke="#9a3d2b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  ${head(style, skinLine, hair, hairLine, photo)}
 </svg>`;
 }
 
@@ -168,7 +179,7 @@ export function figureSvg(figure, scale = 1) {
 // Jedes Mal ein neuer Name, damit ein Bild, das gerade angezeigt wird,
 // nicht verschwindet, bevor das neue fertig ist.
 let counter = 0;
-export function makeFigureTexture(scene, figure, scale) {
+export function makeFigureTexture(scene, figure, scale, photo = null) {
   const key = `spielfigur-${++counter}`;
   return new Promise((resolve) => {
     const image = new Image();
@@ -177,6 +188,6 @@ export function makeFigureTexture(scene, figure, scale) {
       resolve(key);
     };
     image.onerror = () => resolve(null);
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(figureSvg(figure, scale))}`;
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(figureSvg(figure, scale, photo))}`;
   });
 }

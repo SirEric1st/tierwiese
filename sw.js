@@ -59,6 +59,7 @@ const FILES = [
   'src/elements.js',
   'src/foods.js',
   'src/figure.js',
+  'src/parents.js',
   'src/animals.js',
   'src/Animal.js',
   'src/AnimalManager.js',

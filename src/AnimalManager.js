@@ -15,7 +15,9 @@ const POND_WATER_Y = 56;
 export class AnimalManager {
   // getPlaced: liefert alles, was gerade auf der Wiese steht
   // onChange:  wird aufgerufen, wenn ein Tier ein- oder auszieht (zum Speichern)
-  constructor(scene, getPlaced, world, onChange) {
+  // getName:   Name der Spielfigur (aus dem Eltern-Bereich, kann leer sein)
+  constructor(scene, getPlaced, world, onChange, getName = () => '') {
+    this.getName = getName;
     this.scene = scene;
     this.getPlaced = getPlaced;
     this.world = world;
@@ -115,9 +117,10 @@ export class AnimalManager {
   }
 
   startMoveIn(animal) {
+    const name = this.getName();
     const text = animal.hasLivedHere
-      ? 'Ich bin wieder da!'
-      : `${animal.def.hello} Hurra, hier gefällt es mir! Ich ziehe bei dir ein!`;
+      ? `Ich bin wieder da${name ? `, ${name}` : ''}!`
+      : `${animal.def.hello} Hurra, hier gefällt es mir! Ich ziehe bei dir ein${name ? `, ${name}` : ''}!`;
     const spot = this.spotFor(animal);
     this.start((done) =>
       animal.moveIn(spot, text, () => this.celebrate(animal), () => {

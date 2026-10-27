@@ -11,6 +11,7 @@ import { BuildBar } from '../BuildBar.js';
 import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { getElement } from '../elements.js';
 import { makeFigureTexture, normalizeFigure } from '../figure.js';
+import { cleanName } from '../parents.js';
 import { loadGame, saveGame } from '../save.js';
 import { say } from '../speech.js';
 
@@ -33,6 +34,11 @@ const SHORE_REACH = 400; // so nah muss man Schilf an einen Teich ziehen
 const FOOD_LIFT = 50; // Futter schwebt beim Ziehen so weit über dem Finger
 const ALBUM_RADIUS = 44; // runder Album-Knopf oben rechts
 const ALBUM_MARGIN = 20;
+
+// Nur Fotos annehmen, die der Eltern-Bereich selbst erzeugt hat (JPEG-Daten)
+function validPhoto(photo) {
+  return typeof photo === 'string' && photo.startsWith('data:image/jpeg;base64,') ? photo : null;
+}
 
 export class WorldScene extends Phaser.Scene {
   constructor() {
@@ -66,6 +72,8 @@ export class WorldScene extends Phaser.Scene {
     this.shadow = this.add.image(start.x, start.y, 'schatten').setScale(IMAGE_SCALE);
     this.player = this.add.image(start.x, start.y, 'figur').setOrigin(0.5, 1).setScale(IMAGE_SCALE);
     this.figure = normalizeFigure(saved?.figure);
+    // Name und Foto aus dem Eltern-Bereich (nur auf diesem Gerät gespeichert)
+    this.profile = { name: cleanName(saved?.profile?.name), photo: validPhoto(saved?.profile?.photo) };
     this.applyFigure();
     this.updatePlayerDepth();
 
@@ -73,8 +81,12 @@ export class WorldScene extends Phaser.Scene {
     camera.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     camera.centerOn(this.player.x, this.player.y - 70);
 
-    this.animals = new AnimalManager(this, () => this.placed, { width: WORLD_WIDTH, height: WORLD_HEIGHT }, () =>
-      this.requestSave()
+    this.animals = new AnimalManager(
+      this,
+      () => this.placed,
+      { width: WORLD_WIDTH, height: WORLD_HEIGHT },
+      () => this.requestSave(),
+      () => this.profile.name
     );
     if (saved) this.animals.restore(saved.animals);
     this.bar = new BuildBar(this);
@@ -149,6 +161,7 @@ export class WorldScene extends Phaser.Scene {
       items: this.placed.map((item) => ({ type: item.element.type, x: Math.round(item.x), y: Math.round(item.y) })),
       player: { x: Math.round(this.player.x), y: Math.round(this.player.y) },
       figure: this.figure,
+      profile: this.profile,
       animals: this.animals.getState(),
     });
   }
@@ -501,7 +514,7 @@ export class WorldScene extends Phaser.Scene {
 
   // Das Bild der Figur aus der Auswahl im Baukasten zusammensetzen
   async applyFigure() {
-    const key = await makeFigureTexture(this, this.figure, DPR);
+    const key = await makeFigureTexture(this, this.figure, DPR, this.profile.photo);
     if (!key || !this.player.active) return;
     const old = this.player.texture.key;
     this.player.setTexture(key);
@@ -521,8 +534,10 @@ export class WorldScene extends Phaser.Scene {
     this.scene.pause();
     this.scene.launch('FigureScene', {
       figure: this.figure,
-      onDone: (figure) => {
+      profile: this.profile,
+      onDone: (figure, profile) => {
         this.figure = normalizeFigure(figure);
+        this.profile = { name: cleanName(profile.name), photo: validPhoto(profile.photo) };
         this.applyFigure();
         this.save();
       },

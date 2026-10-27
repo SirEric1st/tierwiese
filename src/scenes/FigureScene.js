@@ -12,6 +12,7 @@ import {
   makeFigureTexture,
   normalizeFigure,
 } from '../figure.js';
+import { askParentLock, openParentArea } from '../parents.js';
 import { say } from '../speech.js';
 
 const SWATCH_RADIUS = 34; // runde Auswahlknöpfe, 68 pt groß
@@ -22,6 +23,8 @@ const STYLE_PREVIEW_SCALE = 0.62; // Mini-Figuren auf den Frisur-Knöpfen
 const BUST = 0.52; // von den Mini-Figuren nur Kopf und Schultern zeigen (oberer Teil)
 const BUST_CENTER = BUST / 2;
 const CLOSE_RADIUS = 40;
+const LOCK_RADIUS = 30; // Schloss zum Eltern-Bereich (oben links)
+const LOCK_HOLD = 2000; // so lange muss man das Schloss gedrückt halten
 const LABEL_WIDTH = 96; // Spalte mit den Symbolen vor den Reihen
 const SYMBOL_SIZE = 50;
 const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
@@ -49,8 +52,10 @@ export class FigureScene extends Phaser.Scene {
     super('FigureScene');
   }
 
-  // data.figure: die aktuelle Auswahl; data.onDone(figure) wird beim Schließen aufgerufen
+  // data.figure: die aktuelle Auswahl; data.profile: Name und Foto
+  // data.onDone(figure, profile) wird beim Schließen aufgerufen
   init(data) {
+    this.profile = { name: data.profile?.name || '', photo: data.profile?.photo || null };
     this.figure = normalizeFigure(data.figure);
     this.onDone = data.onDone;
     this.ownTextures = [];
@@ -70,6 +75,8 @@ export class FigureScene extends Phaser.Scene {
       buttons: row.options.map((option, index) => this.createSwatch(row, option, index)),
     }));
     this.closeButton = this.createCloseButton();
+    this.lockButton = this.createLockButton();
+    this.ui.add(this.lockButton);
     this.ui.add(this.closeButton);
 
     this.layout();
@@ -80,8 +87,10 @@ export class FigureScene extends Phaser.Scene {
       this.ownTextures.forEach((key) => this.textures.remove(key));
     });
 
+    this.input.on('pointerdown', (pointer) => this.onPress(toScreen(pointer)));
     this.input.on('pointerup', (pointer) => this.onTap(toScreen(pointer)));
-    say('Wie soll deine Figur aussehen? Tipp auf die Farben!');
+    const name = this.profile.name ? `, ${this.profile.name}` : '';
+    say(`Wie soll deine Figur aussehen${name}? Tipp auf die Farben!`);
   }
 
   // Symbol und Wort vorne in der Reihe
@@ -187,6 +196,7 @@ export class FigureScene extends Phaser.Scene {
       });
     });
     this.closeButton.setPosition(panelLeft + panelWidth - 30, panelTop + 30).setScale(Math.max(fit, 0.8));
+    this.lockButton.setPosition(panelLeft + 34, panelTop + 34);
   }
 
   // Figur und Frisur-Knöpfe neu zeichnen und die Auswahl markieren
@@ -195,7 +205,7 @@ export class FigureScene extends Phaser.Scene {
       row.buttons.forEach((button) => button.ring.setStrokeStyle(button.index === this.figure[row.key] ? 6 : 0, 0xf2b52a))
     );
     const version = (this.version = (this.version || 0) + 1);
-    const previewKey = await makeFigureTexture(this, this.figure, DPR * PREVIEW_SCALE);
+    const previewKey = await makeFigureTexture(this, this.figure, DPR * PREVIEW_SCALE, this.profile.photo);
     const styleKeys = await Promise.all(
       HAIR_STYLES.map((_, hair) => makeFigureTexture(this, { ...this.figure, hair }, DPR * STYLE_PREVIEW_SCALE))
     );
@@ -216,7 +226,82 @@ export class FigureScene extends Phaser.Scene {
     oldKeys.forEach((key) => this.textures.remove(key));
   }
 
+  // ---------- Eltern-Bereich ----------
+
+  // Ein kleines, unauffälliges Schloss. Lange drücken füllt den Ring.
+  createLockButton() {
+    const g = this.add.graphics();
+    g.fillStyle(0xeadfc6);
+    g.fillCircle(0, 0, LOCK_RADIUS);
+    g.lineStyle(4, 0x9a8462);
+    g.strokeRoundedRect(-8, -16, 16, 18, 7);
+    g.fillStyle(0x9a8462);
+    g.fillRoundedRect(-12, -4, 24, 18, 4);
+    this.lockRing = this.add.graphics();
+    return this.add.container(0, 0, [g, this.lockRing]);
+  }
+
+  isOnLock(x, y) {
+    return Phaser.Math.Distance.Between(x, y, this.lockButton.x, this.lockButton.y) <= LOCK_RADIUS + 10;
+  }
+
+  onPress({ x, y }) {
+    if (!this.isOnLock(x, y)) return;
+    const progress = { value: 0 };
+    this.lockHold = this.tweens.add({
+      targets: progress,
+      value: 1,
+      duration: LOCK_HOLD,
+      onUpdate: () => {
+        this.lockRing.clear().lineStyle(6, 0xf2b52a);
+        this.lockRing.beginPath();
+        this.lockRing.arc(0, 0, LOCK_RADIUS + 4, -Math.PI / 2, -Math.PI / 2 + progress.value * Math.PI * 2);
+        this.lockRing.strokePath();
+      },
+      onComplete: () => {
+        this.lockHold = null;
+        this.lockRing.clear();
+        this.openParents();
+      },
+    });
+  }
+
+  // Losgelassen, bevor der Ring voll war
+  cancelLockHold() {
+    if (!this.lockHold) return false;
+    this.lockHold.stop();
+    this.lockHold = null;
+    this.lockRing.clear();
+    say('Das ist für Erwachsene.');
+    return true;
+  }
+
+  openParents() {
+    say('');
+    this.input.enabled = false;
+    const back = () => {
+      this.input.enabled = true;
+    };
+    askParentLock(
+      () =>
+        openParentArea(
+          this.profile,
+          (profile) => {
+            this.profile = profile;
+            back();
+            this.refresh();
+            if (profile.name) say(`Hallo, ${profile.name}!`);
+          },
+          back
+        ),
+      back
+    );
+  }
+
+  // ---------- Antippen ----------
+
   onTap({ x, y }) {
+    if (this.cancelLockHold() || this.isOnLock(x, y)) return;
     if (Phaser.Math.Distance.Between(x, y, this.closeButton.x, this.closeButton.y) <= CLOSE_RADIUS + 16) {
       this.close();
       return;
@@ -243,7 +328,7 @@ export class FigureScene extends Phaser.Scene {
 
   close() {
     say('So sehe ich jetzt aus. Toll!');
-    this.onDone?.({ ...this.figure });
+    this.onDone?.({ ...this.figure }, { ...this.profile });
     this.scene.resume('WorldScene');
     this.scene.stop();
   }

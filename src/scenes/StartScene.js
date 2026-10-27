@@ -2,7 +2,8 @@
 // Safari Ton und Sprachausgabe erst nach einer Berührung erlaubt.
 import { IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { createTextures, preloadGraphics } from '../textures.js';
-import { requestPersistentStorage } from '../save.js';
+import { loadGame, requestPersistentStorage } from '../save.js';
+import { cleanName } from '../parents.js';
 import { unlockAudio } from '../sound.js';
 import { say } from '../speech.js';
 
@@ -87,7 +88,8 @@ export class StartScene extends Phaser.Scene {
     }
     unlockAudio();
     requestPersistentStorage();
-    say('Hallo! Tipp auf die Wiese, dann laufe ich dorthin.');
+    const name = cleanName(loadGame()?.profile?.name);
+    say(`Hallo${name ? ` ${name}` : ''}! Tipp auf die Wiese, dann laufe ich dorthin.`);
     this.scene.start('WorldScene');
   }
 
