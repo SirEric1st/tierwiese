@@ -1,12 +1,16 @@
 // Ein einzelnes Tier auf der Wiese: laufen, Gedankenblase zeigen, sprechen.
 // Wann ein Tier kommt, einzieht oder geht, entscheidet der AnimalManager.
 import { IMAGE_SCALE } from './display.js';
+import { playHappy } from './sound.js';
 import { say } from './speech.js';
 
 const WALK_SPEED = 170; // Pixel pro Sekunde
 const WANDER_SPEED = 70;
 const POND_RADIUS_X = 85; // Bereich im Teich, in dem die Ente schwimmt
 const POND_RADIUS_Y = 28;
+const HEART_EVERY = 60; // nach so vielen Punkten Streicheln steigt ein Herz auf
+const PET_TALK_DISTANCE = 150; // so viel streicheln, bis das Tier etwas sagt
+const PET_TALK_PAUSE = 5000; // danach eine Weile nichts mehr sagen
 
 export class Animal {
   // isInWater(x, y): sagt, ob diese Stelle in einem Teich liegt
@@ -50,6 +54,74 @@ export class Animal {
     this.hop();
     if (this.state === 'resident') say(this.def.fact);
     else if (this.missingNeed) say(this.missingNeed.wish);
+  }
+
+  // ---------- Streicheln ----------
+
+  // Finger liegt auf dem Tier und bewegt sich: stehen bleiben und genießen
+  startPetting() {
+    this.petting = true;
+    this.petDistance = 0;
+    this.walkTween?.pause();
+    this.stopBobbing();
+  }
+
+  // distance: wie weit sich der Finger über dem Tier bewegt hat
+  pet(distance) {
+    if (!this.petting || this.state !== 'resident') return;
+    const before = this.petDistance;
+    this.petDistance += distance;
+    if (Math.floor(this.petDistance / HEART_EVERY) > Math.floor(before / HEART_EVERY)) {
+      this.showHeart();
+      this.squish();
+    }
+    const now = this.scene.time.now;
+    if (
+      before < PET_TALK_DISTANCE &&
+      this.petDistance >= PET_TALK_DISTANCE &&
+      !(now - this.lastPetTalk < PET_TALK_PAUSE)
+    ) {
+      this.lastPetTalk = now;
+      playHappy();
+      say(this.def.petted);
+    }
+  }
+
+  stopPetting() {
+    if (!this.petting) return;
+    this.petting = false;
+    if (this.walkTween?.isPaused()) {
+      this.walkTween.resume();
+      this.startBobbing();
+    }
+  }
+
+  showHeart() {
+    const heart = this.scene.add
+      .image(this.x + Phaser.Math.Between(-25, 25), this.y - this.sprite.displayHeight, 'herz')
+      .setScale(IMAGE_SCALE)
+      .setDepth(60000);
+    this.scene.tweens.add({
+      targets: heart,
+      y: heart.y - 70,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Quad.easeOut',
+      onComplete: () => heart.destroy(),
+    });
+  }
+
+  // Kurz zusammenkuscheln, wie ein wohliges Zucken
+  squish() {
+    if (this.squishTween?.isPlaying()) return;
+    this.squishTween = this.scene.tweens.add({
+      targets: this.sprite,
+      scaleY: IMAGE_SCALE * 0.9,
+      scaleX: IMAGE_SCALE * 1.05,
+      duration: 120,
+      yoyo: true,
+      ease: 'Sine.easeInOut',
+    });
   }
 
   // ---------- Auftritte ----------
@@ -123,6 +195,7 @@ export class Animal {
     const next = () => {
       if (this.state !== 'resident') return;
       this.wanderTimer = this.scene.time.delayedCall(Phaser.Math.Between(3000, 7000), () => {
+        if (this.petting) return next(); // beim Streicheln bleibt es lieber stehen
         const spot = pickSpot();
         if (spot) this.walkTo(spot.x, spot.y, WANDER_SPEED, next);
         else next();

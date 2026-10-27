@@ -31,3 +31,11 @@ export function playCheer() {
   const now = context.currentTime;
   [523, 659, 784, 1047].forEach((freq, i) => tone(freq, now + i * 0.12, 0.4));
 }
+
+// Zwei sanfte Töne, wenn ein Tier gestreichelt wird
+export function playHappy() {
+  if (!context) return;
+  const now = context.currentTime;
+  tone(659, now, 0.3);
+  tone(880, now + 0.15, 0.45);
+}

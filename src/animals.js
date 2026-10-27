@@ -2,6 +2,7 @@
 // needs: Dinge aus der Bau-Leiste, die auf der Wiese stehen müssen.
 //        wish wird vorgelesen, solange das Ding noch fehlt.
 // fact:  wird vorgelesen, wenn man ein eingezogenes Tier antippt.
+// petted: sagt das Tier, wenn man es streichelt.
 // Futter wie Insekten, Würmer oder Samen gibt es auf der Wiese von selbst.
 
 export const ANIMALS = [
@@ -13,6 +14,7 @@ export const ANIMALS = [
       { type: 'busch', wish: 'Ich hätte so gern einen Busch. Darunter kann ich mein Nest bauen!' },
     ],
     fact: 'Ich bin der Igel. Am Tag schlafe ich. In der Nacht suche ich Käfer, Würmer und Schnecken.',
+    petted: 'Hihi, das kitzelt! Aber schön vorsichtig, ich habe Stacheln.',
   },
   {
     type: 'ente',
@@ -23,6 +25,7 @@ export const ANIMALS = [
       { type: 'schilf', wish: 'Ich hätte so gern Schilf. Da kann ich mich verstecken!' },
     ],
     fact: 'Ich bin die Ente. Ich stecke meinen Kopf unter Wasser und suche Pflanzen und kleine Tiere.',
+    petted: 'Quak! Das ist schön!',
   },
   {
     type: 'eichhoernchen',
@@ -32,5 +35,6 @@ export const ANIMALS = [
       { type: 'nussbaum', wish: 'Ich hätte so gern einen Nussbaum. Ich esse so gern Nüsse!' },
     ],
     fact: 'Ich bin das Eichhörnchen. Im Herbst verstecke ich Nüsse. Die esse ich dann im Winter.',
+    petted: 'Oh, wie schön! Fühl mal, mein Schwanz ist ganz flauschig.',
   },
 ];

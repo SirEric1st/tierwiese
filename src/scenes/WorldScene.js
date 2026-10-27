@@ -2,6 +2,7 @@
 // Tippen → die Figur läuft dorthin. Ziehen → die Ansicht verschiebt sich.
 // Aus der Bau-Leiste zieht man Dinge auf die Wiese; Dinge auf der Wiese
 // kann man verschieben oder zurück auf die Leiste ziehen (wegräumen).
+// Eingezogene Tiere kann man streicheln: Finger über dem Tier hin und her bewegen.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { IMAGE_SCALE, screenSize, setupCamera, toScreen } from '../display.js';
@@ -122,7 +123,8 @@ export class WorldScene extends Phaser.Scene {
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
   //   'bar'     – ein Knopf der Bau-Leiste
   //   'element' – ein Ding auf der Wiese
-  //   'world'   – freie Wiese (oder ein Tier: das kann man antippen, aber nicht ziehen)
+  //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
+  //   'world'   – freie Wiese (oder ein Tier zu Besuch: das kann man nur antippen)
   setupInput() {
     this.touch = null;
 
@@ -138,7 +140,9 @@ export class WorldScene extends Phaser.Scene {
       } else {
         const animal = this.animals.animalAt(pointer.worldX, pointer.worldY);
         const item = animal ? null : this.itemAt(pointer.worldX, pointer.worldY);
-        if (animal) {
+        if (animal?.state === 'resident') {
+          Object.assign(touch, { mode: 'pet', animal, lastX: pointer.worldX, lastY: pointer.worldY });
+        } else if (animal) {
           Object.assign(touch, { mode: 'world', animal, scrollX: camera.scrollX, scrollY: camera.scrollY });
         } else if (item) {
           Object.assign(touch, { mode: 'element', item, offsetX: item.x - pointer.worldX, offsetY: item.y - pointer.worldY });
@@ -184,6 +188,10 @@ export class WorldScene extends Phaser.Scene {
 
   startDrag(touch, pointer) {
     touch.dragging = true;
+    if (touch.mode === 'pet') {
+      touch.animal.startPetting();
+      return;
+    }
     if (touch.mode === 'bar') {
       // Aus der Leiste wird ein neues Ding „herausgezogen“
       const item = this.createItem(touch.slot.element, pointer.worldX, pointer.worldY);
@@ -201,6 +209,14 @@ export class WorldScene extends Phaser.Scene {
   }
 
   continueDrag(touch, pointer) {
+    if (touch.mode === 'pet') {
+      // Nur Bewegung direkt über dem Tier zählt als Streicheln
+      const distance = Math.hypot(pointer.worldX - touch.lastX, pointer.worldY - touch.lastY);
+      touch.lastX = pointer.worldX;
+      touch.lastY = pointer.worldY;
+      if (touch.animal.contains(pointer.worldX, pointer.worldY)) touch.animal.pet(distance);
+      return;
+    }
     if (touch.mode === 'world') {
       const screen = toScreen(pointer);
       this.cameras.main.setScroll(touch.scrollX - (screen.x - touch.x), touch.scrollY - (screen.y - touch.y));
@@ -218,7 +234,8 @@ export class WorldScene extends Phaser.Scene {
 
   endDrag(touch, pointer) {
     this.bar.setHighlight(false);
-    if (touch.mode === 'world') return;
+    if (touch.mode === 'pet') touch.animal.stopPetting();
+    if (touch.mode === 'world' || touch.mode === 'pet') return;
 
     const item = touch.item;
     const screen = toScreen(pointer);

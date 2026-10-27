@@ -32,6 +32,21 @@ export function preloadGraphics(scene) {
 // Im create() aufrufen: Grafiken, die per Code gezeichnet werden
 export function createTextures(scene) {
   if (!scene.textures.exists('konfetti')) drawConfetti(scene);
+  if (!scene.textures.exists('herz')) drawHeart(scene);
+}
+
+// Ein rotes Herz, das beim Streicheln aufsteigt (28 × 26 Punkte)
+function drawHeart(scene) {
+  const s = DPR;
+  const g = scene.make.graphics({ add: false });
+  g.fillStyle(0xe8455a);
+  g.fillCircle(8 * s, 8 * s, 7.5 * s);
+  g.fillCircle(20 * s, 8 * s, 7.5 * s);
+  g.fillTriangle(1 * s, 11 * s, 27 * s, 11 * s, 14 * s, 25 * s);
+  g.fillStyle(0xffffff, 0.45);
+  g.fillCircle(6 * s, 6 * s, 2.5 * s);
+  g.generateTexture('herz', 28 * s, 26 * s);
+  g.destroy();
 }
 
 // Konfetti in fünf Farben, als einzelne Bildausschnitte (Frames 0 bis 4)
