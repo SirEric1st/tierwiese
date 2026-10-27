@@ -569,6 +569,64 @@ def album():
     svg('album', 64, 64, defs, body, 'Tier-Album (Knopf).')
 
 
+# ---------------------------------------------------------------- Symbole im Figuren-Baukasten
+# Zeigen ohne Lesen, was eine Reihe im Baukasten ändert.
+
+def symbol_frisur():
+    defs = '\n'.join([
+        radial('haut', st(('0', '#ffe9d6'), ('1', '#eab48c')), cx='40%', cy='35%'),
+        radial('haare', st(('0', '#c08550'), ('1', '#6b3c1c'))),
+    ])
+    body = '''  <circle cx="32" cy="36" r="20" fill="url(#haut)" stroke="#c98e66" stroke-width="1.8"/>
+  <path d="M11,36 Q8,10 32,8 Q56,10 53,36 Q50,24 42,22 Q36,28 28,24 Q20,26 15,38 Z" fill="url(#haare)" stroke="#4a2810" stroke-width="1.8" stroke-linejoin="round"/>
+  <circle cx="25" cy="38" r="2.6" fill="#3a2414"/>
+  <circle cx="39" cy="38" r="2.6" fill="#3a2414"/>
+  <path d="M27,46 Q32,50 37,46" stroke="#9a3d2b" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M48,50 L58,60 M58,50 L48,60" stroke="#7d8590" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="47" cy="49" r="3.5" fill="none" stroke="#e2553a" stroke-width="2.4"/>
+  <circle cx="47" cy="61" r="3.5" fill="none" stroke="#e2553a" stroke-width="2.4"/>'''
+    svg('symbol-frisur', 64, 64, defs, body, 'Symbol: Frisur.')
+
+
+def symbol_haarfarbe():
+    defs = linear('kamm', st(('0', '#ffb36b'), ('1', '#e2853a')))
+    teeth = ''.join(f'  <rect x="{x}" y="34" width="3.4" height="18" rx="1.7" fill="url(#kamm)" stroke="#b5622a" stroke-width="1"/>\n' for x in range(10, 54, 6))
+    locks = ''.join(
+        f'  <path d="M{x},6 Q{x + 8},16 {x},26" stroke="{c}" stroke-width="5" fill="none" stroke-linecap="round"/>\n'
+        for x, c in [(14, '#f2c55c'), (24, '#a8693a'), (34, '#2b2422'), (44, '#d4602a')]
+    )
+    body = f'''{locks}  <rect x="7" y="27" width="50" height="10" rx="5" fill="url(#kamm)" stroke="#b5622a" stroke-width="1.6"/>
+{teeth}'''
+    svg('symbol-haarfarbe', 64, 64, defs, body, 'Symbol: Haarfarbe.')
+
+
+def symbol_haut():
+    defs = radial('haut', st(('0', '#ffe9d6'), ('1', '#d9a274')), cx='40%', cy='40%')
+    fingers = ''.join(
+        f'  <rect x="{x}" y="{y}" width="9" height="{h}" rx="4.5" fill="url(#haut)" stroke="#b07a52" stroke-width="1.6"/>\n'
+        for x, y, h in [(17, 12, 26), (27, 7, 30), (37, 9, 28), (47, 16, 22)]
+    )
+    body = f'''{fingers}  <path d="M16,32 L56,32 L56,44 Q56,60 38,60 L30,60 Q16,60 14,46 Z" fill="url(#haut)" stroke="#b07a52" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M15,40 Q6,34 5,26 Q6,22 10,24 Q16,30 20,34" fill="url(#haut)" stroke="#b07a52" stroke-width="1.6" stroke-linejoin="round"/>'''
+    svg('symbol-haut', 64, 64, defs, body, 'Symbol: Hautfarbe.')
+
+
+def symbol_shirt():
+    defs = linear('shirt', st(('0', '#ff9c7e'), ('1', '#e2553a')))
+    body = '''  <path d="M22,8 Q32,14 42,8 L58,16 L52,30 L46,27 L46,58 L18,58 L18,27 L12,30 L6,16 Z" fill="url(#shirt)" stroke="#b9432c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24,9 Q32,18 40,9" stroke="#b9432c" stroke-width="2" fill="none"/>
+  <path d="M32,30 L34.5,35.5 L40.5,36 L36,40 L37.5,46 L32,42.8 L26.5,46 L28,40 L23.5,36 L29.5,35.5 Z" fill="#ffd84a" stroke="#e0a91f" stroke-width="1" stroke-linejoin="round"/>'''
+    svg('symbol-shirt', 64, 64, defs, body, 'Symbol: T-Shirt.')
+
+
+def symbol_hose():
+    defs = linear('hose', st(('0', '#6f8fd6'), ('1', '#33508f')))
+    body = '''  <path d="M14,8 L50,8 L54,58 L38,58 L32,26 L26,58 L10,58 Z" fill="url(#hose)" stroke="#2a4074" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="14" y="8" width="36" height="7" fill="#2a4074" opacity="0.35"/>
+  <path d="M20,20 Q24,24 28,20 M36,20 Q40,24 44,20" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2" fill="none"/>'''
+    svg('symbol-hose', 64, 64, defs, body, 'Symbol: Hose.')
+
+
 gras()
 blume('blume-gelb', '#fff3a0', '#f2c21c')
 blume('blume-rosa', '#ffd6e6', '#f27aa8')
@@ -594,4 +652,9 @@ wasserpflanze()
 korb()
 schaufel()
 album()
+symbol_frisur()
+symbol_haarfarbe()
+symbol_haut()
+symbol_shirt()
+symbol_hose()
 print('fertig:', len(list(OUT.glob('*.svg'))), 'Dateien')

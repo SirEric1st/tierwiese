@@ -38,6 +38,11 @@ const GRAPHICS = [
   'korb',
   'schaufel',
   'album',
+  'symbol-frisur',
+  'symbol-haarfarbe',
+  'symbol-haut',
+  'symbol-shirt',
+  'symbol-hose',
 ];
 
 // Im preload() einer Szene aufrufen

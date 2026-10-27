@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Symbol: Hose. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="hose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f8fd6"/><stop offset="1" stop-color="#33508f"/></linearGradient>
+  </defs>
+  <path d="M14,8 L50,8 L54,58 L38,58 L32,26 L26,58 L10,58 Z" fill="url(#hose)" stroke="#2a4074" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="14" y="8" width="36" height="7" fill="#2a4074" opacity="0.35"/>
+  <path d="M20,20 Q24,24 28,20 M36,20 Q40,24 44,20" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+</svg>

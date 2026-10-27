@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Symbol: T-Shirt. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9c7e"/><stop offset="1" stop-color="#e2553a"/></linearGradient>
+  </defs>
+  <path d="M22,8 Q32,14 42,8 L58,16 L52,30 L46,27 L46,58 L18,58 L18,27 L12,30 L6,16 Z" fill="url(#shirt)" stroke="#b9432c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24,9 Q32,18 40,9" stroke="#b9432c" stroke-width="2" fill="none"/>
+  <path d="M32,30 L34.5,35.5 L40.5,36 L36,40 L37.5,46 L32,42.8 L26.5,46 L28,40 L23.5,36 L29.5,35.5 Z" fill="#ffd84a" stroke="#e0a91f" stroke-width="1" stroke-linejoin="round"/>
+</svg>

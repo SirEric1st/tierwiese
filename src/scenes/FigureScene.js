@@ -1,6 +1,7 @@
 // Der Figuren-Baukasten: eine Seite über der Wiese. Links steht die Figur,
 // rechts wählt man Frisur und Farben aus runden Knöpfen. Jede Änderung
-// sieht man sofort. Die WorldScene ist so lange angehalten.
+// sieht man sofort. Vorne in jeder Reihe zeigt ein Symbol (mit kurzem Wort),
+// was die Reihe ändert; antippen liest es vor. Die WorldScene ist so lange angehalten.
 import { DPR, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import {
   HAIR_COLORS,
@@ -21,14 +22,18 @@ const STYLE_PREVIEW_SCALE = 0.62; // Mini-Figuren auf den Frisur-Knöpfen
 const BUST = 0.52; // von den Mini-Figuren nur Kopf und Schultern zeigen (oberer Teil)
 const BUST_CENTER = BUST / 2;
 const CLOSE_RADIUS = 40;
+const LABEL_WIDTH = 96; // Spalte mit den Symbolen vor den Reihen
+const SYMBOL_SIZE = 50;
+const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
 
 // Die Zeilen des Baukastens: welche Einstellung, welche Auswahl, was gesagt wird
+// symbol/label/hint: Symbol vorne in der Reihe, Wort darunter, Satz beim Antippen
 const ROWS = [
-  { key: 'hair', options: HAIR_STYLES, say: (o) => o.say },
-  { key: 'hairColor', options: HAIR_COLORS, say: (o) => `${capitalize(o.word)}e Haare!` },
-  { key: 'skin', options: SKIN_COLORS.map((color) => ({ color })), say: () => 'Schön!' },
-  { key: 'shirt', options: SHIRT_COLORS, say: (o) => `Ein ${o.word}es T-Shirt!` },
-  { key: 'pants', options: PANTS_COLORS, say: (o) => `Eine ${o.word}e Hose!` },
+  { key: 'hair', symbol: 'symbol-frisur', label: 'Frisur', hint: 'Hier suchst du die Frisur aus.', options: HAIR_STYLES, say: (o) => o.say },
+  { key: 'hairColor', symbol: 'symbol-haarfarbe', label: 'Haare', hint: 'Hier suchst du die Haarfarbe aus.', options: HAIR_COLORS, say: (o) => `${capitalize(o.word)}e Haare!` },
+  { key: 'skin', symbol: 'symbol-haut', label: 'Haut', hint: 'Hier suchst du die Hautfarbe aus.', options: SKIN_COLORS.map((color) => ({ color })), say: () => 'Diese Hautfarbe!' },
+  { key: 'shirt', symbol: 'symbol-shirt', label: 'T-Shirt', hint: 'Hier suchst du die Farbe vom T-Shirt aus.', options: SHIRT_COLORS, say: (o) => `Ein ${o.word}es T-Shirt!` },
+  { key: 'pants', symbol: 'symbol-hose', label: 'Hose', hint: 'Hier suchst du die Farbe von der Hose aus.', options: PANTS_COLORS, say: (o) => `Eine ${o.word}e Hose!` },
 ];
 
 function capitalize(word) {
@@ -61,6 +66,7 @@ export class FigureScene extends Phaser.Scene {
 
     this.rows = ROWS.map((row) => ({
       ...row,
+      tag: this.createTag(row),
       buttons: row.options.map((option, index) => this.createSwatch(row, option, index)),
     }));
     this.closeButton = this.createCloseButton();
@@ -76,6 +82,17 @@ export class FigureScene extends Phaser.Scene {
 
     this.input.on('pointerup', (pointer) => this.onTap(toScreen(pointer)));
     say('Wie soll deine Figur aussehen? Tipp auf die Farben!');
+  }
+
+  // Symbol und Wort vorne in der Reihe
+  createTag(row) {
+    const icon = this.add.image(0, -10, row.symbol);
+    icon.setScale(SYMBOL_SIZE / Math.max(icon.width, icon.height));
+    const style = { fontFamily: FONT, fontSize: '16px', fontStyle: 'bold', color: '#7a5a2a', resolution: DPR };
+    const label = this.add.text(0, 26, row.label, style).setOrigin(0.5);
+    const tag = this.add.container(0, 0, [icon, label]);
+    this.ui.add(tag);
+    return tag;
   }
 
   createSwatch(row, option, index) {
@@ -123,7 +140,7 @@ export class FigureScene extends Phaser.Scene {
 
     const step = SWATCH_RADIUS * 2 + SWATCH_GAP + 10;
     const maxButtons = Math.max(...ROWS.map((row) => row.options.length));
-    const rowsWidth = maxButtons * step;
+    const rowsWidth = LABEL_WIDTH + maxButtons * step;
     const rowsHeight = ROWS.length * (SWATCH_RADIUS * 2 + 10 + ROW_GAP);
     const previewWidth = 100 * PREVIEW_SCALE;
     const previewHeight = 150 * PREVIEW_SCALE;
@@ -164,8 +181,9 @@ export class FigureScene extends Phaser.Scene {
 
     this.rows.forEach((row, r) => {
       const y = rowsTop + (r * (SWATCH_RADIUS * 2 + 10 + ROW_GAP) + SWATCH_RADIUS + 5) * fit;
+      row.tag.setPosition(rowsLeft + (LABEL_WIDTH / 2) * fit, y).setScale(fit);
       row.buttons.forEach((button, i) => {
-        button.setPosition(rowsLeft + (i * step + step / 2) * fit, y).setScale(fit);
+        button.setPosition(rowsLeft + (LABEL_WIDTH + i * step + step / 2) * fit, y).setScale(fit);
       });
     });
     this.closeButton.setPosition(panelLeft + panelWidth - 30, panelTop + 30).setScale(Math.max(fit, 0.8));
@@ -204,6 +222,11 @@ export class FigureScene extends Phaser.Scene {
       return;
     }
     for (const row of this.rows) {
+      if (Math.abs(x - row.tag.x) <= (LABEL_WIDTH / 2) * this.fit && Math.abs(y - row.tag.y) <= SWATCH_RADIUS * this.fit) {
+        this.tweens.add({ targets: row.tag, scale: this.fit * 1.15, duration: 120, yoyo: true, ease: 'Quad.easeOut' });
+        say(row.hint);
+        return;
+      }
       const button = row.buttons.find(
         (b) => Phaser.Math.Distance.Between(x, y, b.x, b.y) <= (SWATCH_RADIUS + SWATCH_GAP / 2) * this.fit
       );
