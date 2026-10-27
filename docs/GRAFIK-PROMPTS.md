@@ -14,9 +14,10 @@ Midjourney. Die Bilder ersetzen später die einfachen Vektorgrafiken aus
 3. Bitte immer um ein **PNG mit durchsichtigem Hintergrund**. Klappt das
    nicht, ist ein einfarbig weißer Hintergrund auch in Ordnung – den
    entferne ich.
-4. Speichere jedes Bild unter dem angegebenen **Dateinamen** im Ordner
-   `assets/ki-bilder/` und sag mir Bescheid. Ich schneide die Bilder zu,
-   verkleinere sie und baue sie ein.
+4. Schick mir den **Teilen-Link** des Bildes aus ChatGPT und sag dazu, welches
+   Bild es ist (Dateiname aus der Tabelle). Oder speichere es unter dem
+   Dateinamen im Ordner `assets/ki-bilder/`. Ich schneide die Bilder zu,
+   verkleinere sie mit `tools/ki-bild.py` und baue sie ein.
 5. Notiere, **mit welchem Programm** du die Bilder gemacht hast. Das kommt in
    `assets/LIZENZEN.md`. Bitte vorher kurz in den Nutzungsbedingungen des
    Programms nachsehen, ob man die Bilder in eigenen Projekten verwenden darf.

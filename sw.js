@@ -37,6 +37,7 @@ const FILES = [
   'assets/grafik/korb.svg',
   'assets/grafik/schaufel.svg',
   'assets/grafik/gras.svg',
+  'assets/bilder/igel.png',
   'assets/grafik/igel.svg',
   'assets/grafik/laubhaufen.svg',
   'assets/grafik/nussbaum.svg',

@@ -1,6 +1,16 @@
 // Alle Grafiken des Spiels. Die Bilder liegen als Vektorgrafiken (SVG) in
 // assets/grafik/ und werden beim Start in passender Schärfe geladen.
+// Nach und nach kommen gemalte KI-Bilder dazu (PNG in assets/bilder/,
+// vorbereitet mit tools/ki-bild.py). Sie ersetzen die Vektorgrafik gleichen Namens.
 import { DPR } from './display.js';
+
+// Für diese Namen gibt es schon ein KI-Bild
+const PAINTED = ['igel'];
+const PAINTED_SCALE = 2; // KI-Bilder liegen in doppelter Spielgröße vor
+
+export function isPainted(key) {
+  return PAINTED.includes(key);
+}
 
 const GRAPHICS = [
   'gras',
@@ -32,12 +42,15 @@ const GRAPHICS = [
 // Im preload() einer Szene aufrufen
 export function preloadGraphics(scene) {
   GRAPHICS.forEach((key) => {
-    if (!scene.textures.exists(key)) scene.load.svg(key, `assets/grafik/${key}.svg`, { scale: DPR });
+    if (scene.textures.exists(key)) return;
+    if (isPainted(key)) scene.load.image(key, `assets/bilder/${key}.png`);
+    else scene.load.svg(key, `assets/grafik/${key}.svg`, { scale: DPR });
   });
 }
 
 // Im create() aufrufen: Grafiken, die per Code gezeichnet werden
 export function createTextures(scene) {
+  if (DPR !== PAINTED_SCALE) PAINTED.forEach((key) => resizePainted(scene, key));
   if (!scene.textures.exists('konfetti')) drawConfetti(scene);
   if (!scene.textures.exists('herz')) drawHeart(scene);
 }
@@ -54,6 +67,20 @@ function drawHeart(scene) {
   g.fillCircle(6 * s, 6 * s, 2.5 * s);
   g.generateTexture('herz', 28 * s, 26 * s);
   g.destroy();
+}
+
+// Auf Bildschirmen ohne Retina die KI-Bilder auf halbe Größe bringen,
+// damit sie genauso groß erscheinen wie die Vektorgrafiken
+function resizePainted(scene, key) {
+  const texture = scene.textures.get(key);
+  if (texture.resized) return;
+  const source = texture.getSourceImage();
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round((source.width * DPR) / PAINTED_SCALE);
+  canvas.height = Math.round((source.height * DPR) / PAINTED_SCALE);
+  canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
+  scene.textures.remove(key);
+  scene.textures.addCanvas(key, canvas).resized = true;
 }
 
 // Konfetti in fünf Farben, als einzelne Bildausschnitte (Frames 0 bis 4)

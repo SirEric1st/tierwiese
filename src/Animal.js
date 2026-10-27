@@ -2,6 +2,7 @@
 // Wann ein Tier kommt, einzieht oder geht, entscheidet der AnimalManager.
 import { IMAGE_SCALE } from './display.js';
 import { getFood } from './foods.js';
+import { isPainted } from './textures.js';
 import { playHappy } from './sound.js';
 import { say } from './speech.js';
 
@@ -23,11 +24,14 @@ export class Animal {
     this.state = 'away'; // away | visiting | resident
 
     this.sprite = scene.add.image(0, 0, def.type).setOrigin(0.5, 1).setScale(IMAGE_SCALE);
+    // KI-Bilder haben keinen eigenen Schatten am Boden, darum einen dazulegen
+    this.shadow = scene.add.image(0, -4, 'schatten').setVisible(isPainted(def.type));
+    this.shadow.setScale((this.sprite.displayWidth * 0.8) / this.shadow.width, IMAGE_SCALE * 1.2);
     this.bubble = scene.add.container(0, 0, [
       scene.add.image(0, 0, 'gedankenblase').setOrigin(0.14, 0.95).setScale(IMAGE_SCALE),
     ]);
     this.bubble.setVisible(false);
-    this.container = scene.add.container(0, 0, [this.sprite, this.bubble]);
+    this.container = scene.add.container(0, 0, [this.shadow, this.sprite, this.bubble]);
     this.container.setVisible(false);
   }
 
@@ -320,6 +324,7 @@ export class Animal {
     if (this.def.swimTexture) {
       const texture = this.isInWater(this.x, this.y) ? this.def.swimTexture : this.def.type;
       if (this.sprite.texture.key !== texture) this.sprite.setTexture(texture);
+      this.shadow.setVisible(isPainted(this.def.type) && texture === this.def.type);
     }
   }
 
