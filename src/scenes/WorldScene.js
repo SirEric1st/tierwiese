@@ -4,11 +4,13 @@
 // kann man verschieben oder zurück auf die Leiste ziehen (wegräumen).
 // Eingezogene Tiere kann man streicheln: Finger über dem Tier hin und her bewegen.
 // Mit dem Korb-Knopf wird die Leiste zum Futterkorb; Futter zieht man zu den Tieren.
-// Der Album-Knopf oben rechts öffnet das Tier-Album.
+// Der Album-Knopf oben rechts öffnet das Tier-Album. Tippt man auf die eigene
+// Figur, öffnet sich der Figuren-Baukasten.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
-import { IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
+import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { getElement } from '../elements.js';
+import { makeFigureTexture, normalizeFigure } from '../figure.js';
 import { loadGame, saveGame } from '../save.js';
 import { say } from '../speech.js';
 
@@ -63,6 +65,8 @@ export class WorldScene extends Phaser.Scene {
     const start = saved?.player ?? { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
     this.shadow = this.add.image(start.x, start.y, 'schatten').setScale(IMAGE_SCALE);
     this.player = this.add.image(start.x, start.y, 'figur').setOrigin(0.5, 1).setScale(IMAGE_SCALE);
+    this.figure = normalizeFigure(saved?.figure);
+    this.applyFigure();
     this.updatePlayerDepth();
 
     const camera = this.cameras.main;
@@ -144,6 +148,7 @@ export class WorldScene extends Phaser.Scene {
     saveGame({
       items: this.placed.map((item) => ({ type: item.element.type, x: Math.round(item.x), y: Math.round(item.y) })),
       player: { x: Math.round(this.player.x), y: Math.round(this.player.y) },
+      figure: this.figure,
       animals: this.animals.getState(),
     });
   }
@@ -185,7 +190,9 @@ export class WorldScene extends Phaser.Scene {
       } else {
         const animal = this.animals.animalAt(pointer.worldX, pointer.worldY);
         const item = animal ? null : this.itemAt(pointer.worldX, pointer.worldY);
-        if (animal?.state === 'resident') {
+        if (!animal && this.isOnPlayer(pointer.worldX, pointer.worldY)) {
+          Object.assign(touch, { mode: 'world', figure: true, scrollX: camera.scrollX, scrollY: camera.scrollY });
+        } else if (animal?.state === 'resident') {
           Object.assign(touch, { mode: 'pet', animal, lastX: pointer.worldX, lastY: pointer.worldY });
         } else if (animal) {
           Object.assign(touch, { mode: 'world', animal, scrollX: camera.scrollX, scrollY: camera.scrollY });
@@ -230,6 +237,8 @@ export class WorldScene extends Phaser.Scene {
     } else if (touch.mode === 'element') {
       this.wiggle(touch.item);
       say(touch.item.element.name);
+    } else if (touch.figure) {
+      this.openFigureEditor();
     } else if (touch.animal) {
       touch.animal.onTap();
     } else {
@@ -489,6 +498,36 @@ export class WorldScene extends Phaser.Scene {
   }
 
   // ---------- Figur ----------
+
+  // Das Bild der Figur aus der Auswahl im Baukasten zusammensetzen
+  async applyFigure() {
+    const key = await makeFigureTexture(this, this.figure, DPR);
+    if (!key || !this.player.active) return;
+    const old = this.player.texture.key;
+    this.player.setTexture(key);
+    if (old.startsWith('spielfigur-')) this.textures.remove(old);
+  }
+
+  isOnPlayer(worldX, worldY) {
+    const p = this.player;
+    return (
+      Math.abs(worldX - p.x) <= p.displayWidth / 2 && worldY <= p.y + 10 && worldY >= p.y - p.displayHeight
+    );
+  }
+
+  openFigureEditor() {
+    this.walkTween?.stop();
+    this.stopBobbing();
+    this.scene.pause();
+    this.scene.launch('FigureScene', {
+      figure: this.figure,
+      onDone: (figure) => {
+        this.figure = normalizeFigure(figure);
+        this.applyFigure();
+        this.save();
+      },
+    });
+  }
 
   walkTo(x, y) {
     x = Phaser.Math.Clamp(x, EDGE, WORLD_WIDTH - EDGE);

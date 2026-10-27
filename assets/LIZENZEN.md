@@ -7,6 +7,8 @@ Alle Spielgrafiken sind eigene Arbeit, Teil dieses Projekts:
 - `assets/grafik/*.svg` – Tiere, Spielfigur, Landschaft, Futter, Knöpfe,
   Gedankenblase.
   Erzeugt mit dem eigenen Skript `tools/grafik.py`.
+- Die eigene Spielfigur (Baukasten) wird im Spiel aus Teilen zusammengesetzt
+  (`src/figure.js`), nach dem Vorbild von `assets/grafik/figur.svg`.
 - Konfetti und Knöpfe werden beim Start per Code gezeichnet
   (`src/textures.js`, `src/scenes/StartScene.js`, `src/BuildBar.js`).
 

@@ -53,6 +53,7 @@ const FILES = [
   'src/textures.js',
   'src/elements.js',
   'src/foods.js',
+  'src/figure.js',
   'src/animals.js',
   'src/Animal.js',
   'src/AnimalManager.js',
@@ -60,6 +61,7 @@ const FILES = [
   'src/scenes/StartScene.js',
   'src/scenes/WorldScene.js',
   'src/scenes/AlbumScene.js',
+  'src/scenes/FigureScene.js',
 ];
 
 self.addEventListener('install', (event) => {

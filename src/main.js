@@ -1,6 +1,7 @@
 // Einstiegspunkt: richtet Phaser ein und startet mit dem Startbildschirm.
 import { DPR } from './display.js';
 import { AlbumScene } from './scenes/AlbumScene.js';
+import { FigureScene } from './scenes/FigureScene.js';
 import { StartScene } from './scenes/StartScene.js';
 import { WorldScene } from './scenes/WorldScene.js';
 
@@ -18,7 +19,7 @@ const game = new Phaser.Game({
   input: {
     activePointers: 1,
   },
-  scene: [StartScene, WorldScene, AlbumScene],
+  scene: [StartScene, WorldScene, AlbumScene, FigureScene],
 });
 
 // Das Spielfeld füllt immer den ganzen Bildschirm, auch beim Drehen des iPads
