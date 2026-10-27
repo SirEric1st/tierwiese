@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Klee mit Blüte (Futter). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="blatt" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#a6e36a"/><stop offset="1" stop-color="#3d8a26"/></radialGradient>
+  </defs>
+  <path d="M28,36 Q24,50 20,62" stroke="#3d8a26" stroke-width="3" fill="none"/>
+  <path d="M46,24 Q44,42 42,60" stroke="#3d8a26" stroke-width="2.6" fill="none"/>
+  <ellipse cx="28.0" cy="26.0" rx="10" ry="8" transform="rotate(0 28.0 26.0)" fill="url(#blatt)" stroke="#2b6a1c" stroke-width="1.2"/>
+  <path d="M28,36 L28.0,26.0" stroke="#2b6a1c" stroke-width="1" opacity="0.6"/>
+  <ellipse cx="36.7" cy="41.0" rx="10" ry="8" transform="rotate(120 36.7 41.0)" fill="url(#blatt)" stroke="#2b6a1c" stroke-width="1.2"/>
+  <path d="M28,36 L36.7,41.0" stroke="#2b6a1c" stroke-width="1" opacity="0.6"/>
+  <ellipse cx="19.3" cy="41.0" rx="10" ry="8" transform="rotate(240 19.3 41.0)" fill="url(#blatt)" stroke="#2b6a1c" stroke-width="1.2"/>
+  <path d="M28,36 L19.3,41.0" stroke="#2b6a1c" stroke-width="1" opacity="0.6"/>
+  <ellipse cx="51.0" cy="16.0" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="50.0" cy="19.5" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="47.5" cy="21.7" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="44.5" cy="21.7" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="42.0" cy="19.5" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="41.0" cy="16.0" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="42.0" cy="12.5" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="44.5" cy="10.3" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="47.5" cy="10.3" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+  <ellipse cx="50.0" cy="12.5" rx="2.6" ry="4" fill="#f29ac4" stroke="#c94a8a" stroke-width="0.6"/>
+</svg>

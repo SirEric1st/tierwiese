@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="70" viewBox="0 0 130 70">
+  <!-- Totholz (alter Baumstamm). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="rinde" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a7048"/><stop offset="0.5" stop-color="#6e4a2a"/><stop offset="1" stop-color="#4a301a"/></linearGradient>
+    <radialGradient id="schnitt" cx="50%" cy="50%" r="75%"><stop offset="0" stop-color="#e6c38e"/><stop offset="1" stop-color="#b0824e"/></radialGradient>
+    <radialGradient id="pilz" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffb07a"/><stop offset="1" stop-color="#c95f25"/></radialGradient>
+    <radialGradient id="moos" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#a6d86a"/><stop offset="1" stop-color="#5a9a32"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="64" cy="64" rx="60" ry="6" fill="url(#schatten)"/>
+  <path d="M16,26 L108,22 Q124,22 124,42 Q124,60 108,60 L16,62 Z" fill="url(#rinde)" stroke="#3a2412" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M30,34 Q60,30 92,32 M26,48 Q64,44 100,48" stroke="#3a2412" stroke-width="1.6" fill="none" opacity="0.6"/>
+  <ellipse cx="16" cy="44" rx="11" ry="18" fill="url(#schnitt)" stroke="#3a2412" stroke-width="2"/>
+  <ellipse cx="16" cy="44" rx="6" ry="10" fill="none" stroke="#9a6a3a" stroke-width="1.2"/>
+  <ellipse cx="16" cy="44" rx="2.5" ry="4" fill="none" stroke="#9a6a3a" stroke-width="1.2"/>
+  <ellipse cx="48" cy="26" rx="20" ry="5" fill="url(#moos)"/>
+  <path d="M78,24 Q78,14 88,14 Q98,14 98,24 Z" fill="url(#pilz)" stroke="#8a3a12" stroke-width="1.4"/>
+  <rect x="86" y="22" width="4" height="4" fill="#f4e6c8"/>
+  <circle cx="84" cy="18" r="1.6" fill="#fff" opacity="0.8"/>
+  <path d="M96,24 Q96,18 102,18 Q108,18 108,24 Z" fill="url(#pilz)" stroke="#8a3a12" stroke-width="1.2"/>
+</svg>

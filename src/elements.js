@@ -12,6 +12,13 @@ export const ELEMENTS = [
   { type: 'laubhaufen', name: 'Ein Laubhaufen!', hint: 'Der Laubhaufen. Zieh ihn auf die Wiese!' },
   { type: 'busch', name: 'Ein Busch!', hint: 'Der Busch. Zieh ihn auf die Wiese!' },
   { type: 'steine', name: 'Ein Steinhaufen!', hint: 'Der Steinhaufen. Zieh ihn auf die Wiese!' },
+  { type: 'blumen', name: 'Ein Blumenbeet!', hint: 'Das Blumenbeet. Zieh es auf die Wiese!' },
+  { type: 'hecke', name: 'Eine Hecke!', hint: 'Die Hecke. Zieh sie auf die Wiese!' },
+  { type: 'obstbaum', name: 'Ein Apfelbaum!', hint: 'Der Apfelbaum. Zieh ihn auf die Wiese!' },
+  { type: 'totholz', name: 'Ein alter Baumstamm!', hint: 'Der alte Baumstamm. Zieh ihn auf die Wiese!' },
+  { type: 'insektenhotel', name: 'Ein Insektenhotel!', hint: 'Das Insektenhotel. Zieh es auf die Wiese!' },
+  { type: 'nistkasten', name: 'Ein Nistkasten!', hint: 'Der Nistkasten. Zieh ihn auf die Wiese!' },
+  { type: 'bau', name: 'Ein Erdbau!', hint: 'Der Erdbau. Das ist eine Höhle in der Erde. Zieh ihn auf die Wiese!' },
 ];
 
 export function getElement(type) {

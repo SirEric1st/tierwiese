@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="92" height="62" viewBox="0 0 92 62">
+  <!-- Maulwurf auf seinem Erdhügel. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="fell" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#5a5660"/><stop offset="0.6" stop-color="#2e2c34"/><stop offset="1" stop-color="#16141a"/></radialGradient>
+    <radialGradient id="rosa" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffd0c8"/><stop offset="1" stop-color="#e89a8e"/></radialGradient>
+    <radialGradient id="erde" cx="50%" cy="30%" r="75%"><stop offset="0" stop-color="#a8784a"/><stop offset="1" stop-color="#6a4428"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="46" cy="60" rx="42" ry="4" fill="url(#schatten)"/>
+  <path d="M4,60 Q12,38 46,36 Q80,38 88,60 Z" fill="url(#erde)" stroke="#4a2c12" stroke-width="1.8"/>
+  <path d="M22,48 Q20,22 44,18 Q68,18 70,42 Q70,52 62,54 L30,54 Q22,54 22,48 Z" fill="url(#fell)" stroke="#0e0c10" stroke-width="1.6"/>
+  <path d="M30,26 Q40,18 54,20" stroke="#8a8694" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M64,30 Q76,30 84,34 Q86,38 80,40 Q70,40 64,38 Z" fill="url(#rosa)" stroke="#c97a6e" stroke-width="1.2"/>
+  <circle cx="84" cy="36" r="2.6" fill="#c9706a"/>
+  <circle cx="62" cy="30" r="1.8" fill="#000"/><circle cx="61.6" cy="29.4" r="0.6" fill="#fff"/>
+  <ellipse cx="30" cy="50" rx="10" ry="7" fill="url(#rosa)" stroke="#c97a6e" stroke-width="1.2"/>
+  <path d="M22,48 l-4,-2 M22,51 l-5,0 M23,54 l-4,2" stroke="#c97a6e" stroke-width="1.6" stroke-linecap="round"/>
+  <ellipse cx="62" cy="50" rx="10" ry="7" fill="url(#rosa)" stroke="#c97a6e" stroke-width="1.2"/>
+  <path d="M70,48 l4,-2 M70,51 l5,0 M69,54 l4,2" stroke="#c97a6e" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

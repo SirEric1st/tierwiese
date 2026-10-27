@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="70" viewBox="0 0 120 70">
+  <!-- Erdbau mit Eingang. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="erde" cx="45%" cy="30%" r="75%"><stop offset="0" stop-color="#b5834e"/><stop offset="0.6" stop-color="#8a5a30"/><stop offset="1" stop-color="#5e3a1c"/></radialGradient>
+    <radialGradient id="loch" cx="50%" cy="60%" r="75%"><stop offset="0" stop-color="#0e0804"/><stop offset="1" stop-color="#3a2412"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="60" cy="66" rx="58" ry="6" fill="url(#schatten)"/>
+  <path d="M4,64 Q14,22 60,16 Q106,22 116,64 Z" fill="url(#erde)" stroke="#4a2c12" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M40,64 Q40,36 60,36 Q80,36 80,64 Z" fill="url(#loch)" stroke="#3a2412" stroke-width="2"/>
+  <path d="M22,40 Q36,26 56,22" stroke="#d9a670" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="20" cy="56" r="3" fill="#7a5a3a"/><circle cx="98" cy="52" r="3.5" fill="#7a5a3a"/><circle cx="90" cy="34" r="2.4" fill="#7a5a3a"/>
+  <path d="M8,64 l3,-8 l3,8 M104,64 l3,-9 l3,9" stroke="#4cae4f" stroke-width="2" fill="none"/>
+</svg>

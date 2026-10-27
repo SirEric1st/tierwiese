@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="138" height="92" viewBox="0 0 138 92">
+  <!-- Rotfuchs. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="fell" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#ffa65a"/><stop offset="0.6" stop-color="#e8742a"/><stop offset="1" stop-color="#b24a14"/></radialGradient>
+    <radialGradient id="hell" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f0e6d8"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="66" cy="88" rx="54" ry="5" fill="url(#schatten)"/>
+  <path d="M8,56 Q-2,40 14,36 Q30,34 40,52 Q30,66 8,56 Z" fill="url(#fell)" stroke="#8a3410" stroke-width="1.6"/>
+  <path d="M8,56 Q0,46 6,40 Q12,48 16,54 Z" fill="url(#hell)"/>
+  <path d="M42,66 L40,86 M54,68 L54,86 M88,68 L88,86 M98,64 L102,86" stroke="#2a1a14" stroke-width="7" stroke-linecap="round"/>
+  <path d="M30,56 Q30,40 54,40 L92,40 Q108,42 106,58 Q104,72 88,72 L48,72 Q30,70 30,56 Z" fill="url(#fell)" stroke="#8a3410" stroke-width="1.8"/>
+  <path d="M92,48 Q104,50 104,64 Q96,72 88,70 Z" fill="url(#hell)"/>
+  <path d="M94,22 L96,4 L106,18 Z" fill="url(#fell)" stroke="#8a3410" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M110,18 L118,2 L122,20 Z" fill="url(#fell)" stroke="#8a3410" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M97,18 L97,9 L102,16 Z M113,16 L117,8 L118,18 Z" fill="#2a1a14"/>
+  <path d="M90,32 Q92,16 108,16 Q122,16 124,28 L134,36 Q134,42 126,42 L110,44 Q92,44 90,32 Z" fill="url(#fell)" stroke="#8a3410" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M104,38 Q118,44 132,38 Q126,46 112,46 Q104,44 104,38 Z" fill="url(#hell)"/>
+  <circle cx="133" cy="37" r="3" fill="#1a1a1a"/>
+  <circle cx="112" cy="28" r="5.8" fill="#fff" stroke="#00000022" stroke-width="1"/>
+  <circle cx="112.7" cy="28.5" r="4.6" fill="#7a4a10"/>
+  <circle cx="112.7" cy="28.5" r="2.5" fill="#0d0704"/>
+  <circle cx="111.1" cy="26.4" r="1.7" fill="#fff"/>
+  <circle cx="114.3" cy="30.1" r="0.8" fill="#fff" opacity="0.9"/>
+</svg>

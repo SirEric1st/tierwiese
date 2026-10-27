@@ -10,29 +10,20 @@
 # assets/bilder/<name>.png
 #
 # Braucht das Python-Modul Pillow:  python3 -m pip install --user pillow
+import re
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
 
-# Größte Breite und Höhe im Spiel (in Punkten), in die das Bild passen muss
+# Größte Breite und Höhe im Spiel (in Punkten), in die das Bild passen muss.
+# Steht ein Name nicht hier, gilt die Größe der Vektorgrafik in assets/grafik/.
 SIZES = {
     'igel': (130, 100),
     'ente': (120, 100),
     'ente-schwimmt': (120, 100),
     'eichhoernchen': (115, 125),
-    'figur': (100, 150),
-    'baum': (190, 240),
-    'nussbaum': (190, 240),
-    'teich': (280, 160),
-    'schilf': (100, 150),
-    'laubhaufen': (140, 90),
-    'busch': (140, 110),
     'frosch': (75, 60),
-    'steine': (120, 80),
-    'blume-gelb': (32, 36),
-    'blume-rosa': (32, 36),
-    'blume-weiss': (32, 36),
 }
 RETINA = 2
 CLEAR = 10  # Pixel, die fast durchsichtig sind, werden ganz durchsichtig
@@ -63,9 +54,23 @@ def remove_background(image):
     return result
 
 
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def game_size(name):
+    """Größe im Spiel: aus SIZES oder aus der Vektorgrafik gleichen Namens"""
+    if name in SIZES:
+        return SIZES[name]
+    vector = ROOT / 'assets' / 'grafik' / f'{name}.svg'
+    if not vector.exists():
+        sys.exit(f'Unbekannter Name „{name}“ – es gibt keine Grafik assets/grafik/{name}.svg')
+    head = vector.read_text(encoding='utf-8')[:300]
+    w, h = re.search(r'width="([\d.]+)" height="([\d.]+)"', head).groups()
+    return float(w), float(h)
+
+
 source, name = Path(sys.argv[1]), sys.argv[2]
-if name not in SIZES:
-    sys.exit(f'Unbekannter Name „{name}“. Möglich: {", ".join(SIZES)}')
+max_w, max_h = game_size(name)
 
 image = Image.open(source)
 if 'A' not in image.getbands() or image.getchannel('A').getextrema()[0] > CLEAR:
@@ -84,12 +89,11 @@ image = image.crop((
     min(image.height, bottom + MARGIN),
 ))
 
-max_w, max_h = SIZES[name]
 scale = min(max_w * RETINA / image.width, max_h * RETINA / image.height)
 size = (round(image.width * scale), round(image.height * scale))
 image = image.resize(size, Image.LANCZOS)
 
-target = Path(__file__).resolve().parent.parent / 'assets' / 'bilder' / f'{name}.png'
+target = ROOT / 'assets' / 'bilder' / f'{name}.png'
 target.parent.mkdir(exist_ok=True)
 image.save(target, optimize=True)
 print(f'{target.name}: {size[0]} × {size[1]} Pixel, {target.stat().st_size // 1024} KB')

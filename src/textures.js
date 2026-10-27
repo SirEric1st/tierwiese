@@ -2,7 +2,10 @@
 // assets/grafik/ und werden beim Start in passender Schärfe geladen.
 // Nach und nach kommen gemalte KI-Bilder dazu (PNG in assets/bilder/,
 // vorbereitet mit tools/ki-bild.py). Sie ersetzen die Vektorgrafik gleichen Namens.
+import { ANIMALS } from './animals.js';
 import { DPR } from './display.js';
+import { ELEMENTS } from './elements.js';
+import { FOODS } from './foods.js';
 
 // Für diese Namen gibt es schon ein KI-Bild
 const PAINTED = ['igel'];
@@ -12,6 +15,7 @@ export function isPainted(key) {
   return PAINTED.includes(key);
 }
 
+// Tiere, Dinge und Futter kommen aus ihren Listen; hier stehen nur die übrigen Bilder
 const GRAPHICS = [
   'gras',
   'blume-gelb',
@@ -19,22 +23,8 @@ const GRAPHICS = [
   'blume-weiss',
   'schatten',
   'figur',
-  'igel',
-  'ente',
   'ente-schwimmt',
-  'eichhoernchen',
-  'baum',
-  'nussbaum',
-  'teich',
-  'schilf',
-  'laubhaufen',
-  'busch',
   'gedankenblase',
-  'wurm',
-  'kaefer',
-  'nuss',
-  'koerner',
-  'wasserpflanze',
   'korb',
   'schaufel',
   'album',
@@ -43,8 +33,9 @@ const GRAPHICS = [
   'symbol-haut',
   'symbol-shirt',
   'symbol-hose',
-  'frosch',
-  'steine',
+  ...ANIMALS.map((a) => a.type),
+  ...ELEMENTS.map((e) => e.type),
+  ...FOODS.map((f) => f.type),
 ];
 
 // Im preload() einer Szene aufrufen

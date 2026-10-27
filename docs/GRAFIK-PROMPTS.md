@@ -58,6 +58,26 @@ nach links laufen.
 | `busch.png` | A round dense green bush with a few small flowers, wider than tall. |
 | `frosch.png` | A small green pond frog sitting, facing right, darker green spots, pale yellow belly, big round eyes on top of the head, wide friendly smile, four legs visible. |
 | `steine.png` | A small pile of round grey stones with a little green moss, wider than tall. |
+| `marienkaefer.png` | A seven-spot ladybird walking, facing right, shiny red wing cases with seven black dots, black head with tiny white spots, six little legs. |
+| `zitronenfalter.png` | A brimstone butterfly seen from the side with its wings folded up, facing right, lemon yellow leaf-shaped wings with one small orange dot, thin antennae. |
+| `biene.png` | A fuzzy wild bee flying, facing right, golden-brown furry body with dark stripes, transparent wings, friendly face. |
+| `amsel.png` | A male common blackbird standing, facing right, glossy black feathers, bright orange-yellow beak and yellow eye ring. |
+| `specht.png` | A great spotted woodpecker standing upright, facing right, black and white feathers, red patch under the tail and on the back of the head, strong grey beak. |
+| `hase.png` | A brown European hare sitting, facing right, very long ears with black tips, white belly, long hind legs. |
+| `reh.png` | A female roe deer standing, facing right, reddish-brown coat, white rump patch, big dark eyes, no antlers, four slender legs. |
+| `fuchs.png` | A red fox standing, facing right, orange fur, white chest and chin, black legs, bushy tail with a white tip. |
+| `dachs.png` | A European badger walking, facing right, grey body, black and white striped face, short dark legs. |
+| `maulwurf.png` | A European mole peeking out of a small mound of earth, facing right, black velvet fur, pink nose and big pink digging hands, tiny eyes. |
+| `fledermaus.png` | A small common pipistrelle bat flying, facing the viewer, brown furry body, dark thin wings spread out, big ears. |
+| `waldkauz.png` | A tawny owl sitting, facing the viewer, round brown body, light facial disc, big dark eyes, small yellow beak. |
+| `biber.png` | A Eurasian beaver standing, facing right, brown fur, flat dark scaly tail, orange front teeth. |
+| `blumen.png` | A small flower bed with colorful meadow flowers in pink, yellow, purple, white and orange, wider than tall. |
+| `hecke.png` | A long dense green hedge with a few red berries, much wider than tall. |
+| `obstbaum.png` | An apple tree with a round green crown full of red apples and a brown trunk. |
+| `totholz.png` | An old fallen tree log lying on the ground with moss and two small orange mushrooms. |
+| `insektenhotel.png` | A small wooden insect hotel on short legs, with a roof, bamboo tubes, drilled wood, pine cones and straw. |
+| `nistkasten.png` | A wooden nesting box with a round entrance hole and a green roof, mounted on a tall wooden pole. |
+| `bau.png` | A mound of earth with a dark round burrow entrance at the bottom, a few small stones and grass tufts. |
 | `blume-gelb.png` | One small yellow meadow flower on a short stem. |
 | `blume-rosa.png` | One small pink meadow flower on a short stem. |
 | `blume-weiss.png` | One small daisy with white petals and yellow center on a short stem. |

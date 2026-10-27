@@ -182,7 +182,7 @@ export class WorldScene extends Phaser.Scene {
   // Ein Fingerdruck wird erst beim Loslassen oder nach etwas Bewegung
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
   //   'album'   – der Album-Knopf
-  //   'bar'     – ein Knopf der Leiste (Ding, Futter oder Umschalt-Knopf)
+  //   'bar'     – ein Knopf der Leiste (Ding, Futter, Umschalt- oder Blätter-Knopf)
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
   //   'world'   – freie Wiese (oder ein Tier zu Besuch: das kann man nur antippen)
@@ -240,6 +240,9 @@ export class WorldScene extends Phaser.Scene {
   tap(touch, pointer) {
     if (touch.mode === 'album') {
       this.openAlbum();
+    } else if (touch.mode === 'bar' && touch.slot.page) {
+      this.bar.bounce(touch.slot);
+      this.bar.turnPage(touch.slot.page);
     } else if (touch.mode === 'bar' && touch.slot.toggle) {
       this.bar.bounce(touch.slot);
       this.bar.toggleMode();
@@ -265,7 +268,7 @@ export class WorldScene extends Phaser.Scene {
       touch.animal.startPetting();
       return;
     }
-    if (touch.mode === 'album' || (touch.mode === 'bar' && touch.slot.toggle)) {
+    if (touch.mode === 'album' || (touch.mode === 'bar' && (touch.slot.toggle || touch.slot.page))) {
       touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }

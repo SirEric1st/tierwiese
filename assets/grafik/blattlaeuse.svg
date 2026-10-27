@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Blattläuse auf einem Blatt (Futter). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="blatt" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#a6e36a"/><stop offset="1" stop-color="#3d8a26"/></radialGradient>
+    <radialGradient id="laus" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#d8f59a"/><stop offset="1" stop-color="#7cb83a"/></radialGradient>
+  </defs>
+  <path d="M8,50 Q10,18 46,10 Q58,30 50,46 Q38,60 8,50 Z" fill="url(#blatt)" stroke="#2b6a1c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M8,50 Q30,34 46,12" stroke="#2b6a1c" stroke-width="1.6" fill="none"/>
+  <ellipse cx="24" cy="30" rx="3.6" ry="2.8" fill="url(#laus)" stroke="#4e7a1e" stroke-width="0.9"/><circle cx="27" cy="29" r="1.4" fill="#4e7a1e"/>
+  <ellipse cx="32" cy="38" rx="3.6" ry="2.8" fill="url(#laus)" stroke="#4e7a1e" stroke-width="0.9"/><circle cx="35" cy="37" r="1.4" fill="#4e7a1e"/>
+  <ellipse cx="20" cy="42" rx="3.6" ry="2.8" fill="url(#laus)" stroke="#4e7a1e" stroke-width="0.9"/><circle cx="23" cy="41" r="1.4" fill="#4e7a1e"/>
+  <ellipse cx="38" cy="26" rx="3.6" ry="2.8" fill="url(#laus)" stroke="#4e7a1e" stroke-width="0.9"/><circle cx="41" cy="25" r="1.4" fill="#4e7a1e"/>
+  <ellipse cx="30" cy="22" rx="3.6" ry="2.8" fill="url(#laus)" stroke="#4e7a1e" stroke-width="0.9"/><circle cx="33" cy="21" r="1.4" fill="#4e7a1e"/>
+  <ellipse cx="40" cy="36" rx="3.6" ry="2.8" fill="url(#laus)" stroke="#4e7a1e" stroke-width="0.9"/><circle cx="43" cy="35" r="1.4" fill="#4e7a1e"/>
+</svg>

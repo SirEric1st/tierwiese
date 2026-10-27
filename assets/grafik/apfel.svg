@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Apfel (Futter). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="apfel" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ff9a8a"/><stop offset="0.6" stop-color="#e2423a"/><stop offset="1" stop-color="#a82020"/></radialGradient>
+    <radialGradient id="blatt" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#a6e36a"/><stop offset="1" stop-color="#3d8a26"/></radialGradient>
+  </defs>
+  <path d="M32,18 C20,10 6,18 8,36 C10,54 24,62 32,56 C40,62 54,54 56,36 C58,18 44,10 32,18 Z" fill="url(#apfel)" stroke="#8a1a14" stroke-width="2"/>
+  <path d="M32,18 Q33,10 36,6" stroke="#6e4219" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M36,10 Q46,2 52,8 Q44,16 36,10 Z" fill="url(#blatt)" stroke="#2b6a1c" stroke-width="1.4"/>
+  <ellipse cx="20" cy="30" rx="4" ry="7" fill="#fff" opacity="0.4"/>
+</svg>

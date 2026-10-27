@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="50" viewBox="0 0 60 50">
+  <!-- Wildbiene. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="pelz" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffd77a"/><stop offset="0.6" stop-color="#e8a63a"/><stop offset="1" stop-color="#b5741c"/></radialGradient>
+    <radialGradient id="fluegel" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="1" stop-color="#cfe8ff" stop-opacity="0.6"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="22" cy="14" rx="14" ry="9" transform="rotate(-25 22 14)" fill="url(#fluegel)" stroke="#9ab4cc" stroke-width="1.2"/>
+  <path d="M14,36 l-2,8 M22,38 l0,8 M30,38 l2,8" stroke="#3a2a14" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="22" cy="30" rx="18" ry="12" fill="url(#pelz)" stroke="#7a4a14" stroke-width="1.6"/>
+  <path d="M14,19 Q11,30 14,41 M23,18 Q20,30 23,42" stroke="#4a2c12" stroke-width="4" fill="none" opacity="0.75"/>
+  <path d="M6,32 L1,33" stroke="#4a2c12" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="44" cy="28" r="9" fill="#4a3420" stroke="#2a1a0a" stroke-width="1.4"/>
+  <path d="M46,20 Q48,10 54,8 M48,21 Q54,14 58,14" stroke="#2a1a0a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <circle cx="47" cy="26" r="3" fill="#fff"/><circle cx="47.6" cy="26.4" r="1.7" fill="#1a1a1a"/>
+  <path d="M46,33 Q49,35 51,33" stroke="#fff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="30" cy="14" rx="13" ry="8" transform="rotate(-10 30 14)" fill="url(#fluegel)" stroke="#9ab4cc" stroke-width="1.2"/>
+</svg>

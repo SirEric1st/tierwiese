@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="100" viewBox="0 0 80 100">
+  <!-- Waldkauz. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="feder" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#c9915e"/><stop offset="0.6" stop-color="#9a6a3e"/><stop offset="1" stop-color="#6a4424"/></radialGradient>
+    <radialGradient id="schleier" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#efd8b8"/><stop offset="1" stop-color="#c9a478"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="40" cy="98" rx="26" ry="4" fill="url(#schatten)"/>
+  <path d="M30,92 l-3,6 M34,92 l0,6 M46,92 l0,6 M50,92 l3,6" stroke="#8a6a3a" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M14,60 Q12,36 40,34 Q68,36 66,60 Q66,92 40,94 Q14,92 14,60 Z" fill="url(#feder)" stroke="#4a2c12" stroke-width="1.8"/>
+  <path d="M14,58 Q8,76 20,90 Q24,74 22,58 Z M66,58 Q72,76 60,90 Q56,74 58,58 Z" fill="#7a5230" stroke="#4a2c12" stroke-width="1.4"/>
+  <path d="M30,60 q3,4 0,8" stroke="#5a3a1c" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M40,66 q3,4 0,8" stroke="#5a3a1c" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M50,60 q3,4 0,8" stroke="#5a3a1c" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M36,76 q3,4 0,8" stroke="#5a3a1c" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M46,78 q3,4 0,8" stroke="#5a3a1c" stroke-width="2" fill="none" opacity="0.7"/>
+  <circle cx="40" cy="30" r="24" fill="url(#feder)" stroke="#4a2c12" stroke-width="1.8"/>
+  <path d="M40,14 Q24,12 20,30 Q22,46 40,44 Q58,46 60,30 Q56,12 40,14 Z" fill="url(#schleier)" stroke="#9a6a3e" stroke-width="1.4"/>
+  <path d="M40,16 L40,38" stroke="#9a6a3e" stroke-width="1.6"/>
+  <circle cx="31" cy="28" r="7" fill="#1e140c"/><circle cx="49" cy="28" r="7" fill="#1e140c"/>
+  <circle cx="29" cy="25.6" r="2.4" fill="#fff"/><circle cx="47" cy="25.6" r="2.4" fill="#fff"/>
+  <path d="M37,34 L40,42 L43,34 Z" fill="#e8c95a" stroke="#9a7a2a" stroke-width="1"/>
+</svg>

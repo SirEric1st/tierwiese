@@ -1,16 +1,21 @@
 // Das Tier-Album: eine Seite über der Wiese. Für jedes Tier, das schon
 // einmal eingezogen ist, gibt es ein Bild mit Steckbrief zum Vorlesen.
 // Noch nicht entdeckte Tiere erscheinen als dunkler Schatten.
+// Passen nicht alle Karten auf eine Seite, blättert man mit den Pfeilen.
 // Die WorldScene ist so lange angehalten.
 import { DPR, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { ANIMALS } from '../animals.js';
 import { say } from '../speech.js';
 
-const CARD_WIDTH = 220;
-const CARD_HEIGHT = 230;
-const CARD_GAP = 24;
-const PICTURE_SIZE = 150; // so groß sind die Tiere auf den Karten (höchstens)
+const CARD_WIDTH = 170;
+const CARD_HEIGHT = 180;
+const CARD_GAP = 16;
+const PICTURE_SIZE = 115; // so groß sind die Tiere auf den Karten (höchstens)
 const CLOSE_RADIUS = 40;
+const ARROW_RADIUS = 34; // Blätter-Pfeile links und rechts
+const ARROW_SPACE = 80; // so viel Platz brauchen die Pfeile am Rand
+const INFO_SPACE = 190; // Platz unter den Karten für den Steckbrief
+const MAX_COLUMNS = 5;
 const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
 
 export class AlbumScene extends Phaser.Scene {
@@ -35,7 +40,10 @@ export class AlbumScene extends Phaser.Scene {
 
     this.cards = ANIMALS.map((def) => this.createCard(def));
     this.closeButton = this.createCloseButton();
-    this.ui.add(this.closeButton);
+    this.prevButton = this.createArrow(-1);
+    this.nextButton = this.createArrow(1);
+    this.ui.add([this.closeButton, this.prevButton, this.nextButton]);
+    this.page = 0;
 
     this.layout();
     this.scale.on('resize', this.layout, this);
@@ -66,7 +74,7 @@ export class AlbumScene extends Phaser.Scene {
 
     const picture = this.add.image(0, 40, found ? def.type : this.silhouette(def.type)).setOrigin(0.5, 1);
     picture.setScale(PICTURE_SIZE / Math.max(picture.width, picture.height));
-    const label = this.text(found ? def.name : '?', found ? 26 : 40).setPosition(0, 80);
+    const label = this.text(found ? def.name : '?', found ? 20 : 34).setPosition(0, 64);
 
     const card = this.add.container(0, 0, [background, picture, label]);
     card.def = def;
@@ -102,17 +110,34 @@ export class AlbumScene extends Phaser.Scene {
     return this.add.container(0, 0, [g]);
   }
 
+  createArrow(direction) {
+    const g = this.add.graphics();
+    g.fillStyle(0xeadfc6);
+    g.fillCircle(0, 0, ARROW_RADIUS);
+    g.fillStyle(0x7a5a2a);
+    g.fillTriangle(direction * 16, 0, -direction * 9, -18, -direction * 9, 18);
+    const arrow = this.add.container(0, 0, [g]);
+    arrow.direction = direction;
+    return arrow;
+  }
+
   layout() {
     const { width, height } = screenSize(this);
     const origin = uiOrigin(this);
     this.ui.setPosition(origin.x, origin.y);
     this.dim.setSize(width, height);
 
-    // Karten nebeneinander; wenn der Platz nicht reicht, etwas kleiner
-    const rowWidth = this.cards.length * CARD_WIDTH + (this.cards.length - 1) * CARD_GAP;
-    const panelWidth = Math.min(width - 32, rowWidth + 80);
-    const cardScale = Math.min(1, (panelWidth - 40) / rowWidth);
-    const panelHeight = Math.min(height - 32, 560);
+    // Raster: so viele Spalten und Reihen, wie auf den Bildschirm passen
+    const panelWidth = width - 32;
+    const panelHeight = height - 32;
+    const cell = CARD_WIDTH + CARD_GAP;
+    const columns = Phaser.Math.Clamp(Math.floor((panelWidth - 2 * ARROW_SPACE) / cell), 1, MAX_COLUMNS);
+    const rows = Phaser.Math.Clamp(Math.floor((panelHeight - 100 - INFO_SPACE) / (CARD_HEIGHT + CARD_GAP)), 1, 4);
+    const perPage = columns * rows;
+    const pages = Math.ceil(this.cards.length / perPage);
+    this.pages = pages;
+    this.page = Phaser.Math.Clamp(this.page, 0, pages - 1);
+    const cardScale = Math.min(1, (panelWidth - 2 * ARROW_SPACE) / (columns * cell));
     const panelLeft = (width - panelWidth) / 2;
     const panelTop = (height - panelHeight) / 2;
 
@@ -123,13 +148,24 @@ export class AlbumScene extends Phaser.Scene {
     this.panel.strokeRoundedRect(panelLeft, panelTop, panelWidth, panelHeight, 36);
 
     this.title.setPosition(width / 2, panelTop + 48);
-    const cardY = panelTop + 90 + (CARD_HEIGHT * cardScale) / 2;
+    const gridTop = panelTop + 90;
+    const rowHeight = (CARD_HEIGHT + CARD_GAP) * cardScale;
     this.cards.forEach((card, i) => {
-      const x = width / 2 + (i - (this.cards.length - 1) / 2) * (CARD_WIDTH + CARD_GAP) * cardScale;
-      card.setPosition(x, cardY).setScale(cardScale);
+      const onPage = Math.floor(i / perPage) === this.page;
+      card.setVisible(onPage);
+      if (!onPage) return;
+      const index = i % perPage;
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const x = width / 2 + (column - (columns - 1) / 2) * cell * cardScale;
+      card.setPosition(x, gridTop + row * rowHeight + (CARD_HEIGHT * cardScale) / 2).setScale(cardScale);
       card.baseScale = cardScale;
     });
-    this.info.setWordWrapWidth(panelWidth - 60).setPosition(width / 2, cardY + (CARD_HEIGHT * cardScale) / 2 + 24);
+    const gridBottom = gridTop + rows * rowHeight;
+    const arrowY = gridTop + (rows * rowHeight) / 2;
+    this.prevButton.setPosition(panelLeft + ARROW_SPACE / 2, arrowY).setVisible(pages > 1);
+    this.nextButton.setPosition(panelLeft + panelWidth - ARROW_SPACE / 2, arrowY).setVisible(pages > 1);
+    this.info.setWordWrapWidth(panelWidth - 60).setPosition(width / 2, gridBottom + 12);
     this.closeButton.setPosition(panelLeft + panelWidth - 30, panelTop + 30);
   }
 
@@ -138,8 +174,19 @@ export class AlbumScene extends Phaser.Scene {
       this.close();
       return;
     }
+    const arrow = [this.prevButton, this.nextButton].find(
+      (a) => a.visible && Phaser.Math.Distance.Between(x, y, a.x, a.y) <= ARROW_RADIUS + 12
+    );
+    if (arrow) {
+      // Nach der letzten Seite kommt wieder die erste
+      this.page = (this.page + arrow.direction + this.pages) % this.pages;
+      this.info.setText('');
+      this.layout();
+      return;
+    }
     const card = this.cards.find(
       (c) =>
+        c.visible &&
         Math.abs(x - c.x) <= (CARD_WIDTH * c.baseScale) / 2 && Math.abs(y - c.y) <= (CARD_HEIGHT * c.baseScale) / 2
     );
     if (card) this.showCard(card);

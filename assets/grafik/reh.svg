@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="150" viewBox="0 0 140 150">
+  <!-- Reh (Ricke). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="fell" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#d99a5e"/><stop offset="0.6" stop-color="#b5733a"/><stop offset="1" stop-color="#8a5022"/></radialGradient>
+    <radialGradient id="hell" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff8ec"/><stop offset="1" stop-color="#efdcc0"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="64" cy="146" rx="50" ry="5" fill="url(#schatten)"/>
+  <path d="M30,96 L28,142 M44,98 L46,142 M84,98 L82,142 M96,94 L100,142" stroke="#8a5022" stroke-width="7" stroke-linecap="round"/>
+  <path d="M26,142 L32,142 M44,142 L50,142 M80,142 L86,142 M98,142 L104,142" stroke="#2a1a0a" stroke-width="5" stroke-linecap="round"/>
+  <path d="M18,80 Q16,60 40,58 L96,56 Q112,58 110,80 Q108,102 90,104 L40,104 Q20,102 18,80 Z" fill="url(#fell)" stroke="#5e3214" stroke-width="1.8"/>
+  <ellipse cx="22" cy="78" rx="9" ry="13" fill="url(#hell)"/>
+  <path d="M40,100 Q64,108 92,100" stroke="#efdcc0" stroke-width="4" fill="none" opacity="0.7"/>
+  <path d="M96,66 Q100,42 108,30 L122,36 Q114,52 110,74 Z" fill="url(#fell)" stroke="#5e3214" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M104,26 Q96,10 100,6 Q108,12 110,24 Z" fill="url(#fell)" stroke="#5e3214" stroke-width="1.4"/>
+  <path d="M116,24 Q120,8 126,8 Q126,18 120,28 Z" fill="url(#fell)" stroke="#5e3214" stroke-width="1.4"/>
+  <path d="M104,30 Q104,18 116,18 Q126,18 130,30 L134,40 Q132,46 124,46 Q110,46 104,30 Z" fill="url(#fell)" stroke="#5e3214" stroke-width="1.8" stroke-linejoin="round"/>
+  <ellipse cx="128" cy="40" rx="5" ry="4.5" fill="url(#hell)"/>
+  <circle cx="132" cy="38" r="3" fill="#1a1a1a"/>
+  <circle cx="117" cy="30" r="5.5" fill="#fff" stroke="#00000022" stroke-width="1"/>
+  <circle cx="117.7" cy="30.4" r="4.4" fill="#3a2210"/>
+  <circle cx="117.7" cy="30.4" r="2.4" fill="#0d0704"/>
+  <circle cx="116.1" cy="28.5" r="1.7" fill="#fff"/>
+  <circle cx="119.2" cy="32.0" r="0.7" fill="#fff" opacity="0.9"/>
+</svg>

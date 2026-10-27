@@ -15,6 +15,8 @@ const SHORE_RADIUS_Y = 84;
 const HEART_EVERY = 60; // nach so vielen Punkten Streicheln steigt ein Herz auf
 const PET_TALK_DISTANCE = 150; // so viel streicheln, bis das Tier etwas sagt
 const PET_TALK_PAUSE = 5000; // danach eine Weile nichts mehr sagen
+const MIN_TOUCH = 64; // auch kleine Tiere sind mindestens so groß antippbar
+const FLY_HEIGHT = 45; // so hoch schweben fliegende Tiere über dem Boden
 
 export class Animal {
   // isInWater(x, y): sagt, ob diese Stelle in einem Teich liegt
@@ -26,14 +28,20 @@ export class Animal {
     this.state = 'away'; // away | visiting | resident
 
     this.sprite = scene.add.image(0, 0, def.type).setOrigin(0.5, 1).setScale(IMAGE_SCALE);
-    // KI-Bilder haben keinen eigenen Schatten am Boden, darum einen dazulegen
-    this.shadow = scene.add.image(0, -4, 'schatten').setVisible(isPainted(def.type));
+    // Fliegende Tiere schweben: Das Bild hängt in einem eigenen Behälter über dem Boden
+    this.lift = def.flies ? FLY_HEIGHT : 0;
+    this.body = scene.add.container(0, -this.lift, [this.sprite]);
+    if (def.flies) {
+      scene.tweens.add({ targets: this.body, y: -this.lift - 8, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    // KI-Bilder und fliegende Tiere bekommen einen Schatten am Boden
+    this.shadow = scene.add.image(0, -4, 'schatten').setVisible(isPainted(def.type) || def.flies);
     this.shadow.setScale((this.sprite.displayWidth * 0.8) / this.shadow.width, IMAGE_SCALE * 1.2);
     this.bubble = scene.add.container(0, 0, [
       scene.add.image(0, 0, 'gedankenblase').setOrigin(0.14, 0.95).setScale(IMAGE_SCALE),
     ]);
     this.bubble.setVisible(false);
-    this.container = scene.add.container(0, 0, [this.shadow, this.sprite, this.bubble]);
+    this.container = scene.add.container(0, 0, [this.shadow, this.body, this.bubble]);
     this.container.setVisible(false);
   }
 
@@ -45,16 +53,17 @@ export class Animal {
     return this.container.y;
   }
 
+  // Oberkante des Tieres (bei fliegenden Tieren über dem Boden)
+  get top() {
+    return this.y - this.lift - this.sprite.displayHeight;
+  }
+
   // Liegt dieser Punkt auf dem Tier?
   contains(worldX, worldY) {
     if (!this.container.visible) return false;
-    const halfWidth = this.sprite.displayWidth / 2;
-    return (
-      worldX >= this.x - halfWidth &&
-      worldX <= this.x + halfWidth &&
-      worldY >= this.y - this.sprite.displayHeight &&
-      worldY <= this.y + 10
-    );
+    const halfWidth = Math.max(this.sprite.displayWidth, MIN_TOUCH) / 2;
+    const top = Math.min(this.top, this.y - MIN_TOUCH);
+    return worldX >= this.x - halfWidth && worldX <= this.x + halfWidth && worldY >= top && worldY <= this.y + 10;
   }
 
   onTap() {
@@ -127,7 +136,7 @@ export class Animal {
       this.scene.tweens.add({
         targets: image,
         x: mouthX,
-        y: this.y - this.sprite.displayHeight * 0.5,
+        y: this.y - this.lift - this.sprite.displayHeight * 0.5,
         scale: 0,
         duration: 400,
         ease: 'Quad.easeIn',
@@ -146,7 +155,7 @@ export class Animal {
       this.scene.tweens.add({ targets: image, alpha: 0, y: image.y + 20, duration: 700, onComplete: () => image.destroy() });
       this.scene.tweens.add({ targets: this.sprite, angle: { from: -10, to: 10 }, duration: 110, yoyo: true, repeat: 3, onComplete: () => this.sprite.setAngle(0) });
       this.showBubble(favorite.type);
-      say(`Hm, das mag ich nicht so. Ich fresse lieber ${favorite.plural}!`);
+      say(`Hm, das mag ich nicht so. Ich mag lieber ${favorite.plural}!`);
       this.scene.time.delayedCall(3000, () => {
         this.hideBubble();
         this.finishEating();
@@ -162,7 +171,7 @@ export class Animal {
 
   showHeart() {
     const heart = this.scene.add
-      .image(this.x + Phaser.Math.Between(-25, 25), this.y - this.sprite.displayHeight, 'herz')
+      .image(this.x + Phaser.Math.Between(-25, 25), this.top, 'herz')
       .setScale(IMAGE_SCALE)
       .setDepth(60000);
     this.scene.tweens.add({
@@ -359,7 +368,7 @@ export class Animal {
     const icon = this.scene.add.image(47, -73, elementType);
     icon.setScale(64 / Math.max(icon.width, icon.height));
     this.bubble.add(icon);
-    this.bubble.setPosition(10, -this.sprite.displayHeight + 10).setVisible(true);
+    this.bubble.setPosition(10, this.top - this.y + 10).setVisible(true);
     this.bubble.setScale(0);
     this.scene.tweens.add({ targets: this.bubble, scale: 1, duration: 300, ease: 'Back.easeOut' });
   }
