@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80">
+  <!-- Steinhaufen. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="stein" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#e6e1d8"/><stop offset="0.6" stop-color="#b3ab9f"/><stop offset="1" stop-color="#857d72"/></radialGradient>
+    <radialGradient id="steinDunkel" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#bdb5a8"/><stop offset="1" stop-color="#6f685e"/></radialGradient>
+    <radialGradient id="moos" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#a6d86a"/><stop offset="1" stop-color="#5a9a32"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="60" cy="74" rx="54" ry="8" fill="url(#schatten)"/>
+  <ellipse cx="30" cy="60" rx="22" ry="15" fill="url(#steinDunkel)" stroke="#5e574e" stroke-width="1.6"/>
+  <ellipse cx="88" cy="60" rx="24" ry="15" fill="url(#steinDunkel)" stroke="#5e574e" stroke-width="1.6"/>
+  <ellipse cx="58" cy="64" rx="26" ry="14" fill="url(#steinDunkel)" stroke="#5e574e" stroke-width="1.6"/>
+  <ellipse cx="44" cy="44" rx="20" ry="15" transform="rotate(4 44 44)" fill="url(#stein)" stroke="#5e574e" stroke-width="1.6"/>
+  <path d="M33,40 Q38,34 46,34" stroke="#fff" stroke-opacity="0.55" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="76" cy="42" rx="21" ry="16" transform="rotate(7 76 42)" fill="url(#stein)" stroke="#5e574e" stroke-width="1.6"/>
+  <path d="M64,38 Q70,31 78,32" stroke="#fff" stroke-opacity="0.55" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="60" cy="26" rx="17" ry="13" transform="rotate(9 60 26)" fill="url(#stein)" stroke="#5e574e" stroke-width="1.6"/>
+  <path d="M51,23 Q55,17 62,18" stroke="#fff" stroke-opacity="0.55" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M48,30 Q54,22 62,24 Q58,30 50,32 Z" fill="url(#moos)" opacity="0.9"/>
+  <path d="M80,64 Q90,58 100,62 Q92,68 82,68 Z" fill="url(#moos)" opacity="0.9"/>
+</svg>

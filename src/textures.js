@@ -43,6 +43,8 @@ const GRAPHICS = [
   'symbol-haut',
   'symbol-shirt',
   'symbol-hose',
+  'frosch',
+  'steine',
 ];
 
 // Im preload() einer Szene aufrufen

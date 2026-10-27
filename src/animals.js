@@ -6,6 +6,7 @@
 // eats:  Futter aus dem Futterkorb, das dem Tier schmeckt (das erste ist das liebste).
 // yummy: sagt das Tier, wenn es etwas Leckeres bekommt.
 // name, album: Name und Steckbrief für das Tier-Album (wird vorgelesen).
+// shore: am Teich sitzt das Tier am Ufer statt zu schwimmen.
 // Futter wie Insekten, Würmer oder Samen gibt es auf der Wiese von selbst.
 
 export const ANIMALS = [
@@ -66,5 +67,25 @@ export const ANIMALS = [
     petted: 'Oh, wie schön! Fühl mal, mein Schwanz ist ganz flauschig.',
     eats: ['nuss', 'koerner'],
     yummy: 'Mmh, lecker! Eichhörnchen knabbern gern Nüsse und Samen.',
+  },
+  {
+    type: 'frosch',
+    name: 'Teichfrosch',
+    album: [
+      'Das ist der Teichfrosch.',
+      'Ich fresse Insekten, Würmer und kleine Schnecken.',
+      'Ich wohne an Teichen und verstecke mich gern zwischen Steinen.',
+      'Aus meinen Eiern schlüpfen Kaulquappen. Die leben im Wasser, bis sie kleine Frösche sind.',
+    ],
+    shore: true, // sitzt am Teich lieber am Ufer als im Wasser
+    hello: 'Hallo, ich bin der Frosch!',
+    needs: [
+      { type: 'teich', wish: 'Ich hätte so gern einen Teich. Dort lege ich meine Eier!' },
+      { type: 'steine', wish: 'Ich hätte so gern einen Steinhaufen. Da verstecke ich mich, wenn es heiß ist!' },
+    ],
+    fact: 'Ich bin der Frosch. Ich fange Insekten mit meiner langen, klebrigen Zunge.',
+    petted: 'Hihi! Meine Haut ist ganz glatt und ein bisschen feucht.',
+    eats: ['kaefer', 'wurm'],
+    yummy: 'Mmh, lecker! Frösche fressen Insekten, Würmer und Schnecken.',
   },
 ];

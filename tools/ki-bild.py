@@ -28,6 +28,8 @@ SIZES = {
     'schilf': (100, 150),
     'laubhaufen': (140, 90),
     'busch': (140, 110),
+    'frosch': (75, 60),
+    'steine': (120, 80),
     'blume-gelb': (32, 36),
     'blume-rosa': (32, 36),
     'blume-weiss': (32, 36),

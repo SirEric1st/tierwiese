@@ -11,6 +11,7 @@ export const ELEMENTS = [
   { type: 'schilf', name: 'Schilf!', hint: 'Das Schilf. Zieh es an einen Teich!', shore: true },
   { type: 'laubhaufen', name: 'Ein Laubhaufen!', hint: 'Der Laubhaufen. Zieh ihn auf die Wiese!' },
   { type: 'busch', name: 'Ein Busch!', hint: 'Der Busch. Zieh ihn auf die Wiese!' },
+  { type: 'steine', name: 'Ein Steinhaufen!', hint: 'Der Steinhaufen. Zieh ihn auf die Wiese!' },
 ];
 
 export function getElement(type) {

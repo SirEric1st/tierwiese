@@ -56,6 +56,8 @@ nach links laufen.
 | `schilf.png` | A clump of reeds: tall thin green stalks with a few brown cattail heads. |
 | `laubhaufen.png` | A cozy pile of autumn leaves in orange, red, yellow and brown, wider than tall. |
 | `busch.png` | A round dense green bush with a few small flowers, wider than tall. |
+| `frosch.png` | A small green pond frog sitting, facing right, darker green spots, pale yellow belly, big round eyes on top of the head, wide friendly smile, four legs visible. |
+| `steine.png` | A small pile of round grey stones with a little green moss, wider than tall. |
 | `blume-gelb.png` | One small yellow meadow flower on a short stem. |
 | `blume-rosa.png` | One small pink meadow flower on a short stem. |
 | `blume-weiss.png` | One small daisy with white petals and yellow center on a short stem. |

@@ -10,6 +10,8 @@ const WALK_SPEED = 170; // Pixel pro Sekunde
 const WANDER_SPEED = 70;
 const POND_RADIUS_X = 85; // Bereich im Teich, in dem die Ente schwimmt
 const POND_RADIUS_Y = 28;
+const SHORE_RADIUS_X = 145; // vorne am Steinufer des Teich-Bilds (knapp außerhalb)
+const SHORE_RADIUS_Y = 84;
 const HEART_EVERY = 60; // nach so vielen Punkten Streicheln steigt ein Herz auf
 const PET_TALK_DISTANCE = 150; // so viel streicheln, bis das Tier etwas sagt
 const PET_TALK_PAUSE = 5000; // danach eine Weile nichts mehr sagen
@@ -369,10 +371,15 @@ export class Animal {
   // ---------- Lieblingsplätze ----------
 
   // Ein Platz bei einem der Dinge, die das Tier braucht
-  static spotNear(item, world) {
+  static spotNear(item, world, def) {
     let x;
     let y;
-    if (item.element.type === 'teich') {
+    if (item.element.type === 'teich' && def?.shore) {
+      // Vorne auf dem Steinufer sitzen (nicht im Wasser)
+      const angle = Math.PI * (0.15 + Math.random() * 0.7);
+      x = item.x + Math.cos(angle) * SHORE_RADIUS_X;
+      y = item.y + Math.sin(angle) * SHORE_RADIUS_Y;
+    } else if (item.element.type === 'teich') {
       // Im Teich schwimmen
       const angle = Math.random() * Math.PI * 2;
       const r = Math.random();

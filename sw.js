@@ -42,6 +42,8 @@ const FILES = [
   'assets/grafik/symbol-haut.svg',
   'assets/grafik/symbol-shirt.svg',
   'assets/grafik/symbol-hose.svg',
+  'assets/grafik/frosch.svg',
+  'assets/grafik/steine.svg',
   'assets/grafik/gras.svg',
   'assets/bilder/igel.png',
   'assets/grafik/igel.svg',

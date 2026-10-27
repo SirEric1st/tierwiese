@@ -13,8 +13,9 @@ OUT = Path(sys.argv[1])
 OUT.mkdir(parents=True, exist_ok=True)
 
 
-def svg(name, w, h, defs, body, note):
-    text = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">
+def svg(name, w, h, defs, body, note, size=1):
+    """size: Anzeigegröße im Spiel im Verhältnis zur Zeichenfläche (z. B. 0.7 = kleiner)"""
+    text = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w * size:g}" height="{h * size:g}" viewBox="0 0 {w} {h}">
   <!-- {note} Eigene Zeichnung für das Spiel Tierwiese. -->
   <defs>
 {defs}
@@ -627,6 +628,60 @@ def symbol_hose():
     svg('symbol-hose', 64, 64, defs, body, 'Symbol: Hose.')
 
 
+# ---------------------------------------------------------------- Frosch
+def frosch():
+    defs = '\n'.join([
+        radial('haut', st(('0', '#a6e36a'), ('0.6', '#62b33a'), ('1', '#3d8a26')), cx='40%', cy='30%'),
+        radial('bein', st(('0', '#8fd45a'), ('1', '#3d8a26')), cx='40%', cy='35%'),
+        radial('bauch', st(('0', '#fbf7d2'), ('1', '#e2dc9a'))),
+        SHADOW_DEF,
+    ])
+    spots = ''.join(
+        f'  <ellipse cx="{x}" cy="{y}" rx="{r}" ry="{r * 0.7:.1f}" fill="#2f7a22" opacity="0.55"/>\n'
+        for x, y, r in [(30, 44, 4), (42, 36, 3), (24, 56, 3), (50, 48, 2.5)]
+    )
+    body = f'''{ground_shadow(52, 74, 42, 6)}
+  <!-- Hinterbein (zusammengefaltet) -->
+  <path d="M14,62 Q8,44 26,40 Q44,40 46,58 Q46,70 32,72 L12,72 Q6,72 8,68 Z" fill="url(#bein)" stroke="#2b6a1c" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M10,72 Q4,74 2,70 M14,73 Q10,78 6,76 M20,73 Q18,79 14,79" stroke="#2b6a1c" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <!-- Körper -->
+  <path d="M18,52 Q20,30 46,26 Q68,22 80,30 Q92,38 90,52 Q86,66 64,70 Q36,74 22,66 Q16,60 18,52 Z" fill="url(#haut)" stroke="#2b6a1c" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M50,62 Q66,60 84,50 Q84,62 66,68 Q54,70 50,62 Z" fill="url(#bauch)"/>
+{spots}  <path d="M30,34 Q44,26 60,26" stroke="#ffffff" stroke-opacity="0.45" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Vorderbein -->
+  <path d="M66,58 Q70,66 72,72" stroke="#3d8a26" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M66,74 L78,74 M70,72 L72,77 M76,72 L80,76" stroke="#2b6a1c" stroke-width="3" stroke-linecap="round"/>
+  <!-- Augenhügel -->
+  <circle cx="70" cy="24" r="11" fill="url(#haut)" stroke="#2b6a1c" stroke-width="1.8"/>
+{eye(71, 23, 6.2, '#6b4a14')}
+  <!-- Lächeln und Wange -->
+  <path d="M70,44 Q82,50 94,42" stroke="#2b6a1c" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="80" cy="38" rx="4.5" ry="2.8" fill="#ff8f8f" opacity="0.45"/>
+  <circle cx="90" cy="34" r="1.2" fill="#2b6a1c"/>'''
+    svg('frosch', 100, 80, defs, body, 'Teichfrosch.', size=0.72)
+
+
+# ---------------------------------------------------------------- Steinhaufen
+def steine():
+    rnd = random.Random(5)
+    defs = '\n'.join([
+        radial('stein', st(('0', '#e6e1d8'), ('0.6', '#b3ab9f'), ('1', '#857d72')), cx='35%', cy='30%'),
+        radial('steinDunkel', st(('0', '#bdb5a8'), ('1', '#6f685e')), cx='35%', cy='30%'),
+        radial('moos', st(('0', '#a6d86a'), ('1', '#5a9a32'))),
+        SHADOW_DEF,
+    ])
+    body = [ground_shadow(60, 74, 54, 8)]
+    for x, y, rx, ry in [(30, 60, 22, 15), (88, 60, 24, 15), (58, 64, 26, 14)]:
+        body.append(f'  <ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" fill="url(#steinDunkel)" stroke="#5e574e" stroke-width="1.6"/>')
+    for x, y, rx, ry in [(44, 44, 20, 15), (76, 42, 21, 16), (60, 26, 17, 13)]:
+        a = rnd.uniform(-15, 15)
+        body.append(f'  <ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" transform="rotate({a:.0f} {x} {y})" fill="url(#stein)" stroke="#5e574e" stroke-width="1.6"/>')
+        body.append(f'  <path d="M{x - rx * 0.55:.0f},{y - ry * 0.25:.0f} Q{x - rx * 0.3:.0f},{y - ry * 0.7:.0f} {x + rx * 0.1:.0f},{y - ry * 0.65:.0f}" stroke="#fff" stroke-opacity="0.55" stroke-width="3" fill="none" stroke-linecap="round"/>')
+    body.append('  <path d="M48,30 Q54,22 62,24 Q58,30 50,32 Z" fill="url(#moos)" opacity="0.9"/>')
+    body.append('  <path d="M80,64 Q90,58 100,62 Q92,68 82,68 Z" fill="url(#moos)" opacity="0.9"/>')
+    svg('steine', 120, 80, defs, '\n'.join(body), 'Steinhaufen.')
+
+
 gras()
 blume('blume-gelb', '#fff3a0', '#f2c21c')
 blume('blume-rosa', '#ffd6e6', '#f27aa8')
@@ -657,4 +712,6 @@ symbol_haarfarbe()
 symbol_haut()
 symbol_shirt()
 symbol_hose()
+frosch()
+steine()
 print('fertig:', len(list(OUT.glob('*.svg'))), 'Dateien')

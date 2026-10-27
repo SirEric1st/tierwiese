@@ -151,7 +151,7 @@ export class AnimalManager {
     const needTypes = animal.def.needs.map((need) => need.type);
     const homes = this.getPlaced().filter((item) => needTypes.includes(item.element.type));
     if (homes.length === 0) return null;
-    return Animal.spotNear(Phaser.Utils.Array.GetRandom(homes), this.world);
+    return Animal.spotNear(Phaser.Utils.Array.GetRandom(homes), this.world, animal.def);
   }
 
   // Konfetti und eine fröhliche Melodie

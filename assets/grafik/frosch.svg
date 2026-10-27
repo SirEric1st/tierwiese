@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="57.6" viewBox="0 0 100 80">
+  <!-- Teichfrosch. Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="haut" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#a6e36a"/><stop offset="0.6" stop-color="#62b33a"/><stop offset="1" stop-color="#3d8a26"/></radialGradient>
+    <radialGradient id="bein" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#8fd45a"/><stop offset="1" stop-color="#3d8a26"/></radialGradient>
+    <radialGradient id="bauch" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fbf7d2"/><stop offset="1" stop-color="#e2dc9a"/></radialGradient>
+    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="52" cy="74" rx="42" ry="6" fill="url(#schatten)"/>
+  <!-- Hinterbein (zusammengefaltet) -->
+  <path d="M14,62 Q8,44 26,40 Q44,40 46,58 Q46,70 32,72 L12,72 Q6,72 8,68 Z" fill="url(#bein)" stroke="#2b6a1c" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M10,72 Q4,74 2,70 M14,73 Q10,78 6,76 M20,73 Q18,79 14,79" stroke="#2b6a1c" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <!-- Körper -->
+  <path d="M18,52 Q20,30 46,26 Q68,22 80,30 Q92,38 90,52 Q86,66 64,70 Q36,74 22,66 Q16,60 18,52 Z" fill="url(#haut)" stroke="#2b6a1c" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M50,62 Q66,60 84,50 Q84,62 66,68 Q54,70 50,62 Z" fill="url(#bauch)"/>
+  <ellipse cx="30" cy="44" rx="4" ry="2.8" fill="#2f7a22" opacity="0.55"/>
+  <ellipse cx="42" cy="36" rx="3" ry="2.1" fill="#2f7a22" opacity="0.55"/>
+  <ellipse cx="24" cy="56" rx="3" ry="2.1" fill="#2f7a22" opacity="0.55"/>
+  <ellipse cx="50" cy="48" rx="2.5" ry="1.8" fill="#2f7a22" opacity="0.55"/>
+  <path d="M30,34 Q44,26 60,26" stroke="#ffffff" stroke-opacity="0.45" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Vorderbein -->
+  <path d="M66,58 Q70,66 72,72" stroke="#3d8a26" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M66,74 L78,74 M70,72 L72,77 M76,72 L80,76" stroke="#2b6a1c" stroke-width="3" stroke-linecap="round"/>
+  <!-- Augenhügel -->
+  <circle cx="70" cy="24" r="11" fill="url(#haut)" stroke="#2b6a1c" stroke-width="1.8"/>
+  <circle cx="71" cy="23" r="7.8" fill="#fff" stroke="#00000022" stroke-width="1"/>
+  <circle cx="71.9" cy="23.6" r="6.2" fill="#6b4a14"/>
+  <circle cx="71.9" cy="23.6" r="3.4" fill="#0d0704"/>
+  <circle cx="69.8" cy="20.8" r="2.4" fill="#fff"/>
+  <circle cx="74.1" cy="25.8" r="1.1" fill="#fff" opacity="0.9"/>
+  <!-- Lächeln und Wange -->
+  <path d="M70,44 Q82,50 94,42" stroke="#2b6a1c" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="80" cy="38" rx="4.5" ry="2.8" fill="#ff8f8f" opacity="0.45"/>
+  <circle cx="90" cy="34" r="1.2" fill="#2b6a1c"/>
+</svg>
