@@ -3,6 +3,7 @@
 // Aus der Bau-Leiste zieht man Dinge auf die Wiese; Dinge auf der Wiese
 // kann man verschieben oder zurück auf die Leiste ziehen (wegräumen).
 // Eingezogene Tiere kann man streicheln: Finger über dem Tier hin und her bewegen.
+// Mit dem Korb-Knopf wird die Leiste zum Futterkorb; Futter zieht man zu den Tieren.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { IMAGE_SCALE, screenSize, setupCamera, toScreen } from '../display.js';
@@ -26,6 +27,7 @@ const SAVE_DELAY = 500; // kurz warten, damit viele Änderungen auf einmal gespe
 const SHORE_X = 125; // halbe Breite und Höhe des Teichufers (Wasserrand im Teich-Bild)
 const SHORE_Y = 62;
 const SHORE_REACH = 400; // so nah muss man Schilf an einen Teich ziehen
+const FOOD_LIFT = 50; // Futter schwebt beim Ziehen so weit über dem Finger
 
 export class WorldScene extends Phaser.Scene {
   constructor() {
@@ -121,7 +123,7 @@ export class WorldScene extends Phaser.Scene {
   //
   // Ein Fingerdruck wird erst beim Loslassen oder nach etwas Bewegung
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
-  //   'bar'     – ein Knopf der Bau-Leiste
+  //   'bar'     – ein Knopf der Leiste (Ding, Futter oder Umschalt-Knopf)
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
   //   'world'   – freie Wiese (oder ein Tier zu Besuch: das kann man nur antippen)
@@ -173,9 +175,13 @@ export class WorldScene extends Phaser.Scene {
   }
 
   tap(touch, pointer) {
-    if (touch.mode === 'bar') {
+    if (touch.mode === 'bar' && touch.slot.toggle) {
       this.bar.bounce(touch.slot);
-      say(touch.slot.element.hint);
+      this.bar.toggleMode();
+      say(this.bar.mode === 'food' ? 'Futter! Zieh es zu einem Tier.' : 'Bauen! Zieh etwas auf die Wiese.');
+    } else if (touch.mode === 'bar') {
+      this.bar.bounce(touch.slot);
+      say((touch.slot.element ?? touch.slot.food).hint);
     } else if (touch.mode === 'element') {
       this.wiggle(touch.item);
       say(touch.item.element.name);
@@ -190,6 +196,19 @@ export class WorldScene extends Phaser.Scene {
     touch.dragging = true;
     if (touch.mode === 'pet') {
       touch.animal.startPetting();
+      return;
+    }
+    if (touch.mode === 'bar' && touch.slot.toggle) {
+      touch.mode = 'none'; // den Umschalt-Knopf kann man nicht herausziehen
+      return;
+    }
+    if (touch.mode === 'bar' && touch.slot.food) {
+      // Futter schwebt etwas über dem Finger, damit man es sieht
+      touch.food = touch.slot.food;
+      touch.foodImage = this.add
+        .image(pointer.worldX, pointer.worldY - FOOD_LIFT, touch.food.type)
+        .setScale(IMAGE_SCALE)
+        .setDepth(50000);
       return;
     }
     if (touch.mode === 'bar') {
@@ -209,6 +228,11 @@ export class WorldScene extends Phaser.Scene {
   }
 
   continueDrag(touch, pointer) {
+    if (touch.mode === 'none') return;
+    if (touch.food) {
+      touch.foodImage.setPosition(pointer.worldX, pointer.worldY - FOOD_LIFT);
+      return;
+    }
     if (touch.mode === 'pet') {
       // Nur Bewegung direkt über dem Tier zählt als Streicheln
       const distance = Math.hypot(pointer.worldX - touch.lastX, pointer.worldY - touch.lastY);
@@ -235,7 +259,11 @@ export class WorldScene extends Phaser.Scene {
   endDrag(touch, pointer) {
     this.bar.setHighlight(false);
     if (touch.mode === 'pet') touch.animal.stopPetting();
-    if (touch.mode === 'world' || touch.mode === 'pet') return;
+    if (touch.mode === 'world' || touch.mode === 'pet' || touch.mode === 'none') return;
+    if (touch.food) {
+      this.dropFood(touch.food, touch.foodImage, pointer);
+      return;
+    }
 
     const item = touch.item;
     const screen = toScreen(pointer);
@@ -263,6 +291,15 @@ export class WorldScene extends Phaser.Scene {
       this.pop(item);
     }
     this.requestSave();
+  }
+
+  // Futter beim Tier loslassen → es frisst (oder zeigt, was es lieber mag)
+  dropFood(food, image, pointer) {
+    const animal =
+      this.animals.animalAt(image.x, image.y) || this.animals.animalAt(pointer.worldX, pointer.worldY);
+    if (animal?.feed(food, image)) return;
+    // Kein Tier da: Das Futter verschwindet einfach wieder
+    this.tweens.add({ targets: image, scale: 0, alpha: 0, duration: 300, onComplete: () => image.destroy() });
   }
 
   // Zieht man ein Ding an den Bildschirmrand, wandert die Wiese mit

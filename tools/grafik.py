@@ -442,6 +442,118 @@ def gedankenblase():
     svg('gedankenblase', 130, 130, defs, body, 'Gedankenblase.')
 
 
+# ---------------------------------------------------------------- Futter
+# Futter-Bilder sind 64 × 64 groß und haben keinen Boden-Schatten,
+# weil man sie mit dem Finger zu den Tieren trägt.
+
+def wurm():
+    defs = linear('wurm', st(('0', '#f7a3a0'), ('1', '#d9675f')))
+    path = 'M8,44 C14,30 24,30 28,40 C32,50 42,52 46,40 C49,31 54,26 58,30'
+    rings = ''.join(
+        f'  <path d="M{x},{y - 4} l0,8" stroke="#c4554e" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>\n'
+        for x, y in [(14, 37), (20, 34), (32, 46), (38, 48)]
+    )
+    body = f'''  <path d="{path}" stroke="#a8433d" stroke-width="13" fill="none" stroke-linecap="round"/>
+  <path d="{path}" stroke="url(#wurm)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M10,40 C15,31 22,31 26,37" stroke="#fff" stroke-opacity="0.45" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+{rings}{eye(54, 28, 2.6)}
+  <path d="M56,34 Q58,36 60,34" stroke="#8a3530" stroke-width="1.4" fill="none" stroke-linecap="round"/>'''
+    svg('wurm', 64, 64, defs, body, 'Regenwurm (Futter).')
+
+
+def kaefer():
+    defs = '\n'.join([
+        radial('panzer', st(('0', '#7fd36a'), ('1', '#2c7a2a'))),
+        radial('kopf', st(('0', '#4a4a4a'), ('1', '#141414'))),
+    ])
+    legs = ''.join(
+        f'  <path d="M{x},{y} l{dx},{dy}" stroke="#1d1d1d" stroke-width="2.6" stroke-linecap="round"/>\n'
+        for x, y, dx, dy in [(24, 30, -10, -4), (24, 38, -11, 2), (26, 46, -9, 8), (40, 30, 10, -4), (40, 38, 11, 2), (38, 46, 9, 8)]
+    )
+    body = f'''{legs}  <path d="M26,14 Q22,6 18,6 M38,14 Q42,6 46,6" stroke="#1d1d1d" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="32" cy="18" r="9" fill="url(#kopf)"/>
+  <ellipse cx="32" cy="38" rx="15" ry="18" fill="url(#panzer)" stroke="#1f5a1e" stroke-width="1.8"/>
+  <path d="M32,21 L32,56" stroke="#1f5a1e" stroke-width="1.6"/>
+  <ellipse cx="26" cy="31" rx="4" ry="6" fill="#fff" opacity="0.35"/>
+{eye(28.5, 17, 2.2)}
+{eye(35.5, 17, 2.2)}'''
+    svg('kaefer', 64, 64, defs, body, 'Käfer (Futter).')
+
+
+NUT_DEF = radial('nuss', st(('0', '#d9a066'), ('1', '#8a5326')))
+
+
+def nuss():
+    defs = '\n'.join([NUT_DEF, radial('boden', st(('0', '#f3dfb8'), ('1', '#cfae78')), cx='50%', cy='40%')])
+    body = '''  <path d="M32,6 C36,10 52,20 53,36 C54,50 44,59 32,59 C20,59 10,50 11,36 C12,20 28,10 32,6 Z" fill="url(#nuss)" stroke="#5e3615" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M30,12 C24,20 18,28 18,38" stroke="#6e4219" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <path d="M38,14 C42,22 46,30 46,40" stroke="#6e4219" stroke-width="1.4" fill="none" opacity="0.5"/>
+  <ellipse cx="22" cy="28" rx="4" ry="8" transform="rotate(25 22 28)" fill="#fff" opacity="0.35"/>
+  <path d="M15,46 C20,54 44,54 49,46 C47,55 40,59 32,59 C24,59 17,55 15,46 Z" fill="url(#boden)" stroke="#5e3615" stroke-width="1.6" stroke-linejoin="round"/>'''
+    svg('nuss', 64, 64, defs, body, 'Haselnuss (Futter).')
+
+
+def koerner():
+    defs = radial('korn', st(('0', '#fbe39a'), ('1', '#d2a23c')))
+    rnd = random.Random(7)
+    grains = []
+    for x, y in [(20, 46), (32, 48), (44, 46), (26, 38), (38, 38), (32, 29), (14, 52), (50, 52), (25, 54), (39, 55)]:
+        a = rnd.uniform(-40, 40)
+        grains.append(
+            f'  <ellipse cx="{x}" cy="{y}" rx="5" ry="7.5" transform="rotate({a:.0f} {x} {y})" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>\n'
+            f'  <ellipse cx="{x - 1.5}" cy="{y - 2.5}" rx="1.5" ry="2.5" transform="rotate({a:.0f} {x} {y})" fill="#fff" opacity="0.5"/>'
+        )
+    svg('koerner', 64, 64, defs, '\n'.join(grains), 'Körner (Futter).')
+
+
+def wasserpflanze():
+    defs = '\n'.join([
+        linear('wasser', st(('0', '#9fd8f5'), ('1', '#4c9fd6'))),
+        radial('linse', st(('0', '#b8ec7a'), ('1', '#4f9e2f'))),
+    ])
+    pads = []
+    for x, y, r in [(22, 34, 9), (40, 30, 10), (32, 46, 9), (46, 46, 7), (16, 48, 6)]:
+        pads.append(
+            f'  <circle cx="{x}" cy="{y}" r="{r}" fill="url(#linse)" stroke="#3a7a22" stroke-width="1.6"/>\n'
+            f'  <path d="M{x},{y} L{x + r * 0.7:.1f},{y - r * 0.7:.1f}" stroke="#3a7a22" stroke-width="1.4"/>\n'
+            f'  <circle cx="{x - r * 0.35:.1f}" cy="{y - r * 0.35:.1f}" r="{r * 0.25:.1f}" fill="#fff" opacity="0.5"/>'
+        )
+    body = '  <ellipse cx="32" cy="42" rx="28" ry="18" fill="url(#wasser)" stroke="#3a86b8" stroke-width="2"/>\n' + '\n'.join(pads)
+    svg('wasserpflanze', 64, 64, defs, body, 'Wasserlinsen (Futter für die Ente).')
+
+
+# ---------------------------------------------------------------- Knöpfe der Leiste
+
+def korb():
+    defs = '\n'.join([
+        linear('korb', st(('0', '#e8b26a'), ('1', '#a86a2c'))),
+        radial('apfel', st(('0', '#ff9a8a'), ('1', '#d23a2a'))),
+        NUT_DEF,
+    ])
+    weave = ''.join(
+        f'  <path d="M{x},34 L{x + 3},58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>\n' for x in range(14, 52, 7)
+    )
+    body = f'''  <path d="M14,32 Q14,6 32,6 Q50,6 50,32" stroke="#8a5420" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="24" cy="28" r="8" fill="url(#apfel)" stroke="#9a2a1e" stroke-width="1.4"/>
+  <ellipse cx="38" cy="27" rx="7" ry="9" fill="url(#nuss)" stroke="#5e3615" stroke-width="1.4"/>
+  <path d="M6,32 L58,32 L52,58 Q32,62 12,58 Z" fill="url(#korb)" stroke="#7a4818" stroke-width="2" stroke-linejoin="round"/>
+{weave}  <path d="M10,42 Q32,46 55,42 M12,51 Q32,55 53,51" stroke="#8a5420" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <rect x="4" y="29" width="56" height="6" rx="3" fill="#c8894a" stroke="#7a4818" stroke-width="1.6"/>'''
+    svg('korb', 64, 64, defs, body, 'Futterkorb (Knopf: Füttern).')
+
+
+def schaufel():
+    defs = '\n'.join([
+        linear('stiel', st(('0', '#d9a066'), ('1', '#9a6230')), x2=1, y2=0),
+        linear('blatt', st(('0', '#d7e0ea'), ('1', '#7f8fa3'))),
+    ])
+    body = '''  <rect x="28" y="4" width="8" height="34" rx="4" fill="url(#stiel)" stroke="#6e4219" stroke-width="1.6"/>
+  <rect x="21" y="2" width="22" height="7" rx="3.5" fill="#e2553a" stroke="#a83a24" stroke-width="1.6"/>
+  <path d="M18,38 L46,38 L46,46 Q46,60 32,62 Q18,60 18,46 Z" fill="url(#blatt)" stroke="#5a6878" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M23,42 Q23,54 30,57" stroke="#fff" stroke-opacity="0.6" stroke-width="2.5" fill="none" stroke-linecap="round"/>'''
+    svg('schaufel', 64, 64, defs, body, 'Schaufel (Knopf: Bauen).')
+
+
 gras()
 blume('blume-gelb', '#fff3a0', '#f2c21c')
 blume('blume-rosa', '#ffd6e6', '#f27aa8')
@@ -459,4 +571,11 @@ schilf()
 laubhaufen()
 busch()
 gedankenblase()
+wurm()
+kaefer()
+nuss()
+koerner()
+wasserpflanze()
+korb()
+schaufel()
 print('fertig:', len(list(OUT.glob('*.svg'))), 'Dateien')

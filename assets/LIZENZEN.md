@@ -4,7 +4,8 @@
 
 Alle Spielgrafiken sind eigene Arbeit, Teil dieses Projekts:
 
-- `assets/grafik/*.svg` – Tiere, Spielfigur, Landschaft, Gedankenblase.
+- `assets/grafik/*.svg` – Tiere, Spielfigur, Landschaft, Futter, Knöpfe,
+  Gedankenblase.
   Erzeugt mit dem eigenen Skript `tools/grafik.py`.
 - Konfetti und Knöpfe werden beim Start per Code gezeichnet
   (`src/textures.js`, `src/scenes/StartScene.js`, `src/BuildBar.js`).

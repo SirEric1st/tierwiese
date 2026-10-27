@@ -20,6 +20,13 @@ const GRAPHICS = [
   'laubhaufen',
   'busch',
   'gedankenblase',
+  'wurm',
+  'kaefer',
+  'nuss',
+  'koerner',
+  'wasserpflanze',
+  'korb',
+  'schaufel',
 ];
 
 // Im preload() einer Szene aufrufen

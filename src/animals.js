@@ -3,6 +3,8 @@
 //        wish wird vorgelesen, solange das Ding noch fehlt.
 // fact:  wird vorgelesen, wenn man ein eingezogenes Tier antippt.
 // petted: sagt das Tier, wenn man es streichelt.
+// eats:  Futter aus dem Futterkorb, das dem Tier schmeckt (das erste ist das liebste).
+// yummy: sagt das Tier, wenn es etwas Leckeres bekommt.
 // Futter wie Insekten, Würmer oder Samen gibt es auf der Wiese von selbst.
 
 export const ANIMALS = [
@@ -15,6 +17,8 @@ export const ANIMALS = [
     ],
     fact: 'Ich bin der Igel. Am Tag schlafe ich. In der Nacht suche ich Käfer, Würmer und Schnecken.',
     petted: 'Hihi, das kitzelt! Aber schön vorsichtig, ich habe Stacheln.',
+    eats: ['kaefer', 'wurm'],
+    yummy: 'Mmh, lecker! Igel fressen gern Käfer und Würmer.',
   },
   {
     type: 'ente',
@@ -26,6 +30,8 @@ export const ANIMALS = [
     ],
     fact: 'Ich bin die Ente. Ich stecke meinen Kopf unter Wasser und suche Pflanzen und kleine Tiere.',
     petted: 'Quak! Das ist schön!',
+    eats: ['wasserpflanze', 'koerner', 'wurm', 'kaefer'],
+    yummy: 'Quak, lecker! Enten fressen Wasserpflanzen, Körner und kleine Tiere.',
   },
   {
     type: 'eichhoernchen',
@@ -36,5 +42,7 @@ export const ANIMALS = [
     ],
     fact: 'Ich bin das Eichhörnchen. Im Herbst verstecke ich Nüsse. Die esse ich dann im Winter.',
     petted: 'Oh, wie schön! Fühl mal, mein Schwanz ist ganz flauschig.',
+    eats: ['nuss', 'koerner'],
+    yummy: 'Mmh, lecker! Eichhörnchen knabbern gern Nüsse und Samen.',
   },
 ];

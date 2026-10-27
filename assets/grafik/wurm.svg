@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Regenwurm (Futter). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="wurm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7a3a0"/><stop offset="1" stop-color="#d9675f"/></linearGradient>
+  </defs>
+  <path d="M8,44 C14,30 24,30 28,40 C32,50 42,52 46,40 C49,31 54,26 58,30" stroke="#a8433d" stroke-width="13" fill="none" stroke-linecap="round"/>
+  <path d="M8,44 C14,30 24,30 28,40 C32,50 42,52 46,40 C49,31 54,26 58,30" stroke="url(#wurm)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M10,40 C15,31 22,31 26,37" stroke="#fff" stroke-opacity="0.45" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M14,33 l0,8" stroke="#c4554e" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+  <path d="M20,30 l0,8" stroke="#c4554e" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+  <path d="M32,42 l0,8" stroke="#c4554e" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+  <path d="M38,44 l0,8" stroke="#c4554e" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+  <circle cx="54" cy="28" r="3.2" fill="#fff" stroke="#00000022" stroke-width="1"/>
+  <circle cx="54.4" cy="28.3" r="2.6" fill="#2b1a0e"/>
+  <circle cx="54.4" cy="28.3" r="1.4" fill="#0d0704"/>
+  <circle cx="53.5" cy="27.1" r="1.0" fill="#fff"/>
+  <circle cx="55.3" cy="29.2" r="0.4" fill="#fff" opacity="0.9"/>
+  <path d="M56,34 Q58,36 60,34" stroke="#8a3530" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</svg>

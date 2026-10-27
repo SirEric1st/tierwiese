@@ -1,6 +1,7 @@
 // Ein einzelnes Tier auf der Wiese: laufen, Gedankenblase zeigen, sprechen.
 // Wann ein Tier kommt, einzieht oder geht, entscheidet der AnimalManager.
 import { IMAGE_SCALE } from './display.js';
+import { getFood } from './foods.js';
 import { playHappy } from './sound.js';
 import { say } from './speech.js';
 
@@ -62,8 +63,7 @@ export class Animal {
   startPetting() {
     this.petting = true;
     this.petDistance = 0;
-    this.walkTween?.pause();
-    this.stopBobbing();
+    this.holdStill();
   }
 
   // distance: wie weit sich der Finger über dem Tier bewegt hat
@@ -90,10 +90,68 @@ export class Animal {
   stopPetting() {
     if (!this.petting) return;
     this.petting = false;
+    this.moveOn();
+  }
+
+  // Beim Streicheln und Fressen bleibt das Tier stehen …
+  holdStill() {
+    this.walkTween?.pause();
+    this.stopBobbing();
+  }
+
+  // … und läuft danach weiter, wenn es nicht gerade noch etwas anderes genießt
+  moveOn() {
+    if (this.petting || this.eating) return;
     if (this.walkTween?.isPaused()) {
       this.walkTween.resume();
       this.startBobbing();
     }
+  }
+
+  // ---------- Füttern ----------
+
+  // image: das Futter-Bild, das gerade beim Tier losgelassen wurde
+  feed(food, image) {
+    if (this.state !== 'resident' || this.eating) return false;
+    this.eating = true;
+    this.holdStill();
+    if (this.def.eats.includes(food.type)) {
+      // Lecker: Das Futter wandert zum Maul und verschwindet
+      const mouthX = this.x + (this.sprite.flipX ? -1 : 1) * this.sprite.displayWidth * 0.35;
+      this.scene.tweens.add({
+        targets: image,
+        x: mouthX,
+        y: this.y - this.sprite.displayHeight * 0.5,
+        scale: 0,
+        duration: 400,
+        ease: 'Quad.easeIn',
+        onComplete: () => image.destroy(),
+      });
+      this.scene.time.delayedCall(400, () => {
+        this.squish();
+        playHappy();
+        say(this.def.yummy);
+      });
+      [500, 800, 1100].forEach((delay) => this.scene.time.delayedCall(delay, () => this.showHeart()));
+      this.scene.time.delayedCall(1500, () => this.finishEating());
+    } else {
+      // Mag es nicht: freundlich den Kopf schütteln und zeigen, was es lieber frisst
+      const favorite = getFood(this.def.eats[0]);
+      this.scene.tweens.add({ targets: image, alpha: 0, y: image.y + 20, duration: 700, onComplete: () => image.destroy() });
+      this.scene.tweens.add({ targets: this.sprite, angle: { from: -10, to: 10 }, duration: 110, yoyo: true, repeat: 3, onComplete: () => this.sprite.setAngle(0) });
+      this.showBubble(favorite.type);
+      say(`Hm, das mag ich nicht so. Ich fresse lieber ${favorite.plural}!`);
+      this.scene.time.delayedCall(3000, () => {
+        this.hideBubble();
+        this.finishEating();
+      });
+    }
+    return true;
+  }
+
+  finishEating() {
+    this.eating = false;
+    this.moveOn();
   }
 
   showHeart() {
@@ -195,7 +253,7 @@ export class Animal {
     const next = () => {
       if (this.state !== 'resident') return;
       this.wanderTimer = this.scene.time.delayedCall(Phaser.Math.Between(3000, 7000), () => {
-        if (this.petting) return next(); // beim Streicheln bleibt es lieber stehen
+        if (this.petting || this.eating) return next(); // beim Streicheln und Fressen bleibt es stehen
         const spot = pickSpot();
         if (spot) this.walkTo(spot.x, spot.y, WANDER_SPEED, next);
         else next();

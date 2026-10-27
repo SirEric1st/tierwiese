@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Futterkorb (Knopf: Füttern). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="korb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8b26a"/><stop offset="1" stop-color="#a86a2c"/></linearGradient>
+    <radialGradient id="apfel" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ff9a8a"/><stop offset="1" stop-color="#d23a2a"/></radialGradient>
+    <radialGradient id="nuss" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#d9a066"/><stop offset="1" stop-color="#8a5326"/></radialGradient>
+  </defs>
+  <path d="M14,32 Q14,6 32,6 Q50,6 50,32" stroke="#8a5420" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="24" cy="28" r="8" fill="url(#apfel)" stroke="#9a2a1e" stroke-width="1.4"/>
+  <ellipse cx="38" cy="27" rx="7" ry="9" fill="url(#nuss)" stroke="#5e3615" stroke-width="1.4"/>
+  <path d="M6,32 L58,32 L52,58 Q32,62 12,58 Z" fill="url(#korb)" stroke="#7a4818" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M14,34 L17,58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>
+  <path d="M21,34 L24,58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>
+  <path d="M28,34 L31,58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>
+  <path d="M35,34 L38,58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>
+  <path d="M42,34 L45,58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>
+  <path d="M49,34 L52,58" stroke="#8a5420" stroke-width="1.6" opacity="0.7"/>
+  <path d="M10,42 Q32,46 55,42 M12,51 Q32,55 53,51" stroke="#8a5420" stroke-width="1.6" fill="none" opacity="0.7"/>
+  <rect x="4" y="29" width="56" height="6" rx="3" fill="#c8894a" stroke="#7a4818" stroke-width="1.6"/>
+</svg>

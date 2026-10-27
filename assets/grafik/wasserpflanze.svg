@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Wasserlinsen (Futter für die Ente). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="wasser" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd8f5"/><stop offset="1" stop-color="#4c9fd6"/></linearGradient>
+    <radialGradient id="linse" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#b8ec7a"/><stop offset="1" stop-color="#4f9e2f"/></radialGradient>
+  </defs>
+  <ellipse cx="32" cy="42" rx="28" ry="18" fill="url(#wasser)" stroke="#3a86b8" stroke-width="2"/>
+  <circle cx="22" cy="34" r="9" fill="url(#linse)" stroke="#3a7a22" stroke-width="1.6"/>
+  <path d="M22,34 L28.3,27.7" stroke="#3a7a22" stroke-width="1.4"/>
+  <circle cx="18.9" cy="30.9" r="2.2" fill="#fff" opacity="0.5"/>
+  <circle cx="40" cy="30" r="10" fill="url(#linse)" stroke="#3a7a22" stroke-width="1.6"/>
+  <path d="M40,30 L47.0,23.0" stroke="#3a7a22" stroke-width="1.4"/>
+  <circle cx="36.5" cy="26.5" r="2.5" fill="#fff" opacity="0.5"/>
+  <circle cx="32" cy="46" r="9" fill="url(#linse)" stroke="#3a7a22" stroke-width="1.6"/>
+  <path d="M32,46 L38.3,39.7" stroke="#3a7a22" stroke-width="1.4"/>
+  <circle cx="28.9" cy="42.9" r="2.2" fill="#fff" opacity="0.5"/>
+  <circle cx="46" cy="46" r="7" fill="url(#linse)" stroke="#3a7a22" stroke-width="1.6"/>
+  <path d="M46,46 L50.9,41.1" stroke="#3a7a22" stroke-width="1.4"/>
+  <circle cx="43.5" cy="43.5" r="1.8" fill="#fff" opacity="0.5"/>
+  <circle cx="16" cy="48" r="6" fill="url(#linse)" stroke="#3a7a22" stroke-width="1.6"/>
+  <path d="M16,48 L20.2,43.8" stroke="#3a7a22" stroke-width="1.4"/>
+  <circle cx="13.9" cy="45.9" r="1.5" fill="#fff" opacity="0.5"/>
+</svg>

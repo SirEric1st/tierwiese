@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Körner (Futter). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <radialGradient id="korn" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fbe39a"/><stop offset="1" stop-color="#d2a23c"/></radialGradient>
+  </defs>
+  <ellipse cx="20" cy="46" rx="5" ry="7.5" transform="rotate(-14 20 46)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="18.5" cy="43.5" rx="1.5" ry="2.5" transform="rotate(-14 20 46)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="32" cy="48" rx="5" ry="7.5" transform="rotate(-28 32 48)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="30.5" cy="45.5" rx="1.5" ry="2.5" transform="rotate(-28 32 48)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="44" cy="46" rx="5" ry="7.5" transform="rotate(12 44 46)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="42.5" cy="43.5" rx="1.5" ry="2.5" transform="rotate(12 44 46)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="26" cy="38" rx="5" ry="7.5" transform="rotate(-34 26 38)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="24.5" cy="35.5" rx="1.5" ry="2.5" transform="rotate(-34 26 38)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="38" cy="38" rx="5" ry="7.5" transform="rotate(3 38 38)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="36.5" cy="35.5" rx="1.5" ry="2.5" transform="rotate(3 38 38)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="32" cy="29" rx="5" ry="7.5" transform="rotate(-11 32 29)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="30.5" cy="26.5" rx="1.5" ry="2.5" transform="rotate(-11 32 29)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="14" cy="52" rx="5" ry="7.5" transform="rotate(-35 14 52)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="12.5" cy="49.5" rx="1.5" ry="2.5" transform="rotate(-35 14 52)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="50" cy="52" rx="5" ry="7.5" transform="rotate(1 50 52)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="48.5" cy="49.5" rx="1.5" ry="2.5" transform="rotate(1 50 52)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="25" cy="54" rx="5" ry="7.5" transform="rotate(-37 25 54)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="23.5" cy="51.5" rx="1.5" ry="2.5" transform="rotate(-37 25 54)" fill="#fff" opacity="0.5"/>
+  <ellipse cx="39" cy="55" rx="5" ry="7.5" transform="rotate(-5 39 55)" fill="url(#korn)" stroke="#a87a22" stroke-width="1.4"/>
+  <ellipse cx="37.5" cy="52.5" rx="1.5" ry="2.5" transform="rotate(-5 39 55)" fill="#fff" opacity="0.5"/>
+</svg>

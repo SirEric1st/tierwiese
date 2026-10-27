@@ -1,8 +1,12 @@
-// Die Bau-Leiste am unteren Bildschirmrand. Sie bewegt sich nicht mit,
+// Die Leiste am unteren Bildschirmrand. Sie bewegt sich nicht mit,
 // wenn man die Wiese verschiebt. Die Leiste zeichnet nur sich selbst –
 // was beim Antippen und Ziehen passiert, regelt die WorldScene.
+//
+// Es gibt zwei Leisten: „Bauen“ (Dinge für die Wiese) und „Füttern“
+// (Futter für die Tiere). Der orange Knopf ganz rechts schaltet um.
 import { screenSize, uiOrigin } from './display.js';
 import { ELEMENTS } from './elements.js';
+import { FOODS } from './foods.js';
 
 export const BAR_HEIGHT = 130;
 const SLOT_SIZE = 104; // runde Knöpfe, deutlich größer als 64 pt
@@ -17,39 +21,66 @@ export class BuildBar {
     this.background = scene.add.graphics();
     this.container.add(this.background);
 
-    this.slots = ELEMENTS.map((element) => {
-      const circle = scene.add.circle(0, 0, SLOT_SIZE / 2, 0xffffff, 0.9);
-      const icon = scene.add.image(0, 0, element.type);
-      const scale = ICON_SIZE / Math.max(icon.width, icon.height);
-      icon.setScale(scale);
-      const slot = scene.add.container(0, 0, [circle, icon]);
-      slot.element = element;
-      slot.iconScale = scale;
-      this.container.add(slot);
-      return slot;
-    });
+    this.elementSlots = ELEMENTS.map((element) => Object.assign(this.createSlot(element.type), { element }));
+    this.foodSlots = FOODS.map((food) => Object.assign(this.createSlot(food.type), { food }));
+    // Der Umschalt-Knopf zeigt, wohin er führt: Korb → Füttern, Schaufel → Bauen
+    this.toggleSlot = Object.assign(this.createSlot('korb', 0xffc46b), { toggle: true });
 
+    this.mode = 'build';
     this.highlighted = false;
     this.layout();
+  }
+
+  createSlot(texture, color = 0xffffff) {
+    const circle = this.scene.add.circle(0, 0, SLOT_SIZE / 2, color, 0.9);
+    const icon = this.scene.add.image(0, 0, texture);
+    const slot = this.scene.add.container(0, 0, [circle, icon]);
+    slot.icon = icon;
+    this.setIcon(slot, texture);
+    this.container.add(slot);
+    return slot;
+  }
+
+  setIcon(slot, texture) {
+    slot.icon.setTexture(texture);
+    slot.icon.setScale(ICON_SIZE / Math.max(slot.icon.width, slot.icon.height));
+  }
+
+  get slots() {
+    return [...(this.mode === 'build' ? this.elementSlots : this.foodSlots), this.toggleSlot];
+  }
+
+  toggleMode() {
+    this.mode = this.mode === 'build' ? 'food' : 'build';
+    this.setIcon(this.toggleSlot, this.mode === 'build' ? 'korb' : 'schaufel');
+    this.layout();
+    // Die neuen Knöpfe hüpfen kurz herein
+    this.slots.forEach((slot, i) => {
+      if (slot.toggle) return;
+      slot.setScale(0);
+      this.scene.tweens.add({ targets: slot, scale: this.slotScale, duration: 250, delay: i * 40, ease: 'Back.easeOut' });
+    });
   }
 
   layout() {
     const { width, height } = screenSize(this.scene);
     const origin = uiOrigin(this.scene);
     this.container.setPosition(origin.x, origin.y);
-    const barWidth = Math.min(width - 20, ELEMENTS.length * (SLOT_SIZE + SLOT_GAP) + SLOT_GAP);
+    const slots = this.slots;
+    const barWidth = Math.min(width - 20, slots.length * (SLOT_SIZE + SLOT_GAP) + SLOT_GAP);
     this.barLeft = (width - barWidth) / 2;
     this.barWidth = barWidth;
     this.top = height - BAR_HEIGHT;
     this.drawBackground();
 
     // Knöpfe gleichmäßig verteilen; auf schmalen Bildschirmen etwas kleiner
-    const step = barWidth / ELEMENTS.length;
+    const step = barWidth / slots.length;
     this.step = step;
     this.slotScale = Math.min(1, step / (SLOT_SIZE + SLOT_GAP));
-    this.slots.forEach((slot, i) => {
+    [...this.elementSlots, ...this.foodSlots].forEach((slot) => slot.setVisible(false));
+    slots.forEach((slot, i) => {
       slot.setPosition(this.barLeft + step * (i + 0.5), this.top + BAR_HEIGHT / 2);
-      slot.setScale(this.slotScale);
+      slot.setScale(this.slotScale).setVisible(true);
     });
   }
 
@@ -74,9 +105,7 @@ export class BuildBar {
 
   // Welcher Knopf liegt unter dieser Bildschirmposition?
   slotAt(screenX, screenY) {
-    return this.slots.find(
-      (slot) => Phaser.Math.Distance.Between(slot.x, slot.y, screenX, screenY) <= this.step / 2
-    );
+    return this.slots.find((slot) => Phaser.Math.Distance.Between(slot.x, slot.y, screenX, screenY) <= this.step / 2);
   }
 
   bounce(slot) {

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Schaufel (Knopf: Bauen). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="stiel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9a066"/><stop offset="1" stop-color="#9a6230"/></linearGradient>
+    <linearGradient id="blatt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7e0ea"/><stop offset="1" stop-color="#7f8fa3"/></linearGradient>
+  </defs>
+  <rect x="28" y="4" width="8" height="34" rx="4" fill="url(#stiel)" stroke="#6e4219" stroke-width="1.6"/>
+  <rect x="21" y="2" width="22" height="7" rx="3.5" fill="#e2553a" stroke="#a83a24" stroke-width="1.6"/>
+  <path d="M18,38 L46,38 L46,46 Q46,60 32,62 Q18,60 18,46 Z" fill="url(#blatt)" stroke="#5a6878" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M23,42 Q23,54 30,57" stroke="#fff" stroke-opacity="0.6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>
