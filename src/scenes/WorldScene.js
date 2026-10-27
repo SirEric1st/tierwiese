@@ -6,6 +6,7 @@
 // Mit dem Korb-Knopf wird die Leiste zum Futterkorb; Futter zieht man zu den Tieren.
 // Der Album-Knopf oben rechts öffnet das Tier-Album. Tippt man auf die eigene
 // Figur, öffnet sich der Figuren-Baukasten.
+// Der Knopf daneben (Mond oder Sonne) macht Nacht oder Tag.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin, uiScale } from '../display.js';
@@ -34,6 +35,11 @@ const SHORE_REACH = 400; // so nah muss man Schilf an einen Teich ziehen
 const FOOD_LIFT = 50; // Futter schwebt beim Ziehen so weit über dem Finger
 const ALBUM_RADIUS = 44; // runder Album-Knopf oben rechts
 const ALBUM_MARGIN = 20;
+const NIGHT_COLOR = 0x081040; // so dunkelblau legt sich die Nacht über die Wiese
+const NIGHT_ALPHA = 0.55;
+const DUSK_TIME = 2500; // so lange dauert die Dämmerung (Millisekunden)
+const FIREFLIES = 40; // Glühwürmchen in der Nacht
+const DEPTH_NIGHT = 59000; // über der Wiese, aber unter Herzen, Konfetti und der Leiste
 const SWIPE_DISTANCE = 40; // so weit muss man auf der Leiste wischen, um zu blättern
 const MAX_ZOOM = 1.6; // am weitesten hineinzoomen (1 = normale Größe)
 const MIN_ZOOM = 0.4; // am weitesten herauszoomen (nie kleiner als die ganze Wiese)
@@ -91,7 +97,10 @@ export class WorldScene extends Phaser.Scene {
       () => this.requestSave(),
       () => this.profile.name
     );
+    this.night = Boolean(saved?.night);
+    this.animals.night = this.night;
     if (saved) this.animals.restore(saved.animals);
+    this.createNight();
     this.bar = new BuildBar(this);
     this.createAlbumButton();
 
@@ -186,7 +195,12 @@ export class WorldScene extends Phaser.Scene {
     const icon = this.add.image(0, 0, 'album');
     icon.setScale((ALBUM_RADIUS * 1.4) / Math.max(icon.width, icon.height));
     this.albumButton = this.add.container(0, 0, [circle, icon]);
-    this.hud = this.add.container(0, 0, [this.albumButton]).setScrollFactor(0).setDepth(100000);
+    // Tag/Nacht-Knopf: zeigt, wohin er führt (am Tag den Mond, nachts die Sonne)
+    this.skyIcon = this.add.image(0, 0, 'mond');
+    this.skyIcon.setScale((ALBUM_RADIUS * 1.4) / Math.max(this.skyIcon.width, this.skyIcon.height));
+    this.skyButton = this.add.container(0, 0, [this.add.circle(0, 0, ALBUM_RADIUS, 0xffffff, 0.9), this.skyIcon]);
+    this.updateSkyButton();
+    this.hud = this.add.container(0, 0, [this.albumButton, this.skyButton]).setScrollFactor(0).setDepth(100000);
     this.layoutAlbumButton();
   }
 
@@ -195,12 +209,86 @@ export class WorldScene extends Phaser.Scene {
     const origin = uiOrigin(this);
     this.hud.setPosition(origin.x, origin.y).setScale(uiScale(this));
     this.albumButton.setPosition(width - ALBUM_RADIUS - ALBUM_MARGIN, ALBUM_RADIUS + ALBUM_MARGIN);
+    this.skyButton.setPosition(this.albumButton.x - ALBUM_RADIUS * 2 - ALBUM_MARGIN, this.albumButton.y);
   }
 
   // Liegt diese Bildschirmposition auf dem Album-Knopf?
   isOnAlbumButton(screenX, screenY) {
-    const button = this.albumButton;
+    return this.isOnButton(this.albumButton, screenX, screenY);
+  }
+
+  isOnButton(button, screenX, screenY) {
     return Phaser.Math.Distance.Between(screenX, screenY, button.x, button.y) <= ALBUM_RADIUS + 10;
+  }
+
+  // ---------- Tag und Nacht ----------
+
+  // Eine dunkelblaue Fläche über der ganzen Wiese und Glühwürmchen
+  createNight() {
+    this.darkness = this.add
+      .rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT, NIGHT_COLOR)
+      .setOrigin(0)
+      .setDepth(DEPTH_NIGHT)
+      .setAlpha(this.night ? NIGHT_ALPHA : 0);
+    const rnd = new Phaser.Math.RandomDataGenerator(['gluehwuermchen']);
+    this.fireflies = Array.from({ length: FIREFLIES }, () =>
+      this.add
+        .image(rnd.between(40, WORLD_WIDTH - 40), rnd.between(120, WORLD_HEIGHT - 40), 'leuchtpunkt')
+        .setScale(IMAGE_SCALE * 1.3)
+        .setDepth(DEPTH_NIGHT + 1)
+        .setAlpha(0)
+        .setVisible(false)
+    );
+    if (this.night) this.startFireflies();
+  }
+
+  // Glühwürmchen schweben langsam umher und leuchten mal mehr, mal weniger
+  startFireflies() {
+    this.fireflies.forEach((firefly) => {
+      firefly.setVisible(true);
+      this.tweens.add({
+        targets: firefly,
+        alpha: { from: 0.15, to: 1 },
+        duration: Phaser.Math.Between(900, 1800),
+        delay: Phaser.Math.Between(0, DUSK_TIME),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+      this.tweens.add({
+        targets: firefly,
+        x: firefly.x + Phaser.Math.Between(-60, 60),
+        y: firefly.y + Phaser.Math.Between(-40, 40),
+        duration: Phaser.Math.Between(3000, 6000),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    });
+  }
+
+  stopFireflies() {
+    this.fireflies.forEach((firefly) => {
+      this.tweens.killTweensOf(firefly);
+      this.tweens.add({ targets: firefly, alpha: 0, duration: 800, onComplete: () => firefly.setVisible(false) });
+    });
+  }
+
+  updateSkyButton() {
+    this.skyIcon.setTexture(this.night ? 'sonne' : 'mond');
+  }
+
+  toggleNight() {
+    this.night = !this.night;
+    this.tweens.add({ targets: this.skyButton, scale: 1.15, duration: 120, yoyo: true });
+    this.updateSkyButton();
+    this.tweens.killTweensOf(this.darkness);
+    this.tweens.add({ targets: this.darkness, alpha: this.night ? NIGHT_ALPHA : 0, duration: DUSK_TIME, ease: 'Sine.easeInOut' });
+    if (this.night) this.startFireflies();
+    else this.stopFireflies();
+    say(this.night ? 'Gute Nacht! Jetzt werden die Nachttiere wach.' : 'Guten Morgen! Jetzt werden die Tagtiere wach.');
+    this.animals.setNight(this.night);
+    this.requestSave();
   }
 
   openAlbum() {
@@ -227,6 +315,7 @@ export class WorldScene extends Phaser.Scene {
       figure: this.figure,
       profile: this.profile,
       animals: this.animals.getState(),
+      night: this.night,
     });
   }
 
@@ -246,6 +335,7 @@ export class WorldScene extends Phaser.Scene {
   // Ein Fingerdruck wird erst beim Loslassen oder nach etwas Bewegung
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
   //   'album'   – der Album-Knopf
+  //   'sky'     – der Tag/Nacht-Knopf
   //   'bar'     – die Leiste: ein Knopf (Ding, Futter, Umschalten) oder Wischen zum Blättern
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
@@ -272,6 +362,8 @@ export class WorldScene extends Phaser.Scene {
 
       if (this.isOnAlbumButton(screen.x, screen.y)) {
         Object.assign(touch, { mode: 'album' });
+      } else if (this.isOnButton(this.skyButton, screen.x, screen.y)) {
+        Object.assign(touch, { mode: 'sky' });
       } else if (this.bar.contains(screen.x, screen.y)) {
         // Auch zwischen den Knöpfen kann man wischen (dann ist slot leer)
         Object.assign(touch, { mode: 'bar', slot: this.bar.slotAt(screen.x, screen.y) });
@@ -343,6 +435,8 @@ export class WorldScene extends Phaser.Scene {
   tap(touch, pointer) {
     if (touch.mode === 'album') {
       this.openAlbum();
+    } else if (touch.mode === 'sky') {
+      this.toggleNight();
     } else if (touch.mode === 'bar' && !touch.slot) {
       // zwischen die Knöpfe getippt: nichts tun
     } else if (touch.mode === 'bar' && touch.slot.toggle) {
@@ -370,7 +464,7 @@ export class WorldScene extends Phaser.Scene {
       touch.animal.startPetting();
       return;
     }
-    if (touch.mode === 'album' || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
+    if (touch.mode === 'album' || touch.mode === 'sky' || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
       touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }

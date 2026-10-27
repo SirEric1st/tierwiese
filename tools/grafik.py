@@ -634,6 +634,40 @@ def symbol_hose():
     svg('symbol-hose', 64, 64, defs, body, 'Symbol: Hose.')
 
 
+# ---------------------------------------------------------------- Tag und Nacht (Knopf)
+# Der Knopf zeigt, wohin er führt: am Tag der Mond, in der Nacht die Sonne.
+
+def sonne():
+    defs = radial('sonne', st(('0', '#fff3a0'), ('0.6', '#ffd23f'), ('1', '#f5a623')), cx='40%', cy='38%')
+    rays = ''.join(
+        f'  <path d="M{32 + 21 * math.cos(a):.1f},{32 + 21 * math.sin(a):.1f} L{32 + 29 * math.cos(a):.1f},{32 + 29 * math.sin(a):.1f}" '
+        f'stroke="#f5a623" stroke-width="5" stroke-linecap="round"/>\n'
+        for a in (i * math.pi / 4 for i in range(8))
+    )
+    body = f'''{rays}  <circle cx="32" cy="32" r="16" fill="url(#sonne)" stroke="#e08a12" stroke-width="2"/>
+  <circle cx="26.5" cy="30" r="2.2" fill="#7a4a10"/>
+  <circle cx="37.5" cy="30" r="2.2" fill="#7a4a10"/>
+  <path d="M26,36 Q32,41 38,36" stroke="#7a4a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="23" cy="35" r="2.4" fill="#ff8a5c" opacity="0.5"/>
+  <circle cx="41" cy="35" r="2.4" fill="#ff8a5c" opacity="0.5"/>'''
+    svg('sonne', 64, 64, defs, body, 'Sonne (Knopf: Tag).')
+
+
+def mond():
+    defs = radial('mond', st(('0', '#fffbe0'), ('0.7', '#f3e08a'), ('1', '#d9b94a')), cx='35%', cy='35%')
+    stars = ''.join(
+        f'  <path d="M{x},{y - r} L{x + r * 0.3:.1f},{y - r * 0.3:.1f} L{x + r},{y} L{x + r * 0.3:.1f},{y + r * 0.3:.1f} L{x},{y + r} '
+        f'L{x - r * 0.3:.1f},{y + r * 0.3:.1f} L{x - r},{y} L{x - r * 0.3:.1f},{y - r * 0.3:.1f} Z" fill="#ffe680"/>\n'
+        for x, y, r in [(49, 14, 6), (54, 34, 4), (44, 50, 3.5)]
+    )
+    body = f'''  <path d="M36,6 A26,26 0 1 0 50,52 A21,21 0 1 1 36,6 Z" fill="url(#mond)" stroke="#b8952e" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M20,30 Q23,33 26,30" stroke="#7a5a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M21,40 Q25,43 29,40" stroke="#7a5a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="17" cy="36" r="2.4" fill="#ff9a7a" opacity="0.45"/>
+{stars}'''
+    svg('mond', 64, 64, defs, body, 'Mond mit Sternen (Knopf: Nacht).')
+
+
 # ---------------------------------------------------------------- Frosch
 def frosch():
     defs = '\n'.join([
@@ -1148,6 +1182,8 @@ symbol_haarfarbe()
 symbol_haut()
 symbol_shirt()
 symbol_hose()
+sonne()
+mond()
 frosch()
 steine()
 baum('obstbaum', '#b5e07e', '#62b04a', '#357a2e', '#285e24', 'apfel')

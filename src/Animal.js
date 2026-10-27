@@ -1,6 +1,6 @@
 // Ein einzelnes Tier auf der Wiese: laufen, Gedankenblase zeigen, sprechen.
 // Wann ein Tier kommt, einzieht oder geht, entscheidet der AnimalManager.
-import { IMAGE_SCALE } from './display.js';
+import { DPR, IMAGE_SCALE } from './display.js';
 import { getFood } from './foods.js';
 import { isPainted } from './textures.js';
 import { playHappy } from './sound.js';
@@ -17,6 +17,8 @@ const PET_TALK_DISTANCE = 150; // so viel streicheln, bis das Tier etwas sagt
 const PET_TALK_PAUSE = 5000; // danach eine Weile nichts mehr sagen
 const MIN_TOUCH = 64; // auch kleine Tiere sind mindestens so groß antippbar
 const FLY_HEIGHT = 45; // so hoch schweben fliegende Tiere über dem Boden
+const SNORE_EVERY = 1800; // so oft steigt beim Schlafen ein „Z“ auf
+const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
 
 export class Animal {
   // isInWater(x, y): sagt, ob diese Stelle in einem Teich liegt
@@ -31,9 +33,7 @@ export class Animal {
     // Fliegende Tiere schweben: Das Bild hängt in einem eigenen Behälter über dem Boden
     this.lift = def.flies ? FLY_HEIGHT : 0;
     this.body = scene.add.container(0, -this.lift, [this.sprite]);
-    if (def.flies) {
-      scene.tweens.add({ targets: this.body, y: -this.lift - 8, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    }
+    if (def.flies) this.startHovering();
     // KI-Bilder und fliegende Tiere bekommen einen Schatten am Boden
     this.shadow = scene.add.image(0, -4, 'schatten').setVisible(isPainted(def.type) || def.flies);
     this.shadow.setScale((this.sprite.displayWidth * 0.8) / this.shadow.width, IMAGE_SCALE * 1.2);
@@ -55,7 +55,7 @@ export class Animal {
 
   // Oberkante des Tieres (bei fliegenden Tieren über dem Boden)
   get top() {
-    return this.y - this.lift - this.sprite.displayHeight;
+    return this.y + this.body.y - this.sprite.displayHeight;
   }
 
   // Liegt dieser Punkt auf dem Tier?
@@ -67,6 +67,11 @@ export class Animal {
   }
 
   onTap() {
+    if (this.sleeping) {
+      this.squish();
+      say(this.sleepText());
+      return;
+    }
     this.hop();
     if (this.state === 'resident') say(this.def.fact);
     else if (this.missingNeed) say(this.missingNeed.wish);
@@ -92,6 +97,7 @@ export class Animal {
     }
     const now = this.scene.time.now;
     if (
+      !this.sleeping &&
       before < PET_TALK_DISTANCE &&
       this.petDistance >= PET_TALK_DISTANCE &&
       !(now - this.lastPetTalk < PET_TALK_PAUSE)
@@ -128,6 +134,13 @@ export class Animal {
   // image: das Futter-Bild, das gerade beim Tier losgelassen wurde
   feed(food, image) {
     if (this.state !== 'resident' || this.eating) return false;
+    if (this.sleeping) {
+      // Wer schläft, frisst nicht: Das Futter verschwindet wieder
+      this.scene.tweens.add({ targets: image, alpha: 0, scale: 0, duration: 500, onComplete: () => image.destroy() });
+      this.squish();
+      say(this.sleepText());
+      return true;
+    }
     this.eating = true;
     this.holdStill();
     if (this.def.eats.includes(food.type)) {
@@ -189,8 +202,8 @@ export class Animal {
     if (this.squishTween?.isPlaying()) return;
     this.squishTween = this.scene.tweens.add({
       targets: this.sprite,
-      scaleY: IMAGE_SCALE * 0.9,
-      scaleX: IMAGE_SCALE * 1.05,
+      scaleY: this.sprite.scaleY * 0.9,
+      scaleX: this.sprite.scaleX * 1.05,
       duration: 120,
       yoyo: true,
       ease: 'Sine.easeInOut',
@@ -251,6 +264,7 @@ export class Animal {
 
   // Ausziehen, weil etwas fehlt – kein Drama, nur ein kleiner Ausflug
   leave(missingNeed, done) {
+    this.setSleeping(false);
     this.stopWandering();
     this.state = 'away';
     this.missingNeed = missingNeed;
@@ -265,10 +279,11 @@ export class Animal {
   // Eingezogene Tiere laufen gemütlich zwischen ihren Lieblingsplätzen umher
   startWandering(pickSpot) {
     this.stopWandering();
+    this.pickSpot = pickSpot;
     const next = () => {
       if (this.state !== 'resident') return;
       this.wanderTimer = this.scene.time.delayedCall(Phaser.Math.Between(3000, 7000), () => {
-        if (this.petting || this.eating) return next(); // beim Streicheln und Fressen bleibt es stehen
+        if (this.petting || this.eating || this.sleeping) return next(); // dann bleibt es stehen
         const spot = pickSpot();
         if (spot) this.walkTo(spot.x, spot.y, WANDER_SPEED, next);
         else next();
@@ -280,6 +295,89 @@ export class Animal {
   stopWandering() {
     this.wanderTimer?.remove();
     this.wanderTimer = null;
+  }
+
+  // ---------- Schlafen ----------
+
+  // Tagtiere schlafen nachts, Nachttiere am Tag. Schlafende Tiere bleiben
+  // stehen, ducken sich etwas, und kleine „Z“ steigen auf.
+  setSleeping(on) {
+    if (Boolean(this.sleeping) === on) return;
+    this.sleeping = on;
+    this.squishTween?.stop();
+    if (on) {
+      this.walkTween?.stop();
+      this.stopBobbing();
+      this.hideBubble();
+      this.sprite.setScale(IMAGE_SCALE * 1.04, IMAGE_SCALE * 0.9);
+      if (this.def.flies) this.land();
+      this.snoreTimer = this.scene.time.addEvent({
+        delay: SNORE_EVERY,
+        startAt: Phaser.Math.Between(0, SNORE_EVERY - 1),
+        loop: true,
+        callback: () => this.snore(),
+      });
+    } else {
+      this.snoreTimer?.remove();
+      this.snoreTimer = null;
+      this.sprite.setScale(IMAGE_SCALE);
+      if (this.def.flies) this.startHovering();
+    }
+  }
+
+  // Aufwachen und wieder umherlaufen
+  wakeUp() {
+    if (!this.sleeping) return;
+    this.setSleeping(false);
+    this.hop();
+    if (this.state === 'resident' && this.pickSpot) this.startWandering(this.pickSpot);
+  }
+
+  sleepText() {
+    return this.def.nocturnal
+      ? 'Leise, ich schlafe gerade. Ich bin in der Nacht wach.'
+      : 'Leise, ich schlafe gerade. Ich bin am Tag wach.';
+  }
+
+  // Ein „Z“ steigt auf – aber nur, wenn man das Tier gerade sieht
+  snore() {
+    if (!this.container.visible || !this.scene.cameras.main.worldView.contains(this.x, this.y)) return;
+    const z = this.scene.add
+      .text(this.x + 12, this.top + 6, 'Z', {
+        fontFamily: FONT,
+        fontSize: '26px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        stroke: '#4a5aa0',
+        strokeThickness: 5,
+        resolution: DPR,
+      })
+      .setOrigin(0.5)
+      .setScale(0.8)
+      .setDepth(60000);
+    this.scene.tweens.add({
+      targets: z,
+      x: z.x + 30,
+      y: z.y - 60,
+      scale: 1.3,
+      alpha: { value: 0, ease: 'Quad.easeIn' }, // erst am Ende verblassen
+      duration: 2000,
+      ease: 'Sine.easeOut',
+      onComplete: () => z.destroy(),
+    });
+  }
+
+  // Fliegende Tiere schweben auf und ab …
+  startHovering() {
+    this.hoverTween?.stop();
+    this.body.y = -this.lift;
+    this.hoverTween = this.scene.tweens.add({ targets: this.body, y: -this.lift - 8, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+  }
+
+  // … und landen zum Schlafen auf dem Boden
+  land() {
+    this.hoverTween?.stop();
+    this.hoverTween = this.scene.tweens.add({ targets: this.body, y: 0, duration: 600, ease: 'Quad.easeOut' });
   }
 
   // ---------- Bewegung ----------

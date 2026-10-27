@@ -20,6 +20,8 @@ const FILES = [
   'icons/icon-512.png',
   'lib/phaser.min.js',
   'assets/grafik/album.svg',
+  'assets/grafik/sonne.svg',
+  'assets/grafik/mond.svg',
   'assets/grafik/amsel.svg',
   'assets/grafik/apfel.svg',
   'assets/grafik/bau.svg',

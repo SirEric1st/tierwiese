@@ -24,6 +24,7 @@ export class AnimalManager {
     this.onChange = onChange;
     this.animals = ANIMALS.map((def) => new Animal(scene, def, world, (x, y) => this.isInWater(x, y)));
     this.busy = false;
+    this.night = false;
 
     scene.time.addEvent({ delay: CHECK_INTERVAL, loop: true, callback: () => this.check() });
   }
@@ -47,6 +48,7 @@ export class AnimalManager {
       if (spot) {
         animal.placeAsResident(spot);
         animal.startWandering(() => this.spotFor(animal));
+        if (this.shouldSleep(animal)) animal.setSleeping(true);
       }
     });
   }
@@ -126,9 +128,30 @@ export class AnimalManager {
       animal.moveIn(spot, text, () => this.celebrate(animal), () => {
         animal.hasLivedHere = true;
         animal.startWandering(() => this.spotFor(animal));
+        if (this.shouldSleep(animal)) animal.setSleeping(true);
         done();
       })
     );
+  }
+
+  // Tagtiere schlafen nachts, Nachttiere am Tag
+  shouldSleep(animal) {
+    return Boolean(animal.def.nocturnal) !== this.night;
+  }
+
+  // Tag oder Nacht: Die eingezogenen Tiere schlafen ein oder wachen auf,
+  // nacheinander, damit es lebendig aussieht
+  setNight(night) {
+    this.night = night;
+    this.animals
+      .filter((animal) => animal.state === 'resident')
+      .forEach((animal, i) => {
+        this.scene.time.delayedCall(600 + i * 250, () => {
+          if (animal.state !== 'resident' || this.night !== night) return;
+          if (this.shouldSleep(animal)) animal.setSleeping(true);
+          else animal.wakeUp();
+        });
+      });
   }
 
   // Merkt sich, wann und bei welchem Stand das Tier zuletzt gesagt hat, was fehlt

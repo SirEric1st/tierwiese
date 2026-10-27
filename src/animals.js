@@ -8,6 +8,7 @@
 // name, album: Name und Steckbrief für das Tier-Album (wird vorgelesen).
 // shore: am Teich sitzt das Tier am Ufer statt zu schwimmen.
 // flies: das Tier schwebt über dem Boden (Schmetterling, Biene, Fledermaus).
+// nocturnal: das Tier ist nachts wach und schläft am Tag (alle anderen umgekehrt).
 // Wichtig: keine Tierlaute wie „Quak“ in Sprachtexten – die iPad-Stimme
 // spricht sie unvorhersehbar aus.
 // Futter wie Insekten, Würmer oder Samen gibt es auf der Wiese von selbst.
@@ -15,6 +16,7 @@
 export const ANIMALS = [
   {
     type: 'igel',
+    nocturnal: true,
     name: 'Igel',
     album: [
       'Das ist der Igel.',
@@ -228,6 +230,7 @@ export const ANIMALS = [
   },
   {
     type: 'fuchs',
+    nocturnal: true,
     name: 'Rotfuchs',
     album: [
       'Das ist der Fuchs.',
@@ -247,6 +250,7 @@ export const ANIMALS = [
   },
   {
     type: 'dachs',
+    nocturnal: true,
     name: 'Dachs',
     album: [
       'Das ist der Dachs.',
@@ -285,6 +289,7 @@ export const ANIMALS = [
   },
   {
     type: 'fledermaus',
+    nocturnal: true,
     name: 'Zwergfledermaus',
     album: [
       'Das ist die Zwergfledermaus.',
@@ -305,6 +310,7 @@ export const ANIMALS = [
   },
   {
     type: 'waldkauz',
+    nocturnal: true,
     name: 'Waldkauz',
     album: [
       'Das ist der Waldkauz. Er ist eine Eule.',
@@ -324,6 +330,7 @@ export const ANIMALS = [
   },
   {
     type: 'biber',
+    nocturnal: true,
     name: 'Biber',
     album: [
       'Das ist der Biber.',

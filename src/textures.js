@@ -28,6 +28,8 @@ const GRAPHICS = [
   'korb',
   'schaufel',
   'album',
+  'sonne',
+  'mond',
   'symbol-frisur',
   'symbol-haarfarbe',
   'symbol-haut',
@@ -52,6 +54,7 @@ export function createTextures(scene) {
   if (DPR !== PAINTED_SCALE) PAINTED.forEach((key) => resizePainted(scene, key));
   if (!scene.textures.exists('konfetti')) drawConfetti(scene);
   if (!scene.textures.exists('herz')) drawHeart(scene);
+  if (!scene.textures.exists('leuchtpunkt')) drawGlow(scene);
 }
 
 // Ein rotes Herz, das beim Streicheln aufsteigt (28 × 26 Punkte)
@@ -65,6 +68,20 @@ function drawHeart(scene) {
   g.fillStyle(0xffffff, 0.45);
   g.fillCircle(6 * s, 6 * s, 2.5 * s);
   g.generateTexture('herz', 28 * s, 26 * s);
+  g.destroy();
+}
+
+// Ein weich leuchtender Punkt für die Glühwürmchen in der Nacht (24 × 24 Punkte)
+function drawGlow(scene) {
+  const s = DPR;
+  const g = scene.make.graphics({ add: false });
+  [[12, 0.12], [8, 0.25], [5, 0.5]].forEach(([r, alpha]) => {
+    g.fillStyle(0xeaff7a, alpha);
+    g.fillCircle(12 * s, 12 * s, r * s);
+  });
+  g.fillStyle(0xfdffd8);
+  g.fillCircle(12 * s, 12 * s, 2.5 * s);
+  g.generateTexture('leuchtpunkt', 24 * s, 24 * s);
   g.destroy();
 }
 
