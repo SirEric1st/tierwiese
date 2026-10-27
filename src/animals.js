@@ -44,9 +44,9 @@ export const ANIMALS = [
       { type: 'schilf', wish: 'Ich hätte so gern Schilf. Da kann ich mich verstecken!' },
     ],
     fact: 'Ich bin die Ente. Ich stecke meinen Kopf unter Wasser und suche Pflanzen und kleine Tiere.',
-    petted: 'Quak! Das ist schön!',
+    petted: 'Oh, das ist schön! Da schnattere ich vor Freude.',
     eats: ['wasserpflanze', 'koerner', 'wurm', 'kaefer'],
-    yummy: 'Quak, lecker! Enten fressen Wasserpflanzen, Körner und kleine Tiere.',
+    yummy: 'Mmh, lecker! Enten fressen Wasserpflanzen, Körner und kleine Tiere.',
   },
   {
     type: 'eichhoernchen',
