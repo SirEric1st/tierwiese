@@ -35,9 +35,48 @@ SOLID = 240  # Pixel, die fast deckend sind, werden ganz deckend
 MARGIN = 4  # etwas Luft um das Bild lassen
 BACKGROUND_LIGHT = 205  # so hell muss der Hintergrund mindestens sein …
 BACKGROUND_GRAY = 30  # … und so wenig farbig (Sättigung von 0 bis 255)
+# Tiere mit dünnen Fühlern: Kante weniger stark nach innen ziehen, sonst verschwinden sie
+THIN = {'zitronenfalter', 'biene', 'marienkaefer'}
+# Hier ist Hintergrund eingeschlossen (z. B. zwischen den Beinen) und muss auch weg
+HOLES = {'amsel'}
+HOLE_SIZE = 400  # so groß (Pixel) muss ein eingeschlossener Fleck sein; Lichtpunkte in Augen sind kleiner
+CRUMBS = 0.01  # lose Krümel, kleiner als 1 % des Hauptbilds, werden entfernt
 
 
-def remove_background(image):
+def label_parts(mask, value):
+    """Färbt jede zusammenhängende Fläche mit Wert value einzeln ein (1, 2, 3 …).
+    Gibt die Flächengrößen zurück: {Farbe: Pixelzahl}."""
+    w, h = mask.size
+    pixels = mask.load()
+    label = 0
+    for y in range(h):
+        for x in range(w):
+            if pixels[x, y] == value and label < 250:
+                label += 1
+                ImageDraw.floodfill(mask, (x, y), label)
+    histogram = mask.histogram()
+    return {i: histogram[i] for i in range(1, label + 1)}
+
+
+def remove_crumbs(alpha, in_sheet):
+    """Entfernt kleine lose Teile (z. B. abgerissene Fühlerspitzen). Im Sammelbild
+    auch alles, was den Feldrand berührt – das sind Stücke vom Nachbarbild."""
+    solid = alpha.point(lambda v: 255 if v > 0 else 0)
+    sizes = label_parts(solid, 255)
+    if not sizes:
+        return alpha
+    edge = set()
+    if in_sheet:
+        w, h = solid.size
+        pixels = solid.load()
+        edge = {pixels[x, y] for x in range(w) for y in (0, h - 1)} | {pixels[x, y] for x in (0, w - 1) for y in range(h)}
+    biggest = max(sizes.values())  # das Hauptbild bleibt immer, auch wenn es knapp über den Rand ragt
+    keep = {i for i, size in sizes.items() if size == biggest or (size >= biggest * CRUMBS and i not in edge)}
+    lut = [255 if i in keep or i == 255 else 0 for i in range(256)]
+    return Image.composite(alpha, Image.new('L', alpha.size, 0), solid.point(lut))
+
+
+def remove_background(image, name, in_sheet):
     """Entfernt hellen, grauen Hintergrund, der vom Bildrand aus zusammenhängt."""
     rgb = image.convert('RGB')
     light = rgb.convert('L').point(lambda v: 255 if v >= BACKGROUND_LIGHT else 0)
@@ -50,9 +89,15 @@ def remove_background(image):
     for point in border:
         if mask.getpixel(point) == 255:
             ImageDraw.floodfill(mask, point, 128)
+    if name in HOLES:
+        # Große eingeschlossene helle Flecken sind auch Hintergrund
+        sizes = label_parts(mask, 255)
+        holes = {i for i, size in sizes.items() if size >= HOLE_SIZE}
+        mask = mask.point(lambda v: 128 if v in holes else v)
     alpha = Image.eval(mask, lambda v: 0 if v == 128 else 255)
     # Kante etwas nach innen ziehen (kein heller Saum) und weich machen
-    alpha = alpha.filter(ImageFilter.MinFilter(5)).filter(ImageFilter.GaussianBlur(1.2))
+    alpha = alpha.filter(ImageFilter.MinFilter(3 if name in THIN else 5)).filter(ImageFilter.GaussianBlur(1.2))
+    alpha = remove_crumbs(alpha, in_sheet)
     result = rgb.convert('RGBA')
     result.putalpha(alpha)
     return result
@@ -73,10 +118,10 @@ def game_size(name):
     return float(w), float(h)
 
 
-def prepare(image, name):
+def prepare(image, name, in_sheet=False):
     max_w, max_h = game_size(name)
     if 'A' not in image.getbands() or image.getchannel('A').getextrema()[0] > CLEAR:
-        image = remove_background(image)
+        image = remove_background(image, name, in_sheet)
     image = image.convert('RGBA')
     alpha = image.getchannel('A').point(
         lambda v: 0 if v <= CLEAR else 255 if v >= SOLID else round((v - CLEAR) * 255 / (SOLID - CLEAR))
@@ -111,6 +156,6 @@ elif len(names) == 4:
         if name == '-':
             continue
         x, y = (i % 2) * half_w, (i // 2) * half_h
-        prepare(sheet.crop((x, y, x + half_w, y + half_h)), name)
+        prepare(sheet.crop((x, y, x + half_w, y + half_h)), name, in_sheet=True)
 else:
     sys.exit('Bitte einen Namen (Einzelbild) oder vier Namen (Sammelbild 2 × 2) angeben.')
