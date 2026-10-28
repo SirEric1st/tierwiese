@@ -20,7 +20,8 @@ import { cleanName } from '../parents.js';
 import { stickerTexture, unlockedElements, unlockedFoods } from '../progress.js';
 import { playHappy } from '../sound.js';
 import { loadGame, saveGame } from '../save.js';
-import { SEASONS, SEASON_TEXTS, SeasonView } from '../Seasons.js';
+import { SAETZE, SEASON_TEXTS } from '../saetze.js';
+import { SEASONS, SeasonView } from '../Seasons.js';
 import { say } from '../speech.js';
 
 const WORLD_WIDTH = 2400;
@@ -107,7 +108,6 @@ export class WorldScene extends Phaser.Scene {
         this.refreshUnlocks();
         this.requestSave();
       },
-      () => this.profile.name,
       {
         isUnlocked: (type) => this.unlocked.has(type),
         onGift: (animal, done) => this.receiveGift(animal, done),
@@ -346,7 +346,7 @@ export class WorldScene extends Phaser.Scene {
     this.tweens.add({ targets: this.darkness, alpha: this.night ? NIGHT_ALPHA : 0, duration: DUSK_TIME, ease: 'Sine.easeInOut' });
     if (this.night) this.startFireflies();
     else this.stopFireflies();
-    say(this.night ? 'Gute Nacht! Jetzt werden die Nachttiere wach.' : 'Guten Morgen! Jetzt werden die Tagtiere wach.');
+    say(this.night ? SAETZE.night : SAETZE.morning);
     this.animals.setNight(this.night);
     this.requestSave();
   }
@@ -465,7 +465,7 @@ export class WorldScene extends Phaser.Scene {
   // Speichern und zurück zum Startbildschirm, dort kann ein anderes Kind spielen
   goHome() {
     this.save();
-    say('Bis bald!');
+    say(SAETZE.goodbye);
     this.scene.start('StartScene');
   }
 
@@ -625,7 +625,7 @@ export class WorldScene extends Phaser.Scene {
     } else if (touch.mode === 'bar' && touch.slot.toggle) {
       this.bar.bounce(touch.slot);
       this.bar.toggleMode();
-      say(this.bar.mode === 'food' ? 'Futter! Zieh es zu einem Tier.' : 'Bauen! Zieh etwas auf die Wiese.');
+      say(this.bar.mode === 'food' ? SAETZE.modeFood : SAETZE.modeBuild);
     } else if (touch.mode === 'bar') {
       this.bar.bounce(touch.slot);
       this.bar.setGlow(touch.slot, false);
@@ -861,7 +861,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const anyPond = this.placed.some((item) => item.element.type === 'teich');
-    say(anyPond ? 'Schilf wächst am Wasser. Zieh es an den Teich!' : 'Schilf wächst am Wasser. Stell zuerst einen Teich hin!');
+    say(anyPond ? SAETZE.reedToPond : SAETZE.reedNoPond);
     if (isNew) {
       this.removeItem(reed);
     } else {

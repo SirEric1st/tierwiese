@@ -3,16 +3,9 @@
 // sieht man sofort. Vorne in jeder Reihe zeigt ein Symbol (mit kurzem Wort),
 // was die Reihe ändert; antippen liest es vor. Die WorldScene ist so lange angehalten.
 import { DPR, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
-import {
-  HAIR_COLORS,
-  HAIR_STYLES,
-  PANTS_COLORS,
-  SHIRT_COLORS,
-  SKIN_COLORS,
-  makeFigureTexture,
-  normalizeFigure,
-} from '../figure.js';
+import { FIGURE_ROWS as ROWS, HAIR_STYLES, makeFigureTexture, normalizeFigure } from '../figure.js';
 import { askParentLock, openParentArea } from '../parents.js';
+import { SAETZE } from '../saetze.js';
 import { say } from '../speech.js';
 
 const SWATCH_RADIUS = 34; // runde Auswahlknöpfe, 68 pt groß
@@ -28,20 +21,6 @@ const LOCK_HOLD = 2000; // so lange muss man das Schloss gedrückt halten
 const LABEL_WIDTH = 96; // Spalte mit den Symbolen vor den Reihen
 const SYMBOL_SIZE = 50;
 const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
-
-// Die Zeilen des Baukastens: welche Einstellung, welche Auswahl, was gesagt wird
-// symbol/label/hint: Symbol vorne in der Reihe, Wort darunter, Satz beim Antippen
-const ROWS = [
-  { key: 'hair', symbol: 'symbol-frisur', label: 'Frisur', hint: 'Hier suchst du die Frisur aus.', options: HAIR_STYLES, say: (o) => o.say },
-  { key: 'hairColor', symbol: 'symbol-haarfarbe', label: 'Haare', hint: 'Hier suchst du die Haarfarbe aus.', options: HAIR_COLORS, say: (o) => `${capitalize(o.word)}e Haare!` },
-  { key: 'skin', symbol: 'symbol-haut', label: 'Haut', hint: 'Hier suchst du die Hautfarbe aus.', options: SKIN_COLORS.map((color) => ({ color })), say: () => 'Diese Hautfarbe!' },
-  { key: 'shirt', symbol: 'symbol-shirt', label: 'T-Shirt', hint: 'Hier suchst du die Farbe vom T-Shirt aus.', options: SHIRT_COLORS, say: (o) => `Ein ${o.word}es T-Shirt!` },
-  { key: 'pants', symbol: 'symbol-hose', label: 'Hose', hint: 'Hier suchst du die Farbe von der Hose aus.', options: PANTS_COLORS, say: (o) => `Eine ${o.word}e Hose!` },
-];
-
-function capitalize(word) {
-  return word[0].toUpperCase() + word.slice(1);
-}
 
 function toNumber(hex) {
   return parseInt(hex.slice(1), 16);
@@ -89,8 +68,7 @@ export class FigureScene extends Phaser.Scene {
 
     this.input.on('pointerdown', (pointer) => this.onPress(toScreen(pointer)));
     this.input.on('pointerup', (pointer) => this.onTap(toScreen(pointer)));
-    const name = this.profile.name ? `, ${this.profile.name}` : '';
-    say(`Wie soll deine Figur aussehen${name}? Tipp auf die Farben!`);
+    say(SAETZE.figureIntro);
   }
 
   // Symbol und Wort vorne in der Reihe
@@ -272,7 +250,7 @@ export class FigureScene extends Phaser.Scene {
     this.lockHold.stop();
     this.lockHold = null;
     this.lockRing.clear();
-    say('Das ist für Erwachsene.');
+    say(SAETZE.forAdults);
     return true;
   }
 
@@ -327,7 +305,7 @@ export class FigureScene extends Phaser.Scene {
   }
 
   close() {
-    say('So sehe ich jetzt aus. Toll!');
+    say(SAETZE.figureDone);
     this.onDone?.({ ...this.figure }, { ...this.profile });
     this.scene.resume('WorldScene');
     this.scene.stop();

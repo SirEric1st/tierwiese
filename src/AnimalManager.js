@@ -2,6 +2,7 @@
 // Ausflug macht. Es passiert immer nur eine Sache gleichzeitig, damit
 // sich die Tiere nicht gegenseitig ins Wort fallen.
 import { ANIMALS } from './animals.js';
+import { SAETZE } from './saetze.js';
 import { Animal } from './Animal.js';
 import { playCheer } from './sound.js';
 import { IMAGE_SCALE } from './display.js';
@@ -15,12 +16,10 @@ const POND_WATER_Y = 56;
 export class AnimalManager {
   // getPlaced: liefert alles, was gerade auf der Wiese steht
   // onChange:  wird aufgerufen, wenn ein Tier ein- oder auszieht (zum Speichern)
-  // getName:   Name der Spielfigur (aus dem Eltern-Bereich, kann leer sein)
   // hooks:     isUnlocked(type) – gibt es das Ding schon in der Leiste?
   //            onGift(animal, done) – das Tier überreicht sein Geschenk
   //            onSticker(animal, key) – ein neuer Album-Sticker
-  constructor(scene, getPlaced, world, onChange, getName = () => '', hooks = {}) {
-    this.getName = getName;
+  constructor(scene, getPlaced, world, onChange, hooks = {}) {
     this.hooks = hooks;
     this.scene = scene;
     this.getPlaced = getPlaced;
@@ -144,10 +143,8 @@ export class AnimalManager {
   }
 
   startMoveIn(animal) {
-    const name = this.getName();
-    const text = animal.hasLivedHere
-      ? `Ich bin wieder da${name ? `, ${name}` : ''}!`
-      : `${animal.def.hello} Hurra, hier gefällt es mir! Ich ziehe bei dir ein${name ? `, ${name}` : ''}!`;
+    // Ohne Namen, damit alles aus fertigen Aufnahmen gesprochen werden kann
+    const text = animal.hasLivedHere ? [SAETZE.backAgain] : [animal.def.hello, SAETZE.moveIn];
     const spot = this.spotFor(animal);
     this.start((done) =>
       animal.moveIn(spot, text, () => this.celebrate(animal), () => {

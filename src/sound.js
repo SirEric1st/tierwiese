@@ -11,6 +11,11 @@ export function unlockAudio() {
   if (context.state === 'suspended') context.resume();
 }
 
+// Für die Sprachaufnahmen (speech.js); null, solange noch nicht berührt wurde
+export function audioContext() {
+  return context;
+}
+
 function tone(frequency, start, duration) {
   const osc = context.createOscillator();
   const gain = context.createGain();

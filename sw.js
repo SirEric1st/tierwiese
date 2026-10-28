@@ -5,6 +5,9 @@
 // neueste Version (Updates kommen also von selbst). Ohne Internet – oder
 // wenn das Netz sehr langsam ist – nimmt es die gespeicherte Kopie.
 
+// Liste der Sprachaufnahmen (self.SPRACHE), von tools/sprache.py geschrieben
+importScripts('assets/sprache/liste.js');
+
 const CACHE = 'tierwiese';
 const NETWORK_TIMEOUT = 3000; // so lange aufs Internet warten, dann die Kopie nehmen
 
@@ -111,6 +114,8 @@ const FILES = [
   'src/BuildBar.js',
   'src/Seasons.js',
   'src/progress.js',
+  'src/saetze.js',
+  'assets/sprache/liste.js',
   'src/scenes/StartScene.js',
   'src/scenes/WorldScene.js',
   'src/scenes/AlbumScene.js',
@@ -121,7 +126,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(FILES))
+      .then((cache) => cache.addAll([...FILES, ...self.SPRACHE.map((name) => `assets/sprache/${name}.mp3`)]))
       .then(() => self.skipWaiting())
   );
 });

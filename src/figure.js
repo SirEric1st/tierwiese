@@ -34,6 +34,20 @@ export const PANTS_COLORS = [
   { color: '#3e8a45', word: 'grün' },
 ];
 
+// Die Zeilen des Baukastens: welche Einstellung, welche Auswahl, was gesagt wird
+// symbol/label/hint: Symbol vorne in der Reihe, Wort darunter, Satz beim Antippen
+export const FIGURE_ROWS = [
+  { key: 'hair', symbol: 'symbol-frisur', label: 'Frisur', hint: 'Hier suchst du die Frisur aus.', options: HAIR_STYLES, say: (o) => o.say },
+  { key: 'hairColor', symbol: 'symbol-haarfarbe', label: 'Haare', hint: 'Hier suchst du die Haarfarbe aus.', options: HAIR_COLORS, say: (o) => `${capitalize(o.word)}e Haare!` },
+  { key: 'skin', symbol: 'symbol-haut', label: 'Haut', hint: 'Hier suchst du die Hautfarbe aus.', options: SKIN_COLORS.map((color) => ({ color })), say: () => 'Diese Hautfarbe!' },
+  { key: 'shirt', symbol: 'symbol-shirt', label: 'T-Shirt', hint: 'Hier suchst du die Farbe vom T-Shirt aus.', options: SHIRT_COLORS, say: (o) => `Ein ${o.word}es T-Shirt!` },
+  { key: 'pants', symbol: 'symbol-hose', label: 'Hose', hint: 'Hier suchst du die Farbe von der Hose aus.', options: PANTS_COLORS, say: (o) => `Eine ${o.word}e Hose!` },
+];
+
+function capitalize(word) {
+  return word[0].toUpperCase() + word.slice(1);
+}
+
 // Gespeichert werden nur die Nummern der Auswahl
 export const DEFAULT_FIGURE = { hair: 0, hairColor: 1, skin: 0, shirt: 0, pants: 0 };
 

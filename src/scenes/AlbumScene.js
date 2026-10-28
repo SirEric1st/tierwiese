@@ -10,6 +10,7 @@
 import { DPR, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { ANIMALS } from '../animals.js';
 import { STICKERS, albumLines, stickerTexture } from '../progress.js';
+import { SAETZE } from '../saetze.js';
 import { say } from '../speech.js';
 
 const CARD_WIDTH = 170;
@@ -77,11 +78,7 @@ export class AlbumScene extends Phaser.Scene {
     });
 
     const count = this.discovered.size;
-    say(
-      count === 0
-        ? 'Dein Tier-Album. Es ist noch leer. Wenn ein Tier bei dir einzieht, kommt es hier hinein.'
-        : 'Dein Tier-Album! Tipp auf ein Tier, dann erzähle ich dir etwas darüber.'
-    );
+    say(count === 0 ? SAETZE.albumEmpty : SAETZE.albumIntro);
   }
 
   text(content, size) {
@@ -300,12 +297,12 @@ export class AlbumScene extends Phaser.Scene {
     this.tweens.add({ targets: card, scale: card.baseScale * 1.08, duration: 120, yoyo: true, ease: 'Quad.easeOut' });
     if (!card.found) {
       this.setInfo('Dieses Tier hast du noch nicht entdeckt.');
-      say('Dieses Tier hast du noch nicht entdeckt. Vielleicht kommt es bald zu Besuch!');
+      say(SAETZE.albumUnknown);
       return;
     }
     const lines = albumLines(card.def, this.care[card.def.type]);
     this.setInfo(lines.join('\n'));
-    say(lines.join(' '));
+    say(lines); // Satz für Satz, jeder hat seine eigene Aufnahme
   }
 
   close() {

@@ -1,11 +1,14 @@
-// Sprachausgabe über die Web Speech API mit deutscher iPad-Stimme.
-// Wenn keine Sprachausgabe verfügbar ist, passiert einfach nichts.
+// Sprachausgabe: Am liebsten mit fertigen Aufnahmen (assets/sprache/, erzeugt
+// mit tools/sprache.py). Für Sätze ohne Aufnahme spricht die iPad-Stimme
+// (Web Speech API). Ohne beides passiert einfach nichts.
 //
-// Das iPad hat einfache und bessere Stimmen. Die besseren („Erweitert“,
-// „Premium“) muss man einmal in den Einstellungen laden:
-// Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch.
-// Das Spiel nimmt automatisch die beste deutsche Stimme. Im Eltern-Bereich
-// kann man auch selbst eine auswählen; das gilt für das ganze Gerät.
+// Welche Aufnahmen es gibt, steht in assets/sprache/liste.js (window.SPRACHE).
+// Jede Aufnahme heißt wie die Prüfsumme ihres Satzes (clipName), so findet
+// das Spiel sie ohne weitere Liste.
+//
+// Die iPad-Stimme: Das Spiel nimmt die beste installierte deutsche Stimme.
+// Im Eltern-Bereich kann man auch selbst eine auswählen; das gilt für das ganze Gerät.
+import { audioContext } from './sound.js';
 
 const synth = window.speechSynthesis;
 const VOICE_KEY = 'tierwiese-stimme';
@@ -74,29 +77,121 @@ if (synth) {
   synth.addEventListener?.('voiceschanged', findGermanVoice);
 }
 
-// onDone (optional): wird aufgerufen, wenn der Satz zu Ende gesprochen ist.
-// Ohne Sprachausgabe oder wenn sie hängt, nach einer geschätzten Sprechzeit.
-// voiceURI (optional): mit dieser Stimme sprechen (zum Probehören)
+// ---------- Aufnahmen ----------
+
+const CLIPS = new Set(window.SPRACHE || []);
+const buffers = new Map(); // schon geladene Aufnahmen (zuletzt benutzte zuerst behalten)
+const MAX_BUFFERS = 40;
+let source = null; // die Aufnahme, die gerade läuft
+let speaking = 0; // zählt hoch, damit ein neuer Satz alte Rückrufe ungültig macht
+
+// Prüfsumme eines Satzes (FNV-1a, 8 Hex-Zeichen) – genauso in tools/sprache.py
+export function clipName(text) {
+  let hash = 0x811c9dc5;
+  new TextEncoder().encode(text.trim()).forEach((byte) => {
+    hash = Math.imul(hash ^ byte, 0x01000193) >>> 0;
+  });
+  return hash.toString(16).padStart(8, '0');
+}
+
+async function loadClip(name) {
+  if (buffers.has(name)) {
+    const buffer = buffers.get(name);
+    buffers.delete(name);
+    buffers.set(name, buffer);
+    return buffer;
+  }
+  const response = await fetch(`assets/sprache/${name}.mp3`);
+  if (!response.ok) throw new Error(`Aufnahme fehlt: ${name}`);
+  const data = await response.arrayBuffer();
+  const buffer = await new Promise((resolve, reject) => audioContext().decodeAudioData(data, resolve, reject));
+  buffers.set(name, buffer);
+  if (buffers.size > MAX_BUFFERS) buffers.delete(buffers.keys().next().value);
+  return buffer;
+}
+
+// Spielt eine Aufnahme; das Versprechen ist erfüllt, wenn sie zu Ende ist
+async function playClip(name, id) {
+  const buffer = await loadClip(name);
+  if (id !== speaking) return;
+  const context = audioContext();
+  await new Promise((resolve) => {
+    source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(context.destination);
+    source.onended = resolve;
+    source.start();
+  });
+}
+
+function stopAll() {
+  if (source) {
+    source.onended = null;
+    try {
+      source.stop();
+    } catch (error) {
+      // war schon zu Ende
+    }
+    source = null;
+  }
+  synth?.cancel();
+}
+
+// ---------- iPad-Stimme ----------
+
+function speakWithVoice(text, voiceURI) {
+  return new Promise((resolve) => {
+    if (!synth) {
+      resolve();
+      return;
+    }
+    if (!germanVoice) findGermanVoice();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'de-DE';
+    const voice = (voiceURI && germanVoices().find((v) => v.voiceURI === voiceURI)) || germanVoice;
+    if (voice) utterance.voice = voice;
+    // Die einfache Stimme klingt etwas höher und langsamer freundlicher; die besseren so, wie sie sind
+    const simple = !voice || quality(voice) <= 2;
+    utterance.rate = simple ? 0.95 : 1;
+    utterance.pitch = simple ? 1.1 : 1;
+    utterance.onend = resolve;
+    utterance.onerror = resolve;
+    synth.speak(utterance);
+  });
+}
+
+// ---------- Sprechen ----------
+
+// text: ein Satz oder eine Liste von Sätzen (werden nacheinander gesprochen).
+//       Leerer Text: verstummen.
+// onDone (optional): wird aufgerufen, wenn alles gesagt ist. Hängt die
+//       Sprachausgabe, nach einer geschätzten Sprechzeit.
+// voiceURI (optional): mit dieser iPad-Stimme sprechen (zum Probehören)
 export function say(text, onDone, voiceURI) {
+  const parts = (Array.isArray(text) ? text : [text]).map((part) => part.trim()).filter(Boolean);
+  const id = ++speaking;
+  stopAll();
+
   let finished = false;
   const finish = () => {
     if (finished) return;
     finished = true;
     onDone?.();
   };
-  if (onDone) setTimeout(finish, 1500 + text.length * 80);
-  if (!synth) return;
-  if (!germanVoice) findGermanVoice();
-  // Was gerade gesprochen wird, abbrechen, damit sich nichts überlagert
-  synth.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'de-DE';
-  const voice = (voiceURI && germanVoices().find((v) => v.voiceURI === voiceURI)) || germanVoice;
-  if (voice) utterance.voice = voice;
-  // Die einfache Stimme klingt etwas höher und langsamer freundlicher; die besseren so, wie sie sind
-  const simple = !voice || quality(voice) <= 2;
-  utterance.rate = simple ? 0.95 : 1;
-  utterance.pitch = simple ? 1.1 : 1;
-  utterance.onend = finish;
-  synth.speak(utterance);
+  if (onDone) setTimeout(finish, 3000 + parts.join(' ').length * 90);
+
+  (async () => {
+    for (const part of parts) {
+      if (id !== speaking) return;
+      const name = clipName(part);
+      try {
+        if (voiceURI || !CLIPS.has(name) || !audioContext()) throw new Error('keine Aufnahme');
+        await playClip(name, id);
+      } catch (error) {
+        if (id !== speaking) return;
+        await speakWithVoice(part, voiceURI);
+      }
+    }
+    if (id === speaking) finish();
+  })();
 }

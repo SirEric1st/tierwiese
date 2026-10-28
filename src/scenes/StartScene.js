@@ -10,6 +10,7 @@ import { createTextures, preloadGraphics } from '../textures.js';
 import { MAX_SAVES, chooseSave, createSave, deleteSave, listSaves, requestPersistentStorage } from '../save.js';
 import { askParentLock, cleanName, confirmDeleteSave } from '../parents.js';
 import { unlockAudio } from '../sound.js';
+import { SAETZE } from '../saetze.js';
 import { say } from '../speech.js';
 
 const BUTTON_RADIUS = 90;
@@ -20,7 +21,6 @@ const FIGURE_SCALE = 0.9; // so groß ist die Figur auf der Karte
 const DELETE_HOLD = 2000; // so lange drücken, bis die Eltern-Sperre kommt
 const HOLD_VISIBLE = 400; // erst dann erscheint der Fortschritt (ein normaler Tipp ist kürzer)
 const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
-const HELLO_HINT = 'Tipp auf die Wiese, dann laufe ich dorthin.';
 
 // Der Name auf der Karte: Name der Figur oder Datum und Uhrzeit des ersten Spiels
 function saveLabel(save) {
@@ -231,11 +231,10 @@ export class StartScene extends Phaser.Scene {
     requestPersistentStorage();
     if (card.isNew) {
       createSave();
-      say(`Ein neues Spiel! ${HELLO_HINT}`);
+      say([SAETZE.newGame, SAETZE.helloHint]);
     } else {
       chooseSave(card.save.id);
-      const name = cleanName(card.save.profile?.name);
-      say(`Hallo${name ? ` ${name}` : ''}! ${HELLO_HINT}`);
+      say([SAETZE.hello, SAETZE.helloHint]);
     }
     this.scene.start('WorldScene');
   }

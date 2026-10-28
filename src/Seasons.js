@@ -8,13 +8,6 @@ import { screenSize, uiOrigin, uiScale } from './display.js';
 
 export const SEASONS = ['fruehling', 'sommer', 'herbst', 'winter'];
 
-export const SEASON_TEXTS = {
-  fruehling: 'Jetzt ist Frühling! Die Blumen blühen, und die Tiere wachen aus dem Winterschlaf auf.',
-  sommer: 'Jetzt ist Sommer! Es ist schön warm.',
-  herbst: 'Jetzt ist Herbst! Die Blätter werden bunt, und manche Tiere sammeln Vorräte.',
-  winter: 'Jetzt ist Winter! Es schneit. Manche Tiere verkriechen sich und schlafen, bis es Frühling wird.',
-};
-
 // Färbung (wird mit den Bildfarben multipliziert, Weiß = unverändert)
 const GRASS_TINT = { fruehling: 0xffffff, sommer: 0xfff3c8, herbst: 0xf2d28a, winter: 0xffffff };
 const PLANT_TINT = { herbst: 0xffb268, winter: 0xe4eef8 }; // Winter: leicht bläulich

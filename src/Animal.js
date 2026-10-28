@@ -4,6 +4,7 @@ import { DPR, IMAGE_SCALE } from './display.js';
 import { getFood } from './foods.js';
 import { isPainted } from './textures.js';
 import { playHappy } from './sound.js';
+import { SAETZE, dislikeText } from './saetze.js';
 import { say } from './speech.js';
 
 const WALK_SPEED = 170; // Pixel pro Sekunde
@@ -178,7 +179,7 @@ export class Animal {
       this.scene.tweens.add({ targets: image, alpha: 0, y: image.y + 20, duration: 700, onComplete: () => image.destroy() });
       this.scene.tweens.add({ targets: this.sprite, angle: { from: -10, to: 10 }, duration: 110, yoyo: true, repeat: 3, onComplete: () => this.sprite.setAngle(0) });
       this.showBubble(favorite.type);
-      say(`Hm, das mag ich nicht so. Ich mag lieber ${favorite.plural}!`);
+      say(dislikeText(favorite));
       this.scene.time.delayedCall(3000, () => {
         this.hideBubble();
         this.finishEating();
@@ -236,7 +237,7 @@ export class Animal {
     this.appearNear(spot);
     this.walkTo(spot.x, spot.y, WALK_SPEED, () => {
       this.showBubble(missingNeed.type);
-      say(`${this.def.hello} ${missingNeed.wish}`);
+      say([this.def.hello, missingNeed.wish]);
       this.visitTimer = this.scene.time.delayedCall(6000, () => {
         this.hideBubble();
         this.leaveScreen(() => {
@@ -295,7 +296,7 @@ export class Animal {
     this.stopWandering();
     this.state = 'away';
     this.missingNeed = missingNeed;
-    say('Oh, mir fehlt etwas. Ich mache einen kleinen Ausflug. Bis bald!');
+    say(SAETZE.leave);
     this.showBubble(missingNeed.type);
     this.scene.time.delayedCall(2500, () => {
       this.hideBubble();
@@ -360,9 +361,7 @@ export class Animal {
   }
 
   sleepText() {
-    return this.def.nocturnal
-      ? 'Leise, ich schlafe gerade. Ich bin in der Nacht wach.'
-      : 'Leise, ich schlafe gerade. Ich bin am Tag wach.';
+    return this.def.nocturnal ? SAETZE.sleepNocturnal : SAETZE.sleepDiurnal;
   }
 
   startSnoring() {

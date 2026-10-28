@@ -113,7 +113,7 @@ export function openParentArea(profile, onSave, onCancel) {
     <h2>Eltern-Bereich</h2>
     <label for="eltern-name">Name der Spielfigur</label>
     <input type="text" id="eltern-name" maxlength="${NAME_LENGTH}" autocomplete="off" autocorrect="off">
-    <div class="eltern-hinweis">Die Tiere sagen den Namen, z. B. beim Einziehen.</div>
+    <div class="eltern-hinweis">Der Name steht auf der Karte im Startbildschirm.</div>
     <label>Foto vom Gesicht</label>
     <div class="eltern-foto"></div>
     <div class="eltern-reihe">
