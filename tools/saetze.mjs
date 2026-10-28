@@ -28,7 +28,10 @@ ELEMENTS.forEach((element) => {
   add(element.hint);
   add(element.riddle);
 });
-FOODS.forEach((food) => add(food.hint));
+FOODS.forEach((food) => {
+  add(food.hint);
+  add(food.where);
+});
 FIGURE_ROWS.forEach((row) => {
   add(row.hint);
   row.options.forEach((option) => add(row.say(option)));

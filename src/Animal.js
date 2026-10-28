@@ -143,6 +143,7 @@ export class Animal {
   // ---------- Füttern ----------
 
   // image: das Futter-Bild, das gerade beim Tier losgelassen wurde
+  // Ergebnis: 'eaten' (gefressen), true (nicht gefressen), false (nicht für dieses Tier)
   feed(food, image) {
     if (this.state !== 'resident' || this.eating) return false;
     if (this.sleeping) {
@@ -175,6 +176,7 @@ export class Animal {
       });
       [500, 800, 1100].forEach((delay) => this.scene.time.delayedCall(delay, () => this.showHeart()));
       this.scene.time.delayedCall(1500, () => this.finishEating());
+      return 'eaten';
     } else {
       // Mag es nicht: freundlich den Kopf schütteln und zeigen, was es lieber frisst
       const favorite = getFood(this.def.eats[0]);

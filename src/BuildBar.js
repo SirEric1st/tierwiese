@@ -9,7 +9,8 @@
 // wie viele Seiten es gibt und auf welcher man gerade ist.
 // Es sind nur Dinge und Futter zu sehen, die schon freigeschaltet sind
 // (siehe progress.js). Neue Knöpfe leuchten, bis man sie benutzt.
-import { screenSize, uiOrigin, uiScale } from './display.js';
+// Am Futter steht, wie viel davon im Korb ist; leeres Futter ist blass.
+import { DPR, screenSize, uiOrigin, uiScale } from './display.js';
 import { ELEMENTS } from './elements.js';
 import { FOODS } from './foods.js';
 
@@ -21,6 +22,8 @@ const MIN_SLOT_SCALE = 0.72; // kleiner werden die Knöpfe nicht (dann wird gebl
 const DOT_RADIUS = 6; // Seiten-Punkte über der Leiste
 const DOT_GAP = 22;
 const SLIDE = 120; // so weit gleiten die Knöpfe beim Blättern herein
+const BADGE_RADIUS = 17; // Zahl am Futter
+const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
 
 export class BuildBar {
   constructor(scene) {
@@ -35,6 +38,8 @@ export class BuildBar {
     this.foodSlots = FOODS.map((food) => Object.assign(this.createSlot(food.type), { food }));
     // Der Umschalt-Knopf zeigt, wohin er führt: Korb → Füttern, Schaufel → Bauen
     this.toggleSlot = Object.assign(this.createSlot('korb', 0xffc46b), { toggle: true });
+    [...this.foodSlots, this.toggleSlot].forEach((slot) => this.addBadge(slot));
+    this.counts = {};
 
     this.mode = 'build';
     this.page = 0;
@@ -52,6 +57,43 @@ export class BuildBar {
     this.setIcon(slot, texture);
     this.container.add(slot);
     return slot;
+  }
+
+  // Eine kleine runde Zahl oben rechts am Knopf
+  addBadge(slot) {
+    const circle = this.scene.add.circle(0, 0, BADGE_RADIUS, 0xe2553a).setStrokeStyle(3, 0xffffff);
+    const text = this.scene.add
+      .text(0, 0, '', { fontFamily: FONT, fontSize: '20px', fontStyle: 'bold', color: '#ffffff', resolution: DPR })
+      .setOrigin(0.5);
+    slot.badge = this.scene.add.container(SLOT_SIZE / 2 - 12, -SLOT_SIZE / 2 + 12, [circle, text]);
+    slot.badge.text = text;
+    slot.badge.setVisible(false);
+    slot.add(slot.badge);
+  }
+
+  // Wie viel von jedem Futter im Korb ist ({ nuss: 2, … })
+  setCounts(counts) {
+    this.counts = counts;
+    this.foodSlots.forEach((slot) => {
+      const count = counts[slot.food.type] || 0;
+      slot.badge.setVisible(count > 0);
+      slot.badge.text.setText(String(count));
+      slot.icon.setAlpha(count > 0 ? 1 : 0.35);
+    });
+    this.updateToggleBadge();
+  }
+
+  // Am Korb-Knopf steht, wie viel Futter insgesamt im Korb ist
+  updateToggleBadge() {
+    const total = Object.values(this.counts).reduce((sum, n) => sum + n, 0);
+    this.toggleSlot.badge.setVisible(this.mode === 'build' && total > 0);
+    this.toggleSlot.badge.text.setText(String(total));
+  }
+
+  // Wohin eingesammeltes Futter fliegt: zum Futter-Knopf, sonst zum Korb
+  foodTarget(type) {
+    const slot = this.foodSlots.find((s) => s.food.type === type);
+    return slot?.visible ? slot : this.toggleSlot;
   }
 
   setIcon(slot, texture) {
@@ -116,6 +158,7 @@ export class BuildBar {
     this.mode = this.mode === 'build' ? 'food' : 'build';
     this.page = 0;
     this.setIcon(this.toggleSlot, this.mode === 'build' ? 'korb' : 'schaufel');
+    this.updateToggleBadge();
     this.layout();
     this.popIn();
   }

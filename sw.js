@@ -114,6 +114,7 @@ const FILES = [
   'src/BuildBar.js',
   'src/Seasons.js',
   'src/progress.js',
+  'src/FoodField.js',
   'src/saetze.js',
   'assets/sprache/liste.js',
   'src/scenes/StartScene.js',

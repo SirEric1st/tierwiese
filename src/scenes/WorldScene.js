@@ -11,10 +11,14 @@
 // Das Haus oben links führt zurück zum Startbildschirm (anderer Spielstand).
 // Neue Dinge für die Leiste bringen die Tiere als Geschenk mit; Füttern und
 // Streicheln bringt Sticker fürs Album (siehe progress.js).
+// Futter sammelt die Spielfigur auf der Wiese ein (FoodField.js); im Korb
+// liegt von jedem Futter höchstens BASKET_MAX Stück.
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin, uiScale } from '../display.js';
 import { getElement } from '../elements.js';
+import { FoodField } from '../FoodField.js';
+import { getFood } from '../foods.js';
 import { makeFigureTexture, normalizeFigure } from '../figure.js';
 import { cleanName } from '../parents.js';
 import { stickerTexture, unlockedElements, unlockedFoods } from '../progress.js';
@@ -47,6 +51,7 @@ const NIGHT_COLOR = 0x081040; // so dunkelblau legt sich die Nacht über die Wie
 const NIGHT_ALPHA = 0.55;
 const DUSK_TIME = 2500; // so lange dauert die Dämmerung (Millisekunden)
 const FIREFLIES = 40; // Glühwürmchen in der Nacht
+const BASKET_MAX = 9;
 const DEPTH_NIGHT = 59000; // über der Wiese, aber unter Herzen, Konfetti und der Leiste
 const SWIPE_DISTANCE = 40; // so weit muss man auf der Leiste wischen, um zu blättern
 const MAX_ZOOM = 1.6; // am weitesten hineinzoomen (1 = normale Größe)
@@ -63,6 +68,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create() {
+    this.createdAt = this.time.now;
     setupCamera(this);
     this.grass = this.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'gras').setOrigin(0).setTileScale(IMAGE_SCALE);
     this.scatterFlowers();
@@ -125,6 +131,22 @@ export class WorldScene extends Phaser.Scene {
     this.bar = new BuildBar(this);
     this.createAlbumButton();
     this.refreshUnlocks();
+    // Futterkorb: was die Figur schon eingesammelt hat
+    this.basket = {};
+    Object.entries(saved?.basket ?? {}).forEach(([type, count]) => {
+      if (getFood(type)) this.basket[type] = Phaser.Math.Clamp(Math.floor(count) || 0, 0, BASKET_MAX);
+    });
+    this.foodHintGiven = Boolean(saved?.foodHintGiven);
+    this.bar.setCounts(this.basket);
+    this.food = new FoodField(
+      this,
+      () => this.placed,
+      () => this.bar.foodTypes ?? new Set(),
+      { width: WORLD_WIDTH, height: WORLD_HEIGHT },
+      (type, image) => this.collectFood(type, image),
+      (pickup) => this.onFoodGrown(pickup)
+    );
+    this.food.fill(4);
 
     // Beim Wechsel in eine andere App oder beim Schließen sofort speichern
     this.onHide = () => this.save();
@@ -362,6 +384,40 @@ export class WorldScene extends Phaser.Scene {
     this.scene.launch('AlbumScene', { discovered, care });
   }
 
+  // ---------- Futter sammeln ----------
+
+  // Die Figur hat Futter eingesammelt: Es fliegt in den Korb
+  collectFood(type, image) {
+    this.basket[type] = Math.min(BASKET_MAX, (this.basket[type] || 0) + 1);
+    const slot = this.bar.foodTarget(type);
+    const target = this.screenToWorld(slot.x, slot.y);
+    playHappy();
+    this.tweens.add({
+      targets: image,
+      x: target.x,
+      y: target.y,
+      scale: image.scale * 0.6,
+      duration: 600,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        image.destroy();
+        this.bar.setCounts(this.basket);
+        this.bar.bounce(slot);
+      },
+    });
+    this.requestSave();
+  }
+
+  // Beim ersten Futter, das man sehen kann, erklärt die Figur das Sammeln
+  onFoodGrown(pickup) {
+    if (this.foodHintGiven || this.animals.busy || this.animals.guest) return;
+    if (this.time.now - this.createdAt < 8000) return; // nicht gleich die Begrüßung unterbrechen
+    if (!this.cameras.main.worldView.contains(pickup.x, pickup.y)) return;
+    this.foodHintGiven = true;
+    say(SAETZE.foodFound);
+    this.requestSave();
+  }
+
   // ---------- Freischalten und Sticker ----------
 
   // Was gibt es in der Leiste? Ein Geschenk, das gerade noch fliegt, zählt noch nicht.
@@ -488,6 +544,8 @@ export class WorldScene extends Phaser.Scene {
       night: this.night,
       season: this.season,
       unlocked: [...this.unlocked],
+      basket: this.basket,
+      foodHintGiven: this.foodHintGiven,
     });
   }
 
@@ -547,8 +605,10 @@ export class WorldScene extends Phaser.Scene {
         // Auch zwischen den Knöpfen kann man wischen (dann ist slot leer)
         Object.assign(touch, { mode: 'bar', slot: this.bar.slotAt(screen.x, screen.y) });
       } else {
-        const animal = this.animals.animalAt(pointer.worldX, pointer.worldY);
-        const item = animal ? null : this.itemAt(pointer.worldX, pointer.worldY);
+        // Futter antippen: Die Figur läuft hin (auch wenn es z. B. im Teich liegt)
+        const pickup = this.food.pickupAt(pointer.worldX, pointer.worldY);
+        const animal = pickup ? null : this.animals.animalAt(pointer.worldX, pointer.worldY);
+        const item = animal || pickup ? null : this.itemAt(pointer.worldX, pointer.worldY);
         if (!animal && this.isOnPlayer(pointer.worldX, pointer.worldY)) {
           Object.assign(touch, { mode: 'world', figure: true, scrollX: camera.scrollX, scrollY: camera.scrollY });
         } else if (animal?.state === 'resident') {
@@ -629,7 +689,9 @@ export class WorldScene extends Phaser.Scene {
     } else if (touch.mode === 'bar') {
       this.bar.bounce(touch.slot);
       this.bar.setGlow(touch.slot, false);
-      say((touch.slot.element ?? touch.slot.food).hint);
+      const food = touch.slot.food;
+      if (food && !this.basket[food.type]) say([SAETZE.noFood, food.where]); // leer: Wo gibt es das?
+      else say((touch.slot.element ?? food).hint);
     } else if (touch.mode === 'element') {
       this.wiggle(touch.item);
       // Schläft darin ein Tier seinen Winterschlaf, erzählt es davon
@@ -658,6 +720,10 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     if (touch.mode === 'bar') this.bar.setGlow(touch.slot, false);
+    if (touch.mode === 'bar' && touch.slot.food && !this.basket[touch.slot.food.type]) {
+      touch.mode = 'none'; // davon ist nichts mehr im Korb
+      return;
+    }
     if (touch.mode === 'bar' && touch.slot.food) {
       // Futter schwebt etwas über dem Finger, damit man es sieht
       touch.food = touch.slot.food;
@@ -756,17 +822,25 @@ export class WorldScene extends Phaser.Scene {
     this.requestSave();
   }
 
-  // Futter beim Tier loslassen → es frisst (oder zeigt, was es lieber mag)
+  // Futter beim Tier loslassen → es frisst (oder zeigt, was es lieber mag).
+  // Nur gefressenes Futter ist danach weg aus dem Korb.
   dropFood(food, image, pointer) {
     const animal =
       this.animals.animalAt(image.x, image.y) || this.animals.animalAt(pointer.worldX, pointer.worldY);
-    if (animal?.feed(food, image)) return;
+    const result = animal?.feed(food, image);
+    if (result === 'eaten') {
+      this.basket[food.type] = Math.max(0, (this.basket[food.type] || 0) - 1);
+      this.bar.setCounts(this.basket);
+      this.requestSave();
+    }
+    if (result) return;
     // Kein Tier da: Das Futter verschwindet einfach wieder
     this.tweens.add({ targets: image, scale: 0, alpha: 0, duration: 300, onComplete: () => image.destroy() });
   }
 
-  // Zieht man ein Ding an den Bildschirmrand, wandert die Wiese mit
+  // Jedes Bild: Futter einsammeln, und beim Ziehen am Bildschirmrand die Wiese mitwandern lassen
   update(time, delta) {
+    this.food.update(this.player);
     const touch = this.touch;
     if (!touch || !touch.dragging || !touch.item) return;
 

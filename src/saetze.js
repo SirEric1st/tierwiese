@@ -26,6 +26,8 @@ export const SAETZE = {
   riddleHelp: 'Ich verrate es dir.',
 
   // Wiese
+  noFood: 'Davon ist nichts mehr im Korb.',
+  foodFound: 'Schau mal, da liegt Futter! Tipp darauf, dann sammle ich es ein.',
   modeFood: 'Futter! Zieh es zu einem Tier.',
   modeBuild: 'Bauen! Zieh etwas auf die Wiese.',
   reedToPond: 'Schilf wächst am Wasser. Zieh es an den Teich!',
