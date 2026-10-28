@@ -26,6 +26,7 @@ ANIMALS.forEach((animal) => {
 ELEMENTS.forEach((element) => {
   add(element.name);
   add(element.hint);
+  add(element.riddle);
 });
 FOODS.forEach((food) => add(food.hint));
 FIGURE_ROWS.forEach((row) => {

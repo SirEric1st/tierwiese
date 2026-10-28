@@ -748,9 +748,11 @@ export class WorldScene extends Phaser.Scene {
 
     if (touch.isNew) {
       this.placed.push(item);
-      say(item.element.name);
       this.pop(item);
     }
+    // Steht ein Tier zu Besuch daneben, sagt es, ob es das Gesuchte ist
+    const answered = this.animals.itemPlaced(item);
+    if (touch.isNew && !answered) say(item.element.name);
     this.requestSave();
   }
 

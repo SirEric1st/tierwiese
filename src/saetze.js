@@ -18,6 +18,13 @@ export const SAETZE = {
   sleepNocturnal: 'Leise, ich schlafe gerade. Ich bin in der Nacht wach.',
   sleepDiurnal: 'Leise, ich schlafe gerade. Ich bin am Tag wach.',
 
+  // Tier-Rätsel (die Rätsel selbst stehen in elements.js)
+  riddleRight: 'Ja, genau! Danke!',
+  riddleNext: 'Und ich suche noch etwas.',
+  riddleNo: 'Hm, das suche ich nicht.',
+  riddleListen: 'Hör noch mal genau hin!',
+  riddleHelp: 'Ich verrate es dir.',
+
   // Wiese
   modeFood: 'Futter! Zieh es zu einem Tier.',
   modeBuild: 'Bauen! Zieh etwas auf die Wiese.',

@@ -18,6 +18,7 @@ const PET_TALK_DISTANCE = 150; // so viel streicheln, bis das Tier etwas sagt
 const PET_TALK_PAUSE = 5000; // danach eine Weile nichts mehr sagen
 const MIN_TOUCH = 64; // auch kleine Tiere sind mindestens so groß antippbar
 const FLY_HEIGHT = 45; // so hoch schweben fliegende Tiere über dem Boden
+const DEPTH_GUEST = 40000; // Tiere zu Besuch werden vor allem anderen gezeichnet
 const SNORE_EVERY = 1800; // so oft steigt beim Schlafen ein „Z“ auf
 const FONT = '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
 
@@ -80,7 +81,8 @@ export class Animal {
       return;
     }
     this.hop();
-    if (this.state === 'resident') say(this.def.fact);
+    if (this.state === 'visiting') this.onGuestTap?.(); // Rätsel noch einmal hören
+    else if (this.state === 'resident') say(this.def.fact);
     else if (this.missingNeed) say(this.missingNeed.wish);
   }
 
@@ -177,7 +179,7 @@ export class Animal {
       // Mag es nicht: freundlich den Kopf schütteln und zeigen, was es lieber frisst
       const favorite = getFood(this.def.eats[0]);
       this.scene.tweens.add({ targets: image, alpha: 0, y: image.y + 20, duration: 700, onComplete: () => image.destroy() });
-      this.scene.tweens.add({ targets: this.sprite, angle: { from: -10, to: 10 }, duration: 110, yoyo: true, repeat: 3, onComplete: () => this.sprite.setAngle(0) });
+      this.shakeHead();
       this.showBubble(favorite.type);
       say(dislikeText(favorite));
       this.scene.time.delayedCall(3000, () => {
@@ -186,6 +188,11 @@ export class Animal {
       });
     }
     return true;
+  }
+
+  // Freundlich den Kopf schütteln: „Nein, das nicht“
+  shakeHead() {
+    this.scene.tweens.add({ targets: this.sprite, angle: { from: -10, to: 10 }, duration: 110, yoyo: true, repeat: 3, onComplete: () => this.sprite.setAngle(0) });
   }
 
   // Ein Album-Sticker: nur beim ersten Mal ein Ereignis
@@ -230,32 +237,22 @@ export class Animal {
 
   // ---------- Auftritte ----------
 
-  // Kurz vorbeischauen und zeigen, was noch fehlt
-  visit(spot, missingNeed, done) {
+  // Zu Besuch: ins Bild kommen und warten, bis das Rätsel gelöst ist
+  // (was das Tier sagt und sucht, regelt der AnimalManager)
+  arriveAsGuest(spot, onArrive) {
     this.state = 'visiting';
-    this.missingNeed = missingNeed;
+    this.missingNeed = null;
     this.appearNear(spot);
-    this.walkTo(spot.x, spot.y, WALK_SPEED, () => {
-      this.showBubble(missingNeed.type);
-      say([this.def.hello, missingNeed.wish]);
-      this.visitTimer = this.scene.time.delayedCall(6000, () => {
-        this.hideBubble();
-        this.leaveScreen(() => {
-          this.state = 'away';
-          done();
-        });
-      });
-    });
+    this.walkTo(spot.x, spot.y, WALK_SPEED, onArrive);
   }
 
-  // Besuch abbrechen (z. B. weil jetzt alles da ist und das Tier gleich einzieht)
-  cancelVisit() {
-    this.visitTimer?.remove();
-    this.visitTimer = null;
-    this.walkTween?.stop();
-    this.stopBobbing();
+  // Besuch beenden, ohne einzuziehen (z. B. weil es Winter wird)
+  leaveAsGuest(done) {
     this.hideBubble();
-    this.state = 'away';
+    this.leaveScreen(() => {
+      this.state = 'away';
+      done?.();
+    });
   }
 
   // Einziehen: hinlaufen, feiern, ab jetzt auf der Wiese bleiben
@@ -541,7 +538,8 @@ export class Animal {
   }
 
   updateDepth() {
-    this.container.setDepth(this.y);
+    // Zu Besuch immer vorne, damit man Tier und Gedankenblase sieht
+    this.container.setDepth(this.state === 'visiting' ? DEPTH_GUEST + this.y : this.y);
     // Schwimmende Tiere sehen im Wasser anders aus (z. B. ohne Füße)
     if (this.def.swimTexture) {
       const texture = this.isInWater(this.x, this.y) ? this.def.swimTexture : this.def.type;
@@ -575,10 +573,22 @@ export class Animal {
 
   showBubble(elementType) {
     // Das Bild des fehlenden Dings sitzt in der Mitte der Wolke
-    this.bubble.getAt(1)?.destroy();
     const icon = this.scene.add.image(47, -73, elementType);
     icon.setScale(64 / Math.max(icon.width, icon.height));
-    this.bubble.add(icon);
+    this.popBubble(icon);
+  }
+
+  // Ein Fragezeichen in der Wolke: Was suche ich wohl?
+  showQuestion() {
+    const mark = this.scene.add
+      .text(47, -73, '?', { fontFamily: FONT, fontSize: '56px', fontStyle: 'bold', color: '#e2853a', resolution: DPR })
+      .setOrigin(0.5);
+    this.popBubble(mark);
+  }
+
+  popBubble(content) {
+    this.bubble.getAt(1)?.destroy();
+    this.bubble.add(content);
     this.bubble.setPosition(10, this.top - this.y + 10).setVisible(true);
     this.bubble.setScale(0);
     this.scene.tweens.add({ targets: this.bubble, scale: 1, duration: 300, ease: 'Back.easeOut' });

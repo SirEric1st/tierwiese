@@ -1,15 +1,29 @@
 // Entscheidet, wann welches Tier vorbeischaut, einzieht oder einen
 // Ausflug macht. Es passiert immer nur eine Sache gleichzeitig, damit
 // sich die Tiere nicht gegenseitig ins Wort fallen.
+//
+// Tier-Rätsel: Es ist immer nur ein Tier zu Besuch. Es wartet mit einem
+// „?“ in der Gedankenblase und beschreibt, was es sucht (riddle in
+// elements.js). Man muss das passende Ding zum Tier ziehen. Nach zwei
+// falschen Dingen oder einer Weile hilft es: Die Blase zeigt das Bild.
+// Hat es beide Dinge bekommen, zieht es ein. Das nächste Tier kommt
+// erst nach einer Pause. Wer schon einmal hier gewohnt hat, kommt ohne
+// Rätsel zurück, sobald alles wieder da ist.
 import { ANIMALS } from './animals.js';
 import { SAETZE } from './saetze.js';
 import { Animal } from './Animal.js';
 import { playCheer } from './sound.js';
+import { say } from './speech.js';
 import { IMAGE_SCALE } from './display.js';
 import { CONFETTI_COLORS } from './textures.js';
+import { getElement } from './elements.js';
 
 const CHECK_INTERVAL = 2000; // alle 2 Sekunden nachsehen
-const REVISIT_DELAY = 120000; // frühestens nach 2 Minuten wieder vorbeischauen
+const FIRST_GUEST_DELAY = 6000; // nach dem Start kommt bald der erste Besuch
+const NEXT_GUEST_DELAY = 30000; // Pause nach einem Einzug bis zum nächsten Besuch
+const HELP_DELAY = 25000; // so lange wartet das Tier, dann zeigt es, was es sucht
+const WRONG_BEFORE_HELP = 2; // oder nach so vielen falschen Dingen
+const GUEST_REACH = 230; // so nah muss man ein Ding zum Tier ziehen
 const POND_WATER_X = 120; // halbe Breite und Höhe der Wasserfläche im Teich-Bild
 const POND_WATER_Y = 56;
 
@@ -33,6 +47,8 @@ export class AnimalManager {
       };
     });
     this.busy = false;
+    this.guest = null; // das Tier, das gerade mit einem Rätsel zu Besuch ist
+    this.nextGuestTime = scene.time.now + FIRST_GUEST_DELAY;
     this.night = false;
     this.season = 'fruehling';
 
@@ -84,72 +100,163 @@ export class AnimalManager {
   }
 
   check() {
+    if (this.busy) return;
     const placedTypes = new Set(this.getPlaced().map((item) => item.element.type));
-    const status = this.animals.map((animal) => {
-      const missing = animal.def.needs.filter((need) => !placedTypes.has(need.type));
-      return { animal, missing, fulfilled: animal.def.needs.length - missing.length };
-    });
+    const missingOf = (animal) => animal.def.needs.filter((need) => !placedTypes.has(need.type));
 
-    if (this.busy) {
-      // Ist während eines Besuchs alles fertig geworden, bleibt das Tier gleich da
-      const visitor = status.find((s) => s.animal === this.visitor);
-      if (visitor && visitor.missing.length === 0) {
-        this.visitor.cancelVisit();
-        this.visitor = null;
-        this.startMoveIn(visitor.animal);
-      }
-      return;
-    }
-
-    // Reihenfolge: erst Ausflüge, dann Einzüge, dann Besuche
-    const leaving = status.find((s) => s.animal.state === 'resident' && s.missing.length > 0);
+    // Erst Ausflüge: Fehlt einem Tier etwas, geht es kurz weg
+    const leaving = this.animals.find((animal) => animal.state === 'resident' && missingOf(animal).length > 0);
     if (leaving) {
-      // Beim Ausflug sagt das Tier schon, was fehlt – das zählt wie ein Besuch
-      this.rememberHint(leaving.animal, leaving.fulfilled);
-      this.start((done) => leaving.animal.leave(leaving.missing[0], done));
+      this.start((done) => leaving.leave(missingOf(leaving)[0], done));
       return;
     }
 
-    // Wer im Winter schläft, kommt erst im Frühling wieder. Und zu Besuch kommt
-    // nur, wer sich etwas wünscht, das es schon in der Leiste gibt.
+    // Wer schon hier gewohnt hat, kommt zurück, sobald alles wieder da ist
+    const returning = this.animals.find(
+      (animal) =>
+        animal.state === 'away' &&
+        animal.hasLivedHere &&
+        !this.sleepsThroughWinter(animal) &&
+        missingOf(animal).length === 0
+    );
+    if (returning) {
+      this.startMoveIn(returning);
+      return;
+    }
+
+    // Ein neues Tier kommt mit einem Rätsel zu Besuch – aber nur eins
+    // gleichzeitig, nach einer Pause, und nur, wenn es das Gesuchte schon gibt
+    if (this.guest || this.scene.time.now < this.nextGuestTime) return;
     const isUnlocked = this.hooks.isUnlocked ?? (() => true);
-    const awake = status.filter(
-      (s) => !this.sleepsThroughWinter(s.animal) && s.animal.def.needs.every((need) => isUnlocked(need.type))
+    const candidates = this.animals.filter(
+      (animal) =>
+        animal.state === 'away' &&
+        !animal.hasLivedHere &&
+        !this.sleepsThroughWinter(animal) &&
+        animal.def.needs.every((need) => isUnlocked(need.type))
     );
-    const movingIn = awake.find((s) => s.animal.state === 'away' && s.missing.length === 0);
-    if (movingIn) {
-      this.startMoveIn(movingIn.animal);
-      return;
-    }
+    if (candidates.length > 0) this.startGuest(Phaser.Utils.Array.GetRandom(candidates));
+  }
 
-    const now = this.scene.time.now;
-    const visiting = awake.find(
-      (s) =>
-        s.animal.state === 'away' &&
-        s.fulfilled > 0 &&
-        (s.fulfilled !== s.animal.lastVisitFulfilled || now - s.animal.lastVisitTime > REVISIT_DELAY)
+  // ---------- Tier-Rätsel ----------
+
+  startGuest(animal) {
+    const guest = { animal, open: [...animal.def.needs], wrong: 0, helped: false, helpTimer: null };
+    this.guest = guest;
+    animal.onGuestTap = () => this.askRiddle([]);
+    this.start((done) =>
+      animal.arriveAsGuest(this.guestSpot(), () => {
+        this.askRiddle([animal.def.hello]);
+        done();
+      })
     );
-    if (visiting) {
-      const animal = visiting.animal;
-      this.rememberHint(animal, visiting.fulfilled);
-      this.visitor = animal;
-      this.start((done) =>
-        animal.visit(this.spotFor(animal), visiting.missing[0], () => {
-          this.visitor = null;
-          done();
-        })
-      );
+  }
+
+  // Ein freier Platz mitten im Bild, damit man den Besuch auch sieht
+  guestSpot() {
+    const view = this.scene.cameras.main.worldView;
+    let spot;
+    for (let i = 0; i < 10; i++) {
+      // links oder rechts neben der Mitte, wo meist die Spielfigur steht
+      const side = Phaser.Math.RND.sign() * Phaser.Math.FloatBetween(0.15, 0.3);
+      spot = {
+        x: Phaser.Math.Clamp(view.centerX + side * view.width, 80, this.world.width - 80),
+        y: Phaser.Math.Clamp(view.centerY + Phaser.Math.FloatBetween(-0.05, 0.2) * view.height, 160, this.world.height - 60),
+      };
+      if (!this.isInWater(spot.x, spot.y)) break;
+    }
+    return spot;
+  }
+
+  // Das Tier sagt, was es sucht: als Rätsel – oder nach der Hilfe mit Bild und Namen
+  askRiddle(before) {
+    const guest = this.guest;
+    if (!guest) return;
+    const need = guest.open[0];
+    if (guest.helped) {
+      guest.animal.showBubble(need.type);
+      say([...before, need.wish]);
+    } else {
+      guest.animal.showQuestion();
+      say([...before, getElement(need.type).riddle]);
+      guest.helpTimer?.remove();
+      guest.helpTimer = this.scene.time.delayedCall(HELP_DELAY, () => {
+        if (this.guest !== guest || guest.helped) return;
+        guest.helped = true;
+        this.askRiddle([SAETZE.riddleHelp]);
+      });
     }
   }
 
-  startMoveIn(animal) {
+  // Ein Ding wurde auf der Wiese abgestellt. Steht es nah beim Besuch, schaut
+  // das Tier, ob es das gesuchte ist. true: Das Tier hat etwas dazu gesagt.
+  itemPlaced(item) {
+    const guest = this.guest;
+    if (!guest || this.busy || guest.animal.state !== 'visiting') return false;
+    const animal = guest.animal;
+    if (Phaser.Math.Distance.Between(item.x, item.y, animal.x, animal.y) > GUEST_REACH) return false;
+    const name = item.element.name;
+    const match = guest.open.find((need) => need.type === item.element.type);
+    if (!match) {
+      // Falsch – kein Problem, das Ding bleibt einfach stehen
+      guest.wrong += 1;
+      animal.shakeHead();
+      if (guest.wrong >= WRONG_BEFORE_HELP && !guest.helped) {
+        guest.helped = true;
+        this.askRiddle([name, SAETZE.riddleNo, SAETZE.riddleHelp]);
+      } else {
+        this.askRiddle([name, SAETZE.riddleNo, SAETZE.riddleListen]);
+      }
+      return true;
+    }
+    animal.hop();
+    guest.open = guest.open.filter((need) => need !== match);
+    guest.wrong = 0;
+    guest.helped = false;
+    if (guest.open.length > 0) {
+      this.askRiddle([name, SAETZE.riddleRight, SAETZE.riddleNext]);
+      return true;
+    }
+    // Alles da: Das Tier freut sich und zieht ein
+    this.endGuest();
+    this.busy = true;
+    say([name, SAETZE.riddleRight], () => {
+      this.busy = false;
+      this.startMoveIn(animal, true);
+    });
+    return true;
+  }
+
+  endGuest() {
+    const guest = this.guest;
+    if (!guest) return;
+    guest.helpTimer?.remove();
+    guest.animal.onGuestTap = null;
+    guest.animal.hideBubble();
+    this.guest = null;
+  }
+
+  // Besuch ohne Einzug beenden (z. B. Winterschlaf); das Tier kommt später wieder
+  cancelGuest() {
+    const animal = this.guest?.animal;
+    if (!animal) return;
+    this.endGuest();
+    animal.leaveAsGuest();
+    this.nextGuestTime = this.scene.time.now + NEXT_GUEST_DELAY;
+  }
+
+  // afterRiddle: Das Tier war schon zu Besuch und hat sich schon vorgestellt
+  startMoveIn(animal, afterRiddle = false) {
     // Ohne Namen, damit alles aus fertigen Aufnahmen gesprochen werden kann
-    const text = animal.hasLivedHere ? [SAETZE.backAgain] : [animal.def.hello, SAETZE.moveIn];
+    let text = [animal.def.hello, SAETZE.moveIn];
+    if (animal.hasLivedHere) text = [SAETZE.backAgain];
+    else if (afterRiddle) text = [SAETZE.moveIn];
     const spot = this.spotFor(animal);
     this.start((done) =>
       animal.moveIn(spot, text, () => this.celebrate(animal), () => {
         const firstTime = !animal.hasLivedHere;
         animal.hasLivedHere = true;
+        if (firstTime) this.nextGuestTime = this.scene.time.now + NEXT_GUEST_DELAY;
         animal.startWandering(() => this.spotFor(animal));
         if (this.shouldSleep(animal)) animal.setSleeping(true);
         // Beim ersten Einzug bringt das Tier ein Geschenk mit
@@ -205,6 +312,7 @@ export class AnimalManager {
   // Im Winter verkriechen sich manche Tiere, im Frühling kommen sie wieder heraus
   setSeason(season) {
     this.season = season;
+    if (this.guest && this.sleepsThroughWinter(this.guest.animal)) this.cancelGuest();
     this.animals.forEach((animal) => (animal.season = season));
     const residents = this.animals.filter((animal) => animal.state === 'resident');
     residents.forEach((animal, i) => {
@@ -222,11 +330,6 @@ export class AnimalManager {
     });
   }
 
-  // Merkt sich, wann und bei welchem Stand das Tier zuletzt gesagt hat, was fehlt
-  rememberHint(animal, fulfilled) {
-    animal.lastVisitFulfilled = fulfilled;
-    animal.lastVisitTime = this.scene.time.now;
-  }
 
   start(action) {
     this.busy = true;
