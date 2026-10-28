@@ -35,11 +35,16 @@ SOLID = 240  # Pixel, die fast deckend sind, werden ganz deckend
 MARGIN = 4  # etwas Luft um das Bild lassen
 BACKGROUND_LIGHT = 205  # so hell muss der Hintergrund mindestens sein …
 BACKGROUND_GRAY = 30  # … und so wenig farbig (Sättigung von 0 bis 255)
+# Sammelbilder haben rein weißen Hintergrund: strenger sein, damit weiße
+# Stellen am Tier (z. B. das Ohr vom Dachs) nicht verschwinden
+SHEET_LIGHT = 238
+SHEET_GRAY = 18
 # Tiere mit dünnen Fühlern: Kante weniger stark nach innen ziehen, sonst verschwinden sie
 THIN = {'zitronenfalter', 'biene', 'marienkaefer'}
 # Hier ist Hintergrund eingeschlossen (z. B. zwischen den Beinen) und muss auch weg
-HOLES = {'amsel'}
+HOLES = {'amsel', 'hase', 'fuchs'}
 HOLE_SIZE = 400  # so groß (Pixel) muss ein eingeschlossener Fleck sein; Lichtpunkte in Augen sind kleiner
+EDGE = 6  # so nah am Feldrand gilt ein Teil als Stück vom Nachbarbild
 CRUMBS = 0.01  # lose Krümel, kleiner als 1 % des Hauptbilds, werden entfernt
 
 
@@ -69,7 +74,9 @@ def remove_crumbs(alpha, in_sheet):
     if in_sheet:
         w, h = solid.size
         pixels = solid.load()
-        edge = {pixels[x, y] for x in range(w) for y in (0, h - 1)} | {pixels[x, y] for x in (0, w - 1) for y in range(h)}
+        near = range(EDGE)  # knapp neben dem Rand zählt auch (die Kante wurde nach innen gezogen)
+        edge = {pixels[x, y] for x in range(w) for d in near for y in (d, h - 1 - d)}
+        edge |= {pixels[x, y] for y in range(h) for d in near for x in (d, w - 1 - d)}
     biggest = max(sizes.values())  # das Hauptbild bleibt immer, auch wenn es knapp über den Rand ragt
     keep = {i for i, size in sizes.items() if size == biggest or (size >= biggest * CRUMBS and i not in edge)}
     lut = [255 if i in keep or i == 255 else 0 for i in range(256)]
@@ -79,8 +86,10 @@ def remove_crumbs(alpha, in_sheet):
 def remove_background(image, name, in_sheet):
     """Entfernt hellen, grauen Hintergrund, der vom Bildrand aus zusammenhängt."""
     rgb = image.convert('RGB')
-    light = rgb.convert('L').point(lambda v: 255 if v >= BACKGROUND_LIGHT else 0)
-    gray = rgb.convert('HSV').getchannel('S').point(lambda v: 255 if v <= BACKGROUND_GRAY else 0)
+    min_light = SHEET_LIGHT if in_sheet else BACKGROUND_LIGHT
+    max_gray = SHEET_GRAY if in_sheet else BACKGROUND_GRAY
+    light = rgb.convert('L').point(lambda v: 255 if v >= min_light else 0)
+    gray = rgb.convert('HSV').getchannel('S').point(lambda v: 255 if v <= max_gray else 0)
     mask = Image.composite(light, Image.new('L', rgb.size, 0), gray)
     # Vom Rand aus füllen: Nur Hintergrund, der den Rand berührt, wird entfernt
     w, h = mask.size
