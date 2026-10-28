@@ -22,6 +22,7 @@ const FILES = [
   'assets/grafik/album.svg',
   'assets/grafik/sonne.svg',
   'assets/grafik/mond.svg',
+  'assets/grafik/haus.svg',
   'assets/grafik/jahreszeit-fruehling.svg',
   'assets/grafik/jahreszeit-sommer.svg',
   'assets/grafik/jahreszeit-herbst.svg',

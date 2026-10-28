@@ -30,6 +30,7 @@ const GRAPHICS = [
   'album',
   'sonne',
   'mond',
+  'haus',
   'jahreszeit-fruehling',
   'jahreszeit-sommer',
   'jahreszeit-herbst',

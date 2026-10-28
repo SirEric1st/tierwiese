@@ -8,6 +8,7 @@
 // Figur, öffnet sich der Figuren-Baukasten.
 // Der Knopf daneben (Mond oder Sonne) macht Nacht oder Tag, der nächste
 // wechselt die Jahreszeit (er zeigt die Jahreszeit, die als Nächstes kommt).
+// Das Haus oben links führt zurück zum Startbildschirm (anderer Spielstand).
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin, uiScale } from '../display.js';
@@ -207,8 +208,9 @@ export class WorldScene extends Phaser.Scene {
     this.updateSkyButton();
     this.seasonButton = this.createRoundButton('jahreszeit-sommer');
     this.updateSeasonButton();
+    this.homeButton = this.createRoundButton('haus');
     this.hud = this.add
-      .container(0, 0, [this.albumButton, this.skyButton, this.seasonButton])
+      .container(0, 0, [this.albumButton, this.skyButton, this.seasonButton, this.homeButton])
       .setScrollFactor(0)
       .setDepth(100000);
     this.layoutAlbumButton();
@@ -221,6 +223,7 @@ export class WorldScene extends Phaser.Scene {
     this.albumButton.setPosition(width - ALBUM_RADIUS - ALBUM_MARGIN, ALBUM_RADIUS + ALBUM_MARGIN);
     this.skyButton.setPosition(this.albumButton.x - ALBUM_RADIUS * 2 - ALBUM_MARGIN, this.albumButton.y);
     this.seasonButton.setPosition(this.skyButton.x - ALBUM_RADIUS * 2 - ALBUM_MARGIN, this.albumButton.y);
+    this.homeButton.setPosition(ALBUM_RADIUS + ALBUM_MARGIN, this.albumButton.y);
   }
 
   // Weißer runder Knopf mit Bild; button.icon ist das Bild
@@ -339,6 +342,13 @@ export class WorldScene extends Phaser.Scene {
     this.scene.launch('AlbumScene', { discovered });
   }
 
+  // Speichern und zurück zum Startbildschirm, dort kann ein anderes Kind spielen
+  goHome() {
+    this.save();
+    say('Bis bald!');
+    this.scene.start('StartScene');
+  }
+
   // ---------- Speichern ----------
 
   requestSave() {
@@ -379,6 +389,7 @@ export class WorldScene extends Phaser.Scene {
   //   'album'   – der Album-Knopf
   //   'sky'     – der Tag/Nacht-Knopf
   //   'season'  – der Jahreszeiten-Knopf
+  //   'home'    – das Haus: zurück zum Startbildschirm
   //   'bar'     – die Leiste: ein Knopf (Ding, Futter, Umschalten) oder Wischen zum Blättern
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
@@ -409,6 +420,8 @@ export class WorldScene extends Phaser.Scene {
         Object.assign(touch, { mode: 'sky' });
       } else if (this.isOnButton(this.seasonButton, screen.x, screen.y)) {
         Object.assign(touch, { mode: 'season' });
+      } else if (this.isOnButton(this.homeButton, screen.x, screen.y)) {
+        Object.assign(touch, { mode: 'home' });
       } else if (this.bar.contains(screen.x, screen.y)) {
         // Auch zwischen den Knöpfen kann man wischen (dann ist slot leer)
         Object.assign(touch, { mode: 'bar', slot: this.bar.slotAt(screen.x, screen.y) });
@@ -484,6 +497,8 @@ export class WorldScene extends Phaser.Scene {
       this.toggleNight();
     } else if (touch.mode === 'season') {
       this.changeSeason();
+    } else if (touch.mode === 'home') {
+      this.goHome();
     } else if (touch.mode === 'bar' && !touch.slot) {
       // zwischen die Knöpfe getippt: nichts tun
     } else if (touch.mode === 'bar' && touch.slot.toggle) {
@@ -516,7 +531,7 @@ export class WorldScene extends Phaser.Scene {
       touch.animal.startPetting();
       return;
     }
-    if (['album', 'sky', 'season'].includes(touch.mode) || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
+    if (['album', 'sky', 'season', 'home'].includes(touch.mode) || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
       touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }

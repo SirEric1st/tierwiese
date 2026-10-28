@@ -1,6 +1,7 @@
-// Eltern-Bereich: Name und Foto der Spielfigur. Er liegt als normale
-// Webseite (HTML) über dem Spiel, weil man hier tippen und die Kamera
-// benutzen muss. Davor steht die Eltern-Sperre: eine Rechenaufgabe.
+// Eltern-Bereich: Name und Foto der Spielfigur, Spielstände löschen.
+// Er liegt als normale Webseite (HTML) über dem Spiel, weil man hier
+// tippen und die Kamera benutzen muss. Davor steht die Eltern-Sperre:
+// eine Rechenaufgabe.
 // Name und Foto werden nur im Spielstand auf diesem Gerät gespeichert.
 
 const NAME_LENGTH = 20;
@@ -77,6 +78,27 @@ export function askParentLock(onSuccess, onCancel) {
     });
   };
   showTask();
+}
+
+// Nachfrage vor dem Löschen eines Spielstands (nach der Eltern-Sperre)
+export function confirmDeleteSave(label, onDelete, onCancel) {
+  const element = overlay(`
+    <h2>Spielstand löschen?</h2>
+    <p></p>
+    <p>Die Wiese, die Tiere, die Figur und das Album dieses Spielstands sind danach weg.</p>
+    <div class="eltern-reihe">
+      <button class="leise" data-abbrechen>Behalten</button>
+      <button data-loeschen>Löschen</button>
+    </div>`);
+  element.querySelector('p').textContent = `„${label}“`; // als Text einsetzen, nicht als HTML
+  element.querySelector('[data-abbrechen]').addEventListener('click', () => {
+    element.remove();
+    onCancel?.();
+  });
+  element.querySelector('[data-loeschen]').addEventListener('click', () => {
+    element.remove();
+    onDelete();
+  });
 }
 
 // Name und Foto bearbeiten. onSave({ name, photo }) beim Speichern.

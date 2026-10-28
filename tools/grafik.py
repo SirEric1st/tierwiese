@@ -668,6 +668,23 @@ def mond():
     svg('mond', 64, 64, defs, body, 'Mond mit Sternen (Knopf: Nacht).')
 
 
+def haus():
+    """Haus-Knopf: zurück zum Startbildschirm (Spielstand wechseln)."""
+    defs = '\n'.join([
+        linear('dach', st(('0', '#ff8a6a'), ('1', '#d9452a'))),
+        linear('wand', st(('0', '#fff3d6'), ('1', '#efd9a8'))),
+    ])
+    body = '''  <rect x="42" y="12" width="8" height="16" rx="2" fill="#a8533a" stroke="#7a3422" stroke-width="1.6"/>
+  <path d="M14,32 L14,58 L50,58 L50,32 Z" fill="url(#wand)" stroke="#b9925a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M6,34 L32,8 L58,34 Q59,38 55,38 L32,16 L9,38 Q5,38 6,34 Z" fill="url(#dach)" stroke="#a8381a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M10,36 L32,14 L54,36" fill="url(#dach)"/>
+  <rect x="26" y="40" width="12" height="18" rx="5" fill="#8a5a2c" stroke="#5e3615" stroke-width="1.6"/>
+  <circle cx="35" cy="50" r="1.4" fill="#ffd84a"/>
+  <rect x="16" y="38" width="8" height="8" rx="1.5" fill="#9fd4f0" stroke="#b9925a" stroke-width="1.4"/>
+  <rect x="40" y="38" width="8" height="8" rx="1.5" fill="#9fd4f0" stroke="#b9925a" stroke-width="1.4"/>'''
+    svg('haus', 64, 64, defs, body, 'Haus (Knopf: zurück zum Startbildschirm).')
+
+
 # ---------------------------------------------------------------- Jahreszeiten (Knopf)
 # Der Knopf zeigt die Jahreszeit, die als Nächstes kommt.
 
@@ -1229,6 +1246,7 @@ symbol_shirt()
 symbol_hose()
 sonne()
 mond()
+haus()
 jahreszeit_fruehling()
 jahreszeit_sommer()
 jahreszeit_herbst()
