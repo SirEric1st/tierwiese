@@ -30,6 +30,9 @@ SIZES = {
     'frosch': (90, 75),
 }
 RETINA = 2
+# Schwimmende Tiere: aus dem stehenden Bild wird unten so viel abgeschnitten
+# (Anteil der Höhe, der bleibt), dass Beine und Füße „unter Wasser“ sind
+CUT_BOTTOM = {'ente-schwimmt': 0.8}
 CLEAR = 10  # Pixel, die fast durchsichtig sind, werden ganz durchsichtig
 SOLID = 240  # Pixel, die fast deckend sind, werden ganz deckend
 MARGIN = 4  # etwas Luft um das Bild lassen
@@ -41,8 +44,10 @@ SHEET_LIGHT = 238
 SHEET_GRAY = 18
 # Tiere mit dünnen Fühlern: Kante weniger stark nach innen ziehen, sonst verschwinden sie
 THIN = {'zitronenfalter', 'biene', 'marienkaefer'}
-# Hier ist Hintergrund eingeschlossen (z. B. zwischen den Beinen) und muss auch weg
-HOLES = {'amsel', 'hase', 'fuchs'}
+# Hier ist Hintergrund eingeschlossen (z. B. zwischen den Beinen) und muss auch weg.
+# Die Zahl sagt, ab welcher Höhe gesucht wird (0 = überall, 0.7 = nur im unteren
+# Drittel, damit weiße Streifen am Flügel der Ente bleiben)
+HOLES = {'amsel': 0, 'hase': 0, 'fuchs': 0, 'ente': 0.7}
 HOLE_SIZE = 400  # so groß (Pixel) muss ein eingeschlossener Fleck sein; Lichtpunkte in Augen sind kleiner
 EDGE = 6  # so nah am Feldrand gilt ein Teil als Stück vom Nachbarbild
 CRUMBS = 0.01  # lose Krümel, kleiner als 1 % des Hauptbilds, werden entfernt
@@ -101,7 +106,9 @@ def remove_background(image, name, in_sheet):
     if name in HOLES:
         # Große eingeschlossene helle Flecken sind auch Hintergrund
         sizes = label_parts(mask, 255)
-        holes = {i for i, size in sizes.items() if size >= HOLE_SIZE}
+        top = round(mask.height * HOLES[name])
+        lower = mask.crop((0, top, mask.width, mask.height)).histogram()
+        holes = {i for i, size in sizes.items() if size >= HOLE_SIZE and lower[i] == size}
         mask = mask.point(lambda v: 128 if v in holes else v)
     alpha = Image.eval(mask, lambda v: 0 if v == 128 else 255)
     # Kante etwas nach innen ziehen (kein heller Saum) und weich machen
@@ -148,6 +155,9 @@ def prepare(image, name, in_sheet=False):
     scale = min(max_w * RETINA / image.width, max_h * RETINA / image.height)
     size = (round(image.width * scale), round(image.height * scale))
     image = image.resize(size, Image.LANCZOS)
+    if name in CUT_BOTTOM:
+        image = image.crop((0, 0, image.width, round(image.height * CUT_BOTTOM[name])))
+        size = image.size
 
     target = ROOT / 'assets' / 'bilder' / f'{name}.png'
     target.parent.mkdir(exist_ok=True)

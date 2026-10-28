@@ -22,6 +22,8 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 | Datei | Erzeugt am | Werkzeug |
 |-------|------------|----------|
 | `assets/bilder/igel.png` | 27.10.2026 | ChatGPT |
+| `assets/bilder/ente.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
+| `assets/bilder/ente-schwimmt.png` | 28.10.2026 | ChatGPT (Sammelbild 1, unten abgeschnitten) |
 | `assets/bilder/eichhoernchen.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
 | `assets/bilder/frosch.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
 | `assets/bilder/marienkaefer.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
