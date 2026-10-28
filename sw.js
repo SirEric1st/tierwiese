@@ -82,6 +82,8 @@ const FILES = [
   'assets/grafik/wurm.svg',
   'assets/grafik/zitronenfalter.svg',
   'assets/bilder/igel.png',
+  'assets/bilder/eichhoernchen.png',
+  'assets/bilder/frosch.png',
   'src/main.js',
   'src/display.js',
   'src/speech.js',

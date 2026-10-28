@@ -2,6 +2,10 @@
 # Aufruf im Projektordner:  python3 tools/ki-bild.py <bild.png> <name>
 # Beispiel:                 python3 tools/ki-bild.py ~/Downloads/igel.png igel
 #
+# Sammelbild (Sheet) mit 2 × 2 Motiven: vier Namen angeben, in der Reihenfolge
+# oben links, oben rechts, unten links, unten rechts. „-“ überspringt ein Feld.
+# Beispiel:  python3 tools/ki-bild.py sheet1.png ente eichhoernchen frosch -
+#
 # Hat das Bild keinen durchsichtigen Hintergrund, sondern einen hellen
 # (weiß oder ein aufgemaltes graues Karomuster), wird dieser entfernt.
 # Das Skript schneidet leere Ränder ab, macht das Bild überall ganz deckend
@@ -23,7 +27,7 @@ SIZES = {
     'ente': (120, 100),
     'ente-schwimmt': (120, 100),
     'eichhoernchen': (115, 125),
-    'frosch': (75, 60),
+    'frosch': (90, 75),
 }
 RETINA = 2
 CLEAR = 10  # Pixel, die fast durchsichtig sind, werden ganz durchsichtig
@@ -69,31 +73,44 @@ def game_size(name):
     return float(w), float(h)
 
 
-source, name = Path(sys.argv[1]), sys.argv[2]
-max_w, max_h = game_size(name)
+def prepare(image, name):
+    max_w, max_h = game_size(name)
+    if 'A' not in image.getbands() or image.getchannel('A').getextrema()[0] > CLEAR:
+        image = remove_background(image)
+    image = image.convert('RGBA')
+    alpha = image.getchannel('A').point(
+        lambda v: 0 if v <= CLEAR else 255 if v >= SOLID else round((v - CLEAR) * 255 / (SOLID - CLEAR))
+    )
+    image.putalpha(alpha)
 
-image = Image.open(source)
-if 'A' not in image.getbands() or image.getchannel('A').getextrema()[0] > CLEAR:
-    image = remove_background(image)
-image = image.convert('RGBA')
-alpha = image.getchannel('A').point(
-    lambda v: 0 if v <= CLEAR else 255 if v >= SOLID else round((v - CLEAR) * 255 / (SOLID - CLEAR))
-)
-image.putalpha(alpha)
+    left, top, right, bottom = alpha.getbbox()
+    image = image.crop((
+        max(0, left - MARGIN),
+        max(0, top - MARGIN),
+        min(image.width, right + MARGIN),
+        min(image.height, bottom + MARGIN),
+    ))
 
-left, top, right, bottom = alpha.getbbox()
-image = image.crop((
-    max(0, left - MARGIN),
-    max(0, top - MARGIN),
-    min(image.width, right + MARGIN),
-    min(image.height, bottom + MARGIN),
-))
+    scale = min(max_w * RETINA / image.width, max_h * RETINA / image.height)
+    size = (round(image.width * scale), round(image.height * scale))
+    image = image.resize(size, Image.LANCZOS)
 
-scale = min(max_w * RETINA / image.width, max_h * RETINA / image.height)
-size = (round(image.width * scale), round(image.height * scale))
-image = image.resize(size, Image.LANCZOS)
+    target = ROOT / 'assets' / 'bilder' / f'{name}.png'
+    target.parent.mkdir(exist_ok=True)
+    image.save(target, optimize=True)
+    print(f'{target.name}: {size[0]} × {size[1]} Pixel, {target.stat().st_size // 1024} KB')
 
-target = ROOT / 'assets' / 'bilder' / f'{name}.png'
-target.parent.mkdir(exist_ok=True)
-image.save(target, optimize=True)
-print(f'{target.name}: {size[0]} × {size[1]} Pixel, {target.stat().st_size // 1024} KB')
+
+source, names = Path(sys.argv[1]), sys.argv[2:]
+sheet = Image.open(source)
+if len(names) == 1:
+    prepare(sheet, names[0])
+elif len(names) == 4:
+    half_w, half_h = sheet.width // 2, sheet.height // 2
+    for i, name in enumerate(names):
+        if name == '-':
+            continue
+        x, y = (i % 2) * half_w, (i // 2) * half_h
+        prepare(sheet.crop((x, y, x + half_w, y + half_h)), name)
+else:
+    sys.exit('Bitte einen Namen (Einzelbild) oder vier Namen (Sammelbild 2 × 2) angeben.')
