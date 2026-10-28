@@ -3,6 +3,8 @@
 // tippen und die Kamera benutzen muss. Davor steht die Eltern-Sperre:
 // eine Rechenaufgabe.
 // Name und Foto werden nur im Spielstand auf diesem Gerät gespeichert.
+// Die Stimme gilt für alle Spielstände auf diesem Gerät.
+import { germanVoices, say, setVoice, voiceChoice } from './speech.js';
 
 const NAME_LENGTH = 20;
 const PHOTO_SIZE = 192; // das Foto wird quadratisch auf diese Pixelgröße verkleinert
@@ -26,6 +28,9 @@ const STYLE = `
 .eltern-foto { width: 120px; height: 120px; border-radius: 50%; background: #eadfc6 center / cover no-repeat;
   margin: 8px auto; border: 3px solid #d9b77a; }
 .eltern-hinweis { font-size: 14px; color: #7a5a2a; margin-top: 4px; }
+.eltern select { font: inherit; font-size: 18px; width: 100%; padding: 12px; border: 2px solid #d9b77a;
+  border-radius: 14px; background: #fff; color: #4a3417; }
+.eltern-box { max-height: calc(100vh - 32px); overflow-y: auto; }
 `;
 
 function addStyle() {
@@ -117,6 +122,12 @@ export function openParentArea(profile, onSave, onCancel) {
     </div>
     <div class="eltern-hinweis">Gesicht möglichst groß in die Mitte. Das Foto ersetzt den Kopf der Figur.</div>
     <input type="file" accept="image/*" hidden>
+    <label for="eltern-stimme">Stimme</label>
+    <select id="eltern-stimme"></select>
+    <div class="eltern-reihe"><button class="leise" data-probe>Probehören</button></div>
+    <div class="eltern-hinweis">Bessere Stimmen laden: Einstellungen → Bedienungshilfen → Gesprochene Inhalte →
+      Stimmen → Deutsch, dort eine Stimme „Erweitert“ oder „Premium“ laden. Danach das Spiel neu starten.
+      Die Stimme gilt für alle Spielstände.</div>
     <div class="eltern-reihe" style="margin-top: 24px">
       <button class="leise" data-abbrechen>Abbrechen</button>
       <button class="gruen" data-speichern>Speichern</button>
@@ -128,6 +139,24 @@ export function openParentArea(profile, onSave, onCancel) {
   const fileInput = element.querySelector('input[type=file]');
   const removeButton = element.querySelector('[data-foto-weg]');
   nameInput.value = profile.name || '';
+
+  // Stimmen-Auswahl: „Automatisch“ nimmt die beste installierte deutsche Stimme
+  const voiceSelect = element.querySelector('#eltern-stimme');
+  const auto = document.createElement('option');
+  auto.value = '';
+  auto.textContent = 'Automatisch (beste Stimme)';
+  voiceSelect.appendChild(auto);
+  germanVoices().forEach((voice) => {
+    const option = document.createElement('option');
+    option.value = voice.voiceURI;
+    option.textContent = `${voice.name} (${voice.lang})`;
+    voiceSelect.appendChild(option);
+  });
+  const savedChoice = voiceChoice();
+  voiceSelect.value = [...voiceSelect.options].some((o) => o.value === savedChoice) ? savedChoice : '';
+  element.querySelector('[data-probe]').addEventListener('click', () => {
+    say('Hallo, ich bin der Igel! Hier gefällt es mir.', null, voiceSelect.value || germanVoices()[0]?.voiceURI);
+  });
 
   const showPhoto = () => {
     preview.style.backgroundImage = photo ? `url("${photo}")` : '';
@@ -155,6 +184,7 @@ export function openParentArea(profile, onSave, onCancel) {
     onCancel?.();
   });
   element.querySelector('[data-speichern]').addEventListener('click', () => {
+    setVoice(voiceSelect.value);
     element.remove();
     onSave({ name: cleanName(nameInput.value), photo });
   });
