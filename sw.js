@@ -96,6 +96,7 @@ const FILES = [
   'src/Animal.js',
   'src/AnimalManager.js',
   'src/BuildBar.js',
+  'src/Seasons.js',
   'src/scenes/StartScene.js',
   'src/scenes/WorldScene.js',
   'src/scenes/AlbumScene.js',
