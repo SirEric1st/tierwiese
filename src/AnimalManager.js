@@ -25,6 +25,7 @@ export class AnimalManager {
     this.animals = ANIMALS.map((def) => new Animal(scene, def, world, (x, y) => this.isInWater(x, y)));
     this.busy = false;
     this.night = false;
+    this.season = 'fruehling';
 
     scene.time.addEvent({ delay: CHECK_INTERVAL, loop: true, callback: () => this.check() });
   }
@@ -44,6 +45,12 @@ export class AnimalManager {
       const animal = this.animals.find((a) => a.def.type === saved.type);
       if (!animal) return;
       animal.hasLivedHere = saved.hasLivedHere;
+      const shelter = saved.resident && this.sleepsThroughWinter(animal) ? this.shelterFor(animal) : null;
+      if (shelter) {
+        animal.state = 'resident';
+        animal.placeHibernating(shelter);
+        return;
+      }
       const spot = saved.resident ? this.spotFor(animal) : null;
       if (spot) {
         animal.placeAsResident(spot);
@@ -92,14 +99,16 @@ export class AnimalManager {
       return;
     }
 
-    const movingIn = status.find((s) => s.animal.state === 'away' && s.missing.length === 0);
+    // Wer im Winter schläft, kommt erst im Frühling wieder
+    const awake = status.filter((s) => !this.sleepsThroughWinter(s.animal));
+    const movingIn = awake.find((s) => s.animal.state === 'away' && s.missing.length === 0);
     if (movingIn) {
       this.startMoveIn(movingIn.animal);
       return;
     }
 
     const now = this.scene.time.now;
-    const visiting = status.find(
+    const visiting = awake.find(
       (s) =>
         s.animal.state === 'away' &&
         s.fulfilled > 0 &&
@@ -144,14 +153,55 @@ export class AnimalManager {
   setNight(night) {
     this.night = night;
     this.animals
-      .filter((animal) => animal.state === 'resident')
+      .filter((animal) => animal.state === 'resident' && !animal.hibernating)
       .forEach((animal, i) => {
         this.scene.time.delayedCall(600 + i * 250, () => {
-          if (animal.state !== 'resident' || this.night !== night) return;
+          if (animal.state !== 'resident' || animal.hibernating || this.night !== night) return;
           if (this.shouldSleep(animal)) animal.setSleeping(true);
           else animal.wakeUp();
         });
       });
+  }
+
+  // ---------- Jahreszeiten ----------
+
+  sleepsThroughWinter(animal) {
+    return this.season === 'winter' && Boolean(animal.def.winter);
+  }
+
+  // Das nächstgelegene Winterversteck (z. B. der Laubhaufen für den Igel)
+  shelterFor(animal) {
+    const shelters = this.getPlaced().filter((item) => item.element.type === animal.def.winter.shelter);
+    let best = null;
+    shelters.forEach((item) => {
+      if (!best || Phaser.Math.Distance.Between(item.x, item.y, animal.x, animal.y) < Phaser.Math.Distance.Between(best.x, best.y, animal.x, animal.y)) best = item;
+    });
+    return best;
+  }
+
+  // Wer schläft gerade in diesem Ding seinen Winterschlaf?
+  hibernatingIn(item) {
+    return this.animals.filter((animal) => animal.hibernating && animal.shelter === item && !animal.container.visible);
+  }
+
+  // Im Winter verkriechen sich manche Tiere, im Frühling kommen sie wieder heraus
+  setSeason(season) {
+    this.season = season;
+    this.animals.forEach((animal) => (animal.season = season));
+    const residents = this.animals.filter((animal) => animal.state === 'resident');
+    residents.forEach((animal, i) => {
+      this.scene.time.delayedCall(800 + i * 300, () => {
+        if (animal.state !== 'resident' || this.season !== season) return;
+        if (this.sleepsThroughWinter(animal) && !animal.hibernating) {
+          const shelter = this.shelterFor(animal);
+          if (shelter) animal.hibernate(shelter);
+        } else if (!this.sleepsThroughWinter(animal) && animal.hibernating) {
+          animal.wakeFromHibernation();
+          animal.startWandering(() => this.spotFor(animal));
+          if (this.shouldSleep(animal)) this.scene.time.delayedCall(800, () => animal.setSleeping(true));
+        }
+      });
+    });
   }
 
   // Merkt sich, wann und bei welchem Stand das Tier zuletzt gesagt hat, was fehlt

@@ -668,6 +668,51 @@ def mond():
     svg('mond', 64, 64, defs, body, 'Mond mit Sternen (Knopf: Nacht).')
 
 
+# ---------------------------------------------------------------- Jahreszeiten (Knopf)
+# Der Knopf zeigt die Jahreszeit, die als Nächstes kommt.
+
+def jahreszeit_fruehling():
+    defs = linear('bluete', st(('0', '#ff9ec4'), ('1', '#e2557f')))
+    body = '''  <path d="M32,60 L32,30" stroke="#4f9a3a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32,50 Q18,46 14,32 Q28,34 32,46 Z" fill="#6cc04a" stroke="#3d7a2a" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M32,54 Q46,50 50,38 Q36,40 32,50 Z" fill="#6cc04a" stroke="#3d7a2a" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M20,10 L26,18 L32,6 L38,18 L44,10 L44,24 Q44,34 32,34 Q20,34 20,24 Z" fill="url(#bluete)" stroke="#b83a64" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M25,20 Q25,28 30,30" stroke="#fff" stroke-opacity="0.55" stroke-width="2.5" fill="none" stroke-linecap="round"/>'''
+    svg('jahreszeit-fruehling', 64, 64, defs, body, 'Tulpe (Knopf: Frühling).')
+
+
+def jahreszeit_sommer():
+    defs = radial('kern', st(('0', '#a0662a'), ('1', '#5a3412')), cx='45%', cy='40%')
+    petals = ''.join(
+        f'  <ellipse cx="{32 + 17 * math.cos(a):.1f}" cy="{30 + 17 * math.sin(a):.1f}" rx="8" ry="4.6" '
+        f'transform="rotate({math.degrees(a):.0f} {32 + 17 * math.cos(a):.1f} {30 + 17 * math.sin(a):.1f})" fill="#ffd23f" stroke="#e09a12" stroke-width="1.4"/>\n'
+        for a in (i * math.pi / 6 for i in range(12))
+    )
+    body = f'''  <path d="M32,44 L32,62" stroke="#4f9a3a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32,56 Q44,52 48,44 Q38,46 32,52 Z" fill="#6cc04a" stroke="#3d7a2a" stroke-width="1.6"/>
+{petals}  <circle cx="32" cy="30" r="11" fill="url(#kern)" stroke="#3e220a" stroke-width="1.6"/>
+  <circle cx="29" cy="27" r="1.4" fill="#d9a066"/><circle cx="35" cy="29" r="1.4" fill="#d9a066"/><circle cx="31" cy="33" r="1.4" fill="#d9a066"/>'''
+    svg('jahreszeit-sommer', 64, 64, defs, body, 'Sonnenblume (Knopf: Sommer).')
+
+
+def jahreszeit_herbst():
+    defs = linear('blatt', st(('0', '#ffb347'), ('0.6', '#f07a2a'), ('1', '#c8441e')))
+    body = '''  <path d="M32,4 L37,18 L49,12 L45,26 L59,28 L48,37 L54,46 L40,44 L36,54 L32,48 L28,54 L24,44 L10,46 L16,37 L5,28 L19,26 L15,12 L27,18 Z" fill="url(#blatt)" stroke="#a8381a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M32,48 L32,62 M32,40 L22,30 M32,40 L42,30 M32,30 L32,14" stroke="#a8381a" stroke-width="2.2" fill="none" stroke-linecap="round"/>'''
+    svg('jahreszeit-herbst', 64, 64, defs, body, 'Buntes Herbstblatt (Knopf: Herbst).')
+
+
+def jahreszeit_winter():
+    arms = ''
+    for i in range(6):
+        a = math.degrees(i * math.pi / 3)
+        arms += (f'  <g transform="rotate({a:.0f} 32 32)">'
+                 '<path d="M32,32 L32,6 M32,14 L25,8 M32,14 L39,8 M32,22 L26,17 M32,22 L38,17" '
+                 'stroke="#5aa9ec" stroke-width="3.4" fill="none" stroke-linecap="round"/></g>\n')
+    body = f'''{arms}  <circle cx="32" cy="32" r="5" fill="#ffffff" stroke="#5aa9ec" stroke-width="2.4"/>'''
+    svg('jahreszeit-winter', 64, 64, '', body, 'Schneeflocke (Knopf: Winter).')
+
+
 # ---------------------------------------------------------------- Frosch
 def frosch():
     defs = '\n'.join([
@@ -1184,6 +1229,10 @@ symbol_shirt()
 symbol_hose()
 sonne()
 mond()
+jahreszeit_fruehling()
+jahreszeit_sommer()
+jahreszeit_herbst()
+jahreszeit_winter()
 frosch()
 steine()
 baum('obstbaum', '#b5e07e', '#62b04a', '#357a2e', '#285e24', 'apfel')

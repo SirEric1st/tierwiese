@@ -6,7 +6,8 @@
 // Mit dem Korb-Knopf wird die Leiste zum Futterkorb; Futter zieht man zu den Tieren.
 // Der Album-Knopf oben rechts öffnet das Tier-Album. Tippt man auf die eigene
 // Figur, öffnet sich der Figuren-Baukasten.
-// Der Knopf daneben (Mond oder Sonne) macht Nacht oder Tag.
+// Der Knopf daneben (Mond oder Sonne) macht Nacht oder Tag, der nächste
+// wechselt die Jahreszeit (er zeigt die Jahreszeit, die als Nächstes kommt).
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin, uiScale } from '../display.js';
@@ -14,6 +15,7 @@ import { getElement } from '../elements.js';
 import { makeFigureTexture, normalizeFigure } from '../figure.js';
 import { cleanName } from '../parents.js';
 import { loadGame, saveGame } from '../save.js';
+import { SEASONS, SEASON_TEXTS, SeasonView } from '../Seasons.js';
 import { say } from '../speech.js';
 
 const WORLD_WIDTH = 2400;
@@ -56,7 +58,7 @@ export class WorldScene extends Phaser.Scene {
 
   create() {
     setupCamera(this);
-    this.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'gras').setOrigin(0).setTileScale(IMAGE_SCALE);
+    this.grass = this.add.tileSprite(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 'gras').setOrigin(0).setTileScale(IMAGE_SCALE);
     this.scatterFlowers();
 
     const saved = loadGame();
@@ -99,8 +101,12 @@ export class WorldScene extends Phaser.Scene {
     );
     this.night = Boolean(saved?.night);
     this.animals.night = this.night;
+    this.season = SEASONS.includes(saved?.season) ? saved.season : SEASONS[0];
+    this.animals.setSeason(this.season);
     if (saved) this.animals.restore(saved.animals);
     this.createNight();
+    this.seasons = new SeasonView(this, this.grass, this.flowers, { width: WORLD_WIDTH, height: WORLD_HEIGHT });
+    this.seasons.apply(this.season, false);
     this.bar = new BuildBar(this);
     this.createAlbumButton();
 
@@ -128,6 +134,7 @@ export class WorldScene extends Phaser.Scene {
   layoutHud() {
     this.bar.layout();
     this.layoutAlbumButton();
+    this.seasons.layout();
   }
 
   // ---------- Zoomen ----------
@@ -196,11 +203,14 @@ export class WorldScene extends Phaser.Scene {
     icon.setScale((ALBUM_RADIUS * 1.4) / Math.max(icon.width, icon.height));
     this.albumButton = this.add.container(0, 0, [circle, icon]);
     // Tag/Nacht-Knopf: zeigt, wohin er führt (am Tag den Mond, nachts die Sonne)
-    this.skyIcon = this.add.image(0, 0, 'mond');
-    this.skyIcon.setScale((ALBUM_RADIUS * 1.4) / Math.max(this.skyIcon.width, this.skyIcon.height));
-    this.skyButton = this.add.container(0, 0, [this.add.circle(0, 0, ALBUM_RADIUS, 0xffffff, 0.9), this.skyIcon]);
+    this.skyButton = this.createRoundButton('mond');
     this.updateSkyButton();
-    this.hud = this.add.container(0, 0, [this.albumButton, this.skyButton]).setScrollFactor(0).setDepth(100000);
+    this.seasonButton = this.createRoundButton('jahreszeit-sommer');
+    this.updateSeasonButton();
+    this.hud = this.add
+      .container(0, 0, [this.albumButton, this.skyButton, this.seasonButton])
+      .setScrollFactor(0)
+      .setDepth(100000);
     this.layoutAlbumButton();
   }
 
@@ -210,6 +220,16 @@ export class WorldScene extends Phaser.Scene {
     this.hud.setPosition(origin.x, origin.y).setScale(uiScale(this));
     this.albumButton.setPosition(width - ALBUM_RADIUS - ALBUM_MARGIN, ALBUM_RADIUS + ALBUM_MARGIN);
     this.skyButton.setPosition(this.albumButton.x - ALBUM_RADIUS * 2 - ALBUM_MARGIN, this.albumButton.y);
+    this.seasonButton.setPosition(this.skyButton.x - ALBUM_RADIUS * 2 - ALBUM_MARGIN, this.albumButton.y);
+  }
+
+  // Weißer runder Knopf mit Bild; button.icon ist das Bild
+  createRoundButton(texture) {
+    const icon = this.add.image(0, 0, texture);
+    icon.setScale((ALBUM_RADIUS * 1.4) / Math.max(icon.width, icon.height));
+    const button = this.add.container(0, 0, [this.add.circle(0, 0, ALBUM_RADIUS, 0xffffff, 0.9), icon]);
+    button.icon = icon;
+    return button;
   }
 
   // Liegt diese Bildschirmposition auf dem Album-Knopf?
@@ -275,7 +295,27 @@ export class WorldScene extends Phaser.Scene {
   }
 
   updateSkyButton() {
-    this.skyIcon.setTexture(this.night ? 'sonne' : 'mond');
+    this.skyButton.icon.setTexture(this.night ? 'sonne' : 'mond');
+  }
+
+  // ---------- Jahreszeiten ----------
+
+  get nextSeason() {
+    return SEASONS[(SEASONS.indexOf(this.season) + 1) % SEASONS.length];
+  }
+
+  updateSeasonButton() {
+    this.seasonButton.icon.setTexture(`jahreszeit-${this.nextSeason}`);
+  }
+
+  changeSeason() {
+    this.season = this.nextSeason;
+    this.tweens.add({ targets: this.seasonButton, scale: 1.15, duration: 120, yoyo: true });
+    this.updateSeasonButton();
+    this.seasons.apply(this.season, true);
+    say(SEASON_TEXTS[this.season]);
+    this.animals.setSeason(this.season);
+    this.requestSave();
   }
 
   toggleNight() {
@@ -316,6 +356,7 @@ export class WorldScene extends Phaser.Scene {
       profile: this.profile,
       animals: this.animals.getState(),
       night: this.night,
+      season: this.season,
     });
   }
 
@@ -323,10 +364,11 @@ export class WorldScene extends Phaser.Scene {
   scatterFlowers() {
     const rnd = new Phaser.Math.RandomDataGenerator(['wiese']);
     const keys = ['blume-gelb', 'blume-rosa', 'blume-weiss'];
+    this.flowers = [];
     for (let i = 0; i < 60; i++) {
       const x = rnd.between(30, WORLD_WIDTH - 30);
       const y = rnd.between(40, WORLD_HEIGHT - 20);
-      this.add.image(x, y, rnd.pick(keys)).setOrigin(0.5, 1).setScale(IMAGE_SCALE).setDepth(DEPTH_FLOWERS);
+      this.flowers.push(this.add.image(x, y, rnd.pick(keys)).setOrigin(0.5, 1).setScale(IMAGE_SCALE).setDepth(DEPTH_FLOWERS));
     }
   }
 
@@ -336,6 +378,7 @@ export class WorldScene extends Phaser.Scene {
   // eingeordnet. `this.touch.mode` sagt, worauf der Finger anfangs lag:
   //   'album'   – der Album-Knopf
   //   'sky'     – der Tag/Nacht-Knopf
+  //   'season'  – der Jahreszeiten-Knopf
   //   'bar'     – die Leiste: ein Knopf (Ding, Futter, Umschalten) oder Wischen zum Blättern
   //   'element' – ein Ding auf der Wiese
   //   'pet'     – ein eingezogenes Tier: antippen oder streicheln
@@ -364,6 +407,8 @@ export class WorldScene extends Phaser.Scene {
         Object.assign(touch, { mode: 'album' });
       } else if (this.isOnButton(this.skyButton, screen.x, screen.y)) {
         Object.assign(touch, { mode: 'sky' });
+      } else if (this.isOnButton(this.seasonButton, screen.x, screen.y)) {
+        Object.assign(touch, { mode: 'season' });
       } else if (this.bar.contains(screen.x, screen.y)) {
         // Auch zwischen den Knöpfen kann man wischen (dann ist slot leer)
         Object.assign(touch, { mode: 'bar', slot: this.bar.slotAt(screen.x, screen.y) });
@@ -437,6 +482,8 @@ export class WorldScene extends Phaser.Scene {
       this.openAlbum();
     } else if (touch.mode === 'sky') {
       this.toggleNight();
+    } else if (touch.mode === 'season') {
+      this.changeSeason();
     } else if (touch.mode === 'bar' && !touch.slot) {
       // zwischen die Knöpfe getippt: nichts tun
     } else if (touch.mode === 'bar' && touch.slot.toggle) {
@@ -448,7 +495,12 @@ export class WorldScene extends Phaser.Scene {
       say((touch.slot.element ?? touch.slot.food).hint);
     } else if (touch.mode === 'element') {
       this.wiggle(touch.item);
-      say(touch.item.element.name);
+      // Schläft darin ein Tier seinen Winterschlaf, erzählt es davon
+      const sleeper = Phaser.Utils.Array.GetRandom(this.animals.hibernatingIn(touch.item));
+      if (sleeper) {
+        say(sleeper.def.winter.text);
+        sleeper.snore();
+      } else say(touch.item.element.name);
     } else if (touch.figure) {
       this.openFigureEditor();
     } else if (touch.animal) {
@@ -464,7 +516,7 @@ export class WorldScene extends Phaser.Scene {
       touch.animal.startPetting();
       return;
     }
-    if (touch.mode === 'album' || touch.mode === 'sky' || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
+    if (['album', 'sky', 'season'].includes(touch.mode) || (touch.mode === 'bar' && (!touch.slot || touch.slot.toggle))) {
       touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }
@@ -602,6 +654,7 @@ export class WorldScene extends Phaser.Scene {
     const item = this.add.image(x, y, element.type).setScale(IMAGE_SCALE);
     item.setOrigin(0.5, element.flat ? 0.5 : 1);
     item.element = element;
+    this.seasons?.tintItem(item);
     return item;
   }
 

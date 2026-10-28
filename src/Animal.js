@@ -67,6 +67,10 @@ export class Animal {
   }
 
   onTap() {
+    if (this.hibernating) {
+      say(this.def.winter.text);
+      return;
+    }
     if (this.sleeping) {
       this.squish();
       say(this.sleepText());
@@ -264,6 +268,15 @@ export class Animal {
 
   // Ausziehen, weil etwas fehlt – kein Drama, nur ein kleiner Ausflug
   leave(missingNeed, done) {
+    if (this.hibernating) {
+      // Das Versteck ist weg: still aus dem Winterschlaf verschwinden
+      this.stopHibernating();
+      this.state = 'away';
+      this.missingNeed = missingNeed;
+      this.container.setVisible(false);
+      this.scene.time.delayedCall(0, done);
+      return;
+    }
     this.setSleeping(false);
     this.stopWandering();
     this.state = 'away';
@@ -283,7 +296,12 @@ export class Animal {
     const next = () => {
       if (this.state !== 'resident') return;
       this.wanderTimer = this.scene.time.delayedCall(Phaser.Math.Between(3000, 7000), () => {
-        if (this.petting || this.eating || this.sleeping) return next(); // dann bleibt es stehen
+        if (this.petting || this.eating || this.sleeping || this.hibernating) return next(); // dann bleibt es stehen
+        if (this.def.stash && this.season === 'herbst' && Math.random() < 0.4) {
+          this.stash();
+          this.scene.time.delayedCall(1300, () => this.moveOn());
+          return next();
+        }
         const spot = pickSpot();
         if (spot) this.walkTo(spot.x, spot.y, WANDER_SPEED, next);
         else next();
@@ -311,15 +329,9 @@ export class Animal {
       this.hideBubble();
       this.sprite.setScale(IMAGE_SCALE * 1.04, IMAGE_SCALE * 0.9);
       if (this.def.flies) this.land();
-      this.snoreTimer = this.scene.time.addEvent({
-        delay: SNORE_EVERY,
-        startAt: Phaser.Math.Between(0, SNORE_EVERY - 1),
-        loop: true,
-        callback: () => this.snore(),
-      });
+      this.startSnoring();
     } else {
-      this.snoreTimer?.remove();
-      this.snoreTimer = null;
+      this.stopSnoring();
       this.sprite.setScale(IMAGE_SCALE);
       if (this.def.flies) this.startHovering();
     }
@@ -339,11 +351,33 @@ export class Animal {
       : 'Leise, ich schlafe gerade. Ich bin am Tag wach.';
   }
 
-  // Ein „Z“ steigt auf – aber nur, wenn man das Tier gerade sieht
+  startSnoring() {
+    this.stopSnoring();
+    this.snoreTimer = this.scene.time.addEvent({
+      delay: SNORE_EVERY,
+      startAt: Phaser.Math.Between(0, SNORE_EVERY - 1),
+      loop: true,
+      callback: () => this.snore(),
+    });
+  }
+
+  stopSnoring() {
+    this.snoreTimer?.remove();
+    this.snoreTimer = null;
+  }
+
+  // Ein „Z“ steigt auf – aber nur, wenn man das Tier (oder sein Winterversteck) gerade sieht
   snore() {
-    if (!this.container.visible || !this.scene.cameras.main.worldView.contains(this.x, this.y)) return;
+    let x = this.x + 12;
+    let y = this.top + 6;
+    if (this.hibernating) {
+      if (!this.shelter.active) return;
+      x = this.shelter.x + 10;
+      y = this.shelter.y - this.shelter.displayHeight * (this.shelter.originY === 1 ? 0.7 : 0.2);
+    } else if (!this.container.visible) return;
+    if (!this.scene.cameras.main.worldView.contains(x, y)) return;
     const z = this.scene.add
-      .text(this.x + 12, this.top + 6, 'Z', {
+      .text(x, y, 'Z', {
         fontFamily: FONT,
         fontSize: '26px',
         fontStyle: 'bold',
@@ -365,6 +399,72 @@ export class Animal {
       ease: 'Sine.easeOut',
       onComplete: () => z.destroy(),
     });
+  }
+
+  // ---------- Winter ----------
+
+  // Zum Versteck laufen und darin verschwinden (Winterschlaf, Winterruhe, Winterstarre)
+  hibernate(shelter) {
+    if (this.hibernating) return;
+    this.setSleeping(false);
+    this.stopWandering();
+    this.hideBubble();
+    this.hibernating = true;
+    this.shelter = shelter;
+    this.walkTo(shelter.x, shelter.y + 5, WALK_SPEED, () => {
+      if (!this.hibernating) return;
+      this.scene.tweens.add({
+        targets: this.container,
+        alpha: 0,
+        scale: 0.5,
+        duration: 500,
+        onComplete: () => {
+          if (this.hibernating) this.container.setVisible(false);
+          this.container.setAlpha(1).setScale(1);
+          this.hoverTween?.stop(); // im Versteck wird nicht geschwebt
+        },
+      });
+      this.startSnoring();
+    });
+  }
+
+  // Beim Laden im Winter: gleich im Versteck sein
+  placeHibernating(shelter) {
+    this.hibernating = true;
+    this.shelter = shelter;
+    this.setPosition(shelter.x, shelter.y + 5);
+    this.container.setVisible(false);
+    this.startSnoring();
+  }
+
+  // Im Frühling wieder aus dem Versteck kommen
+  wakeFromHibernation() {
+    if (!this.hibernating) return;
+    this.stopHibernating();
+    if (this.shelter?.active) this.setPosition(this.shelter.x, this.shelter.y + 15);
+    this.container.setAlpha(0).setScale(0.5).setVisible(true);
+    if (this.def.flies) this.startHovering();
+    this.scene.tweens.add({ targets: this.container, alpha: 1, scale: 1, duration: 500, ease: 'Back.easeOut' });
+    this.hop();
+  }
+
+  stopHibernating() {
+    this.hibernating = false;
+    this.stopSnoring();
+    this.walkTween?.stop();
+    this.stopBobbing();
+  }
+
+  // Im Herbst: eine Nuss vergraben
+  stash() {
+    const front = this.sprite.flipX ? -1 : 1;
+    const x = this.x + front * this.sprite.displayWidth * 0.4;
+    const nut = this.scene.add.image(x, this.top + this.sprite.displayHeight * 0.4, this.def.stash);
+    nut.setScale(36 / Math.max(nut.width, nut.height)).setDepth(this.y + 1);
+    this.holdStill();
+    this.scene.tweens.add({ targets: nut, y: this.y - 4, duration: 350, ease: 'Bounce.easeOut' });
+    this.scene.tweens.add({ targets: this.sprite, angle: { from: -8, to: 8 }, duration: 100, yoyo: true, repeat: 4, delay: 350, onComplete: () => this.sprite.setAngle(0) });
+    this.scene.tweens.add({ targets: nut, scale: 0, alpha: 0, duration: 600, delay: 600, onComplete: () => nut.destroy() });
   }
 
   // Fliegende Tiere schweben auf und ab …

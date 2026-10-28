@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Buntes Herbstblatt (Knopf: Herbst). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="blatt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="0.6" stop-color="#f07a2a"/><stop offset="1" stop-color="#c8441e"/></linearGradient>
+  </defs>
+  <path d="M32,4 L37,18 L49,12 L45,26 L59,28 L48,37 L54,46 L40,44 L36,54 L32,48 L28,54 L24,44 L10,46 L16,37 L5,28 L19,26 L15,12 L27,18 Z" fill="url(#blatt)" stroke="#a8381a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M32,48 L32,62 M32,40 L22,30 M32,40 L42,30 M32,30 L32,14" stroke="#a8381a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+</svg>

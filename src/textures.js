@@ -30,6 +30,10 @@ const GRAPHICS = [
   'album',
   'sonne',
   'mond',
+  'jahreszeit-fruehling',
+  'jahreszeit-sommer',
+  'jahreszeit-herbst',
+  'jahreszeit-winter',
   'symbol-frisur',
   'symbol-haarfarbe',
   'symbol-haut',
@@ -55,6 +59,8 @@ export function createTextures(scene) {
   if (!scene.textures.exists('konfetti')) drawConfetti(scene);
   if (!scene.textures.exists('herz')) drawHeart(scene);
   if (!scene.textures.exists('leuchtpunkt')) drawGlow(scene);
+  if (!scene.textures.exists('schneeflocke')) drawSnowflake(scene);
+  if (!scene.textures.exists('blatt')) drawLeaves(scene);
 }
 
 // Ein rotes Herz, das beim Streicheln aufsteigt (28 × 26 Punkte)
@@ -83,6 +89,37 @@ function drawGlow(scene) {
   g.fillCircle(12 * s, 12 * s, 2.5 * s);
   g.generateTexture('leuchtpunkt', 24 * s, 24 * s);
   g.destroy();
+}
+
+// Eine weiche Schneeflocke (14 × 14 Punkte)
+function drawSnowflake(scene) {
+  const s = DPR;
+  const g = scene.make.graphics({ add: false });
+  g.fillStyle(0xffffff, 0.35);
+  g.fillCircle(7 * s, 7 * s, 7 * s);
+  g.fillStyle(0xffffff);
+  g.fillCircle(7 * s, 7 * s, 4.5 * s);
+  g.generateTexture('schneeflocke', 14 * s, 14 * s);
+  g.destroy();
+}
+
+// Fallende Blätter: Herbstlaub (Frames 0 bis 2) und rosa Blütenblätter (Frame 3)
+export const LEAF_COLORS = [0xf07a2a, 0xd9452a, 0xf2b53a, 0xffb3cf];
+
+function drawLeaves(scene) {
+  const w = 22 * DPR;
+  const h = 14 * DPR;
+  const g = scene.make.graphics({ add: false });
+  LEAF_COLORS.forEach((color, i) => {
+    g.fillStyle(color);
+    g.fillEllipse(i * w + w / 2, h / 2, w * 0.9, h * 0.75);
+    g.fillStyle(0xffffff, 0.3);
+    g.fillEllipse(i * w + w * 0.4, h * 0.38, w * 0.4, h * 0.22);
+  });
+  g.generateTexture('blatt', LEAF_COLORS.length * w, h);
+  g.destroy();
+  const texture = scene.textures.get('blatt');
+  LEAF_COLORS.forEach((_, i) => texture.add(i, 0, i * w, 0, w, h));
 }
 
 // Auf Bildschirmen ohne Retina die KI-Bilder auf halbe Größe bringen,

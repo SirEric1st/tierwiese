@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Tulpe (Knopf: Frühling). Eigene Zeichnung für das Spiel Tierwiese. -->
+  <defs>
+    <linearGradient id="bluete" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9ec4"/><stop offset="1" stop-color="#e2557f"/></linearGradient>
+  </defs>
+  <path d="M32,60 L32,30" stroke="#4f9a3a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32,50 Q18,46 14,32 Q28,34 32,46 Z" fill="#6cc04a" stroke="#3d7a2a" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M32,54 Q46,50 50,38 Q36,40 32,50 Z" fill="#6cc04a" stroke="#3d7a2a" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M20,10 L26,18 L32,6 L38,18 L44,10 L44,24 Q44,34 32,34 Q20,34 20,24 Z" fill="url(#bluete)" stroke="#b83a64" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M25,20 Q25,28 30,30" stroke="#fff" stroke-opacity="0.55" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>

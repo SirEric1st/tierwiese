@@ -9,6 +9,9 @@
 // shore: am Teich sitzt das Tier am Ufer statt zu schwimmen.
 // flies: das Tier schwebt über dem Boden (Schmetterling, Biene, Fledermaus).
 // nocturnal: das Tier ist nachts wach und schläft am Tag (alle anderen umgekehrt).
+// winter: das Tier verkriecht sich im Winter in sein Versteck (shelter, ein Ding
+//         aus needs). text wird vorgelesen, wenn man das Versteck antippt.
+// stash:  im Herbst vergräbt das Tier Vorräte (Futter-Bild).
 // Wichtig: keine Tierlaute wie „Quak“ in Sprachtexten – die iPad-Stimme
 // spricht sie unvorhersehbar aus.
 // Futter wie Insekten, Würmer oder Samen gibt es auf der Wiese von selbst.
@@ -16,6 +19,7 @@
 export const ANIMALS = [
   {
     type: 'igel',
+    winter: { shelter: 'laubhaufen', text: 'Leise! Hier drin hält der Igel Winterschlaf. Im Frühling wacht er wieder auf.' },
     nocturnal: true,
     name: 'Igel',
     album: [
@@ -56,6 +60,7 @@ export const ANIMALS = [
   },
   {
     type: 'eichhoernchen',
+    stash: 'nuss', // vergräbt im Herbst Nüsse
     name: 'Eichhörnchen',
     album: [
       'Das ist das Eichhörnchen.',
@@ -75,6 +80,7 @@ export const ANIMALS = [
   },
   {
     type: 'frosch',
+    winter: { shelter: 'steine', text: 'Leise! Unter den Steinen überwintert der Frosch. Er bewegt sich kaum, bis es wieder warm wird.' },
     name: 'Teichfrosch',
     album: [
       'Das ist der Teichfrosch.',
@@ -95,6 +101,7 @@ export const ANIMALS = [
   },
   {
     type: 'marienkaefer',
+    winter: { shelter: 'laubhaufen', text: 'Leise! Unter dem Laub überwintert der Marienkäfer. Im Frühling krabbelt er wieder heraus.' },
     name: 'Marienkäfer',
     album: [
       'Das ist der Marienkäfer.',
@@ -114,6 +121,7 @@ export const ANIMALS = [
   },
   {
     type: 'zitronenfalter',
+    winter: { shelter: 'busch', text: 'Leise! Im Busch überwintert der Zitronenfalter. Sogar Frost macht ihm nichts aus.' },
     name: 'Zitronenfalter',
     album: [
       'Das ist der Zitronenfalter.',
@@ -134,6 +142,7 @@ export const ANIMALS = [
   },
   {
     type: 'biene',
+    winter: { shelter: 'insektenhotel', text: 'Leise! In den Röhrchen überwintern die Kinder der Wildbiene. Im Frühling krabbeln sie heraus.' },
     name: 'Wildbiene',
     album: [
       'Das ist die Wildbiene.',
@@ -250,6 +259,7 @@ export const ANIMALS = [
   },
   {
     type: 'dachs',
+    winter: { shelter: 'bau', text: 'Leise! Hier drin hält der Dachs Winterruhe. Ab und zu wacht er auf und kommt kurz heraus.' },
     nocturnal: true,
     name: 'Dachs',
     album: [
@@ -289,6 +299,7 @@ export const ANIMALS = [
   },
   {
     type: 'fledermaus',
+    winter: { shelter: 'totholz', text: 'Leise! Im alten Baumstamm hält die Fledermaus Winterschlaf, kopfüber. Im Frühling wacht sie wieder auf.' },
     nocturnal: true,
     name: 'Zwergfledermaus',
     album: [
