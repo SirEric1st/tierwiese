@@ -19,7 +19,16 @@ if (synth) {
   synth.addEventListener?.('voiceschanged', findGermanVoice);
 }
 
-export function say(text) {
+// onDone (optional): wird aufgerufen, wenn der Satz zu Ende gesprochen ist.
+// Ohne Sprachausgabe oder wenn sie hängt, nach einer geschätzten Sprechzeit.
+export function say(text, onDone) {
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    onDone?.();
+  };
+  if (onDone) setTimeout(finish, 1500 + text.length * 80);
   if (!synth) return;
   // Was gerade gesprochen wird, abbrechen, damit sich nichts überlagert
   synth.cancel();
@@ -28,5 +37,6 @@ export function say(text) {
   if (germanVoice) utterance.voice = germanVoice;
   utterance.rate = 0.95;
   utterance.pitch = 1.1;
+  utterance.onend = finish;
   synth.speak(utterance);
 }

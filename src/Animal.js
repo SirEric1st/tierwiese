@@ -28,6 +28,8 @@ export class Animal {
     this.world = world; // { width, height }
     this.isInWater = isInWater;
     this.state = 'away'; // away | visiting | resident
+    this.care = {}; // Album-Sticker: fed, petted, favorite (siehe progress.js)
+    this.onCare = null; // wird aufgerufen, wenn ein Sticker neu dazukommt
 
     this.sprite = scene.add.image(0, 0, def.type).setOrigin(0.5, 1).setScale(IMAGE_SCALE);
     // Fliegende Tiere schweben: Das Bild hängt in einem eigenen Behälter über dem Boden
@@ -99,6 +101,8 @@ export class Animal {
       this.showHeart();
       this.squish();
     }
+    // Genug gestreichelt gibt einen Sticker (auch wenn das Tier dabei schläft)
+    if (before < PET_TALK_DISTANCE && this.petDistance >= PET_TALK_DISTANCE) this.earnSticker('petted');
     const now = this.scene.time.now;
     if (
       !this.sleeping &&
@@ -163,6 +167,8 @@ export class Animal {
         this.squish();
         playHappy();
         say(this.def.yummy);
+        this.earnSticker('fed');
+        if (food.type === this.def.eats[0]) this.scene.time.delayedCall(700, () => this.earnSticker('favorite'));
       });
       [500, 800, 1100].forEach((delay) => this.scene.time.delayedCall(delay, () => this.showHeart()));
       this.scene.time.delayedCall(1500, () => this.finishEating());
@@ -179,6 +185,13 @@ export class Animal {
       });
     }
     return true;
+  }
+
+  // Ein Album-Sticker: nur beim ersten Mal ein Ereignis
+  earnSticker(key) {
+    if (this.care[key]) return;
+    this.care[key] = true;
+    this.onCare?.(this, key);
   }
 
   finishEating() {
@@ -252,9 +265,10 @@ export class Animal {
     if (!this.container.visible) this.appearNear(spot);
     this.walkTo(spot.x, spot.y, WALK_SPEED, () => {
       onArrive();
-      say(text);
       this.hop();
-      this.scene.time.delayedCall(3000, done);
+      // Weiter geht es, wenn der Satz zu Ende ist (aber frühestens nach 2 Sekunden)
+      const start = this.scene.time.now;
+      say(text, () => this.scene.time.delayedCall(Math.max(0, 2000 - (this.scene.time.now - start)), done));
     });
   }
 

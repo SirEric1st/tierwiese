@@ -12,6 +12,8 @@
 // winter: das Tier verkriecht sich im Winter in sein Versteck (shelter, ein Ding
 //         aus needs). text wird vorgelesen, wenn man das Versteck antippt.
 // stash:  im Herbst vergräbt das Tier Vorräte (Futter-Bild).
+// gift:   bringt das Tier beim ersten Einzug als Dankeschön mit: ein neues Ding
+//         für die Bau-Leiste (am Anfang gibt es nur wenige, siehe progress.js).
 // Wichtig: keine Tierlaute wie „Quak“ in Sprachtexten – die iPad-Stimme
 // spricht sie unvorhersehbar aus.
 // Futter wie Insekten, Würmer oder Samen gibt es auf der Wiese von selbst.
@@ -19,6 +21,7 @@
 export const ANIMALS = [
   {
     type: 'igel',
+    gift: { type: 'blumen', text: 'Als Dankeschön schenke ich dir ein Blumenbeet! Vielleicht kommen dann Marienkäfer und Schmetterlinge.' },
     winter: { shelter: 'laubhaufen', text: 'Leise! Hier drin hält der Igel Winterschlaf. Im Frühling wacht er wieder auf.' },
     nocturnal: true,
     name: 'Igel',
@@ -40,6 +43,7 @@ export const ANIMALS = [
   },
   {
     type: 'ente',
+    gift: { type: 'steine', text: 'Danke! Ich schenke dir einen Steinhaufen. Darunter verstecken sich gern Frösche.' },
     name: 'Stockente',
     album: [
       'Das ist die Stockente.',
@@ -60,6 +64,7 @@ export const ANIMALS = [
   },
   {
     type: 'eichhoernchen',
+    gift: { type: 'teich', text: 'Danke! Ich schenke dir einen Teich. Wer schwimmt wohl gern darin?' },
     stash: 'nuss', // vergräbt im Herbst Nüsse
     name: 'Eichhörnchen',
     album: [
@@ -101,6 +106,7 @@ export const ANIMALS = [
   },
   {
     type: 'marienkaefer',
+    gift: { type: 'nussbaum', text: 'Danke! Ich schenke dir einen Nussbaum. Wer knabbert wohl gern Nüsse?' },
     winter: { shelter: 'laubhaufen', text: 'Leise! Unter dem Laub überwintert der Marienkäfer. Im Frühling krabbelt er wieder heraus.' },
     name: 'Marienkäfer',
     album: [
@@ -121,6 +127,7 @@ export const ANIMALS = [
   },
   {
     type: 'zitronenfalter',
+    gift: { type: 'insektenhotel', text: 'Danke! Ich schenke dir ein Insektenhotel. Darin wohnen gern Wildbienen.' },
     winter: { shelter: 'busch', text: 'Leise! Im Busch überwintert der Zitronenfalter. Sogar Frost macht ihm nichts aus.' },
     name: 'Zitronenfalter',
     album: [
@@ -163,6 +170,7 @@ export const ANIMALS = [
   },
   {
     type: 'amsel',
+    gift: { type: 'totholz', text: 'Danke! Ich schenke dir einen alten Baumstamm. Darin krabbeln viele Käfer.' },
     name: 'Amsel',
     album: [
       'Das ist die Amsel.',
@@ -201,6 +209,7 @@ export const ANIMALS = [
   },
   {
     type: 'hase',
+    gift: { type: 'obstbaum', text: 'Danke! Ich schenke dir einen Apfelbaum. Äpfel mögen viele Tiere.' },
     name: 'Feldhase',
     album: [
       'Das ist der Feldhase.',
@@ -220,6 +229,7 @@ export const ANIMALS = [
   },
   {
     type: 'reh',
+    gift: { type: 'bau', text: 'Danke! Ich schenke dir einen Erdbau. Wer wohnt wohl gern unter der Erde?' },
     name: 'Reh',
     album: [
       'Das ist das Reh.',
@@ -259,6 +269,7 @@ export const ANIMALS = [
   },
   {
     type: 'dachs',
+    gift: { type: 'nistkasten', text: 'Danke! Ich schenke dir einen Nistkasten. Vielleicht zieht dann eine Eule ein.' },
     winter: { shelter: 'bau', text: 'Leise! Hier drin hält der Dachs Winterruhe. Ab und zu wacht er auf und kommt kurz heraus.' },
     nocturnal: true,
     name: 'Dachs',
@@ -280,6 +291,7 @@ export const ANIMALS = [
   },
   {
     type: 'maulwurf',
+    gift: { type: 'hecke', text: 'Danke! Ich schenke dir eine Hecke. Darin verstecken sich gern viele Tiere.' },
     name: 'Maulwurf',
     album: [
       'Das ist der Maulwurf.',
@@ -341,6 +353,7 @@ export const ANIMALS = [
   },
   {
     type: 'biber',
+    gift: { type: 'schilf', text: 'Danke! Ich schenke dir Schilf. Das wächst am Teichufer.' },
     nocturnal: true,
     name: 'Biber',
     album: [

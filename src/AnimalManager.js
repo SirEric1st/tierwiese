@@ -16,13 +16,23 @@ export class AnimalManager {
   // getPlaced: liefert alles, was gerade auf der Wiese steht
   // onChange:  wird aufgerufen, wenn ein Tier ein- oder auszieht (zum Speichern)
   // getName:   Name der Spielfigur (aus dem Eltern-Bereich, kann leer sein)
-  constructor(scene, getPlaced, world, onChange, getName = () => '') {
+  // hooks:     isUnlocked(type) – gibt es das Ding schon in der Leiste?
+  //            onGift(animal, done) – das Tier überreicht sein Geschenk
+  //            onSticker(animal, key) – ein neuer Album-Sticker
+  constructor(scene, getPlaced, world, onChange, getName = () => '', hooks = {}) {
     this.getName = getName;
+    this.hooks = hooks;
     this.scene = scene;
     this.getPlaced = getPlaced;
     this.world = world;
     this.onChange = onChange;
     this.animals = ANIMALS.map((def) => new Animal(scene, def, world, (x, y) => this.isInWater(x, y)));
+    this.animals.forEach((animal) => {
+      animal.onCare = (_, key) => {
+        this.hooks.onSticker?.(animal, key);
+        this.onChange?.();
+      };
+    });
     this.busy = false;
     this.night = false;
     this.season = 'fruehling';
@@ -36,6 +46,7 @@ export class AnimalManager {
       type: animal.def.type,
       resident: animal.state === 'resident',
       hasLivedHere: Boolean(animal.hasLivedHere),
+      care: { ...animal.care },
     }));
   }
 
@@ -45,6 +56,7 @@ export class AnimalManager {
       const animal = this.animals.find((a) => a.def.type === saved.type);
       if (!animal) return;
       animal.hasLivedHere = saved.hasLivedHere;
+      animal.care = { ...saved.care };
       const shelter = saved.resident && this.sleepsThroughWinter(animal) ? this.shelterFor(animal) : null;
       if (shelter) {
         animal.state = 'resident';
@@ -99,8 +111,12 @@ export class AnimalManager {
       return;
     }
 
-    // Wer im Winter schläft, kommt erst im Frühling wieder
-    const awake = status.filter((s) => !this.sleepsThroughWinter(s.animal));
+    // Wer im Winter schläft, kommt erst im Frühling wieder. Und zu Besuch kommt
+    // nur, wer sich etwas wünscht, das es schon in der Leiste gibt.
+    const isUnlocked = this.hooks.isUnlocked ?? (() => true);
+    const awake = status.filter(
+      (s) => !this.sleepsThroughWinter(s.animal) && s.animal.def.needs.every((need) => isUnlocked(need.type))
+    );
     const movingIn = awake.find((s) => s.animal.state === 'away' && s.missing.length === 0);
     if (movingIn) {
       this.startMoveIn(movingIn.animal);
@@ -135,10 +151,15 @@ export class AnimalManager {
     const spot = this.spotFor(animal);
     this.start((done) =>
       animal.moveIn(spot, text, () => this.celebrate(animal), () => {
+        const firstTime = !animal.hasLivedHere;
         animal.hasLivedHere = true;
         animal.startWandering(() => this.spotFor(animal));
         if (this.shouldSleep(animal)) animal.setSleeping(true);
-        done();
+        // Beim ersten Einzug bringt das Tier ein Geschenk mit
+        const gift = animal.def.gift;
+        if (firstTime && gift && this.hooks.onGift && !this.hooks.isUnlocked?.(gift.type)) {
+          this.hooks.onGift(animal, done);
+        } else done();
       })
     );
   }

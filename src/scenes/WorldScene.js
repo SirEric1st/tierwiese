@@ -9,12 +9,16 @@
 // Der Knopf daneben (Mond oder Sonne) macht Nacht oder Tag, der nächste
 // wechselt die Jahreszeit (er zeigt die Jahreszeit, die als Nächstes kommt).
 // Das Haus oben links führt zurück zum Startbildschirm (anderer Spielstand).
+// Neue Dinge für die Leiste bringen die Tiere als Geschenk mit; Füttern und
+// Streicheln bringt Sticker fürs Album (siehe progress.js).
 import { AnimalManager } from '../AnimalManager.js';
 import { BuildBar } from '../BuildBar.js';
 import { DPR, IMAGE_SCALE, screenSize, setupCamera, toScreen, uiOrigin, uiScale } from '../display.js';
 import { getElement } from '../elements.js';
 import { makeFigureTexture, normalizeFigure } from '../figure.js';
 import { cleanName } from '../parents.js';
+import { stickerTexture, unlockedElements, unlockedFoods } from '../progress.js';
+import { playHappy } from '../sound.js';
 import { loadGame, saveGame } from '../save.js';
 import { SEASONS, SEASON_TEXTS, SeasonView } from '../Seasons.js';
 import { say } from '../speech.js';
@@ -93,12 +97,22 @@ export class WorldScene extends Phaser.Scene {
     camera.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     camera.centerOn(this.player.x, this.player.y - 70);
 
+    // Freigeschaltete Dinge werden gespeichert, damit nichts wieder verschwindet
+    this.unlocked = new Set(saved?.unlocked ?? []);
     this.animals = new AnimalManager(
       this,
       () => this.placed,
       { width: WORLD_WIDTH, height: WORLD_HEIGHT },
-      () => this.requestSave(),
-      () => this.profile.name
+      () => {
+        this.refreshUnlocks();
+        this.requestSave();
+      },
+      () => this.profile.name,
+      {
+        isUnlocked: (type) => this.unlocked.has(type),
+        onGift: (animal, done) => this.receiveGift(animal, done),
+        onSticker: (animal, key) => this.flySticker(animal, key),
+      }
     );
     this.night = Boolean(saved?.night);
     this.animals.night = this.night;
@@ -110,6 +124,7 @@ export class WorldScene extends Phaser.Scene {
     this.seasons.apply(this.season, false);
     this.bar = new BuildBar(this);
     this.createAlbumButton();
+    this.refreshUnlocks();
 
     // Beim Wechsel in eine andere App oder beim Schließen sofort speichern
     this.onHide = () => this.save();
@@ -202,7 +217,9 @@ export class WorldScene extends Phaser.Scene {
     const circle = this.add.circle(0, 0, ALBUM_RADIUS, 0xffffff, 0.9);
     const icon = this.add.image(0, 0, 'album');
     icon.setScale((ALBUM_RADIUS * 1.4) / Math.max(icon.width, icon.height));
-    this.albumButton = this.add.container(0, 0, [circle, icon]);
+    // Roter Punkt: Im Album gibt es einen neuen Sticker
+    this.albumBadge = this.add.circle(30, -30, 12, 0xe8455a).setStrokeStyle(3, 0xffffff).setVisible(false);
+    this.albumButton = this.add.container(0, 0, [circle, icon, this.albumBadge]);
     // Tag/Nacht-Knopf: zeigt, wohin er führt (am Tag den Mond, nachts die Sonne)
     this.skyButton = this.createRoundButton('mond');
     this.updateSkyButton();
@@ -336,10 +353,113 @@ export class WorldScene extends Phaser.Scene {
 
   openAlbum() {
     this.tweens.add({ targets: this.albumButton, scale: 1.15, duration: 120, yoyo: true });
+    this.albumBadge.setVisible(false);
     this.save();
-    const discovered = this.animals.getState().filter((a) => a.hasLivedHere).map((a) => a.type);
+    const state = this.animals.getState();
+    const discovered = state.filter((a) => a.hasLivedHere).map((a) => a.type);
+    const care = Object.fromEntries(state.map((a) => [a.type, a.care]));
     this.scene.pause();
-    this.scene.launch('AlbumScene', { discovered });
+    this.scene.launch('AlbumScene', { discovered, care });
+  }
+
+  // ---------- Freischalten und Sticker ----------
+
+  // Was gibt es in der Leiste? Ein Geschenk, das gerade noch fliegt, zählt noch nicht.
+  refreshUnlocks() {
+    if (!this.bar) return;
+    const state = this.animals.getState();
+    const elements = unlockedElements(state, this.placed.map((item) => item.element.type));
+    elements.forEach((type) => this.unlocked.add(type));
+    const shown = new Set(this.unlocked);
+    if (this.flyingGift) shown.delete(this.flyingGift);
+    this.bar.setAvailable(shown, unlockedFoods(state));
+  }
+
+  // Bildschirmpunkt (wie bei der Leiste) → Punkt auf der Wiese
+  screenToWorld(x, y) {
+    return this.worldAt(x * DPR, y * DPR);
+  }
+
+  // Das Tier überreicht sein Geschenk: Das Ding erscheint über ihm und fliegt in die Leiste
+  receiveGift(animal, done) {
+    const gift = animal.def.gift;
+    this.flyingGift = gift.type;
+    this.unlocked.add(gift.type);
+    this.refreshUnlocks(); // neues Futter ist schon da, das Geschenk noch nicht
+    const icon = this.add.image(animal.x, animal.top - 50, gift.type).setDepth(60000).setScale(0);
+    const size = 110 / Math.max(icon.width, icon.height);
+    this.tweens.add({ targets: icon, scale: size, duration: 500, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: icon, angle: { from: -6, to: 6 }, duration: 400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    let spoken = false;
+    let arrived = false;
+    const finish = () => {
+      if (spoken && arrived) done();
+    };
+    say(gift.text, () => {
+      spoken = true;
+      finish();
+    });
+    this.time.delayedCall(2500, () => {
+      this.flyingGift = null;
+      this.refreshUnlocks();
+      const slot = this.bar.showElement(gift.type);
+      this.tweens.killTweensOf(icon);
+      if (!slot) {
+        icon.destroy();
+        arrived = true;
+        finish();
+        return;
+      }
+      slot.setAlpha(0);
+      const target = this.screenToWorld(slot.x, slot.y);
+      const camera = this.cameras.main;
+      this.tweens.add({
+        targets: icon,
+        x: target.x,
+        y: target.y,
+        angle: 0,
+        scale: (70 / Math.max(icon.width, icon.height)) * (DPR / camera.zoom),
+        duration: 800,
+        ease: 'Quad.easeIn',
+        onComplete: () => {
+          icon.destroy();
+          slot.setAlpha(1);
+          this.bar.bounce(slot);
+          playHappy();
+          this.requestSave();
+          arrived = true;
+          finish();
+        },
+      });
+    });
+  }
+
+  // Ein Album-Sticker steigt beim Tier auf und fliegt zum Album-Knopf
+  flySticker(animal, key) {
+    const icon = this.add.image(animal.x, animal.top - 20, stickerTexture(animal.def, key)).setDepth(60001).setScale(0);
+    const size = 56 / Math.max(icon.width, icon.height);
+    const ring = this.add.circle(icon.x, icon.y, 38, 0xffffff, 0.9).setStrokeStyle(5, 0xffc93a).setDepth(60000).setScale(0);
+    this.tweens.add({ targets: [icon, ring], y: icon.y - 60, duration: 500, ease: 'Quad.easeOut' });
+    this.tweens.add({ targets: icon, scale: size, duration: 500, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: ring, scale: 1, duration: 500, ease: 'Back.easeOut' });
+    this.time.delayedCall(1300, () => {
+      const target = this.screenToWorld(this.albumButton.x, this.albumButton.y);
+      this.tweens.add({
+        targets: [icon, ring],
+        x: target.x,
+        y: target.y,
+        scale: 0.2,
+        duration: 700,
+        ease: 'Quad.easeIn',
+        onComplete: () => {
+          icon.destroy();
+          ring.destroy();
+          this.albumBadge.setVisible(true);
+          this.tweens.add({ targets: this.albumButton, scale: 1.25, duration: 150, yoyo: true });
+        },
+      });
+    });
   }
 
   // Speichern und zurück zum Startbildschirm, dort kann ein anderes Kind spielen
@@ -367,6 +487,7 @@ export class WorldScene extends Phaser.Scene {
       animals: this.animals.getState(),
       night: this.night,
       season: this.season,
+      unlocked: [...this.unlocked],
     });
   }
 
@@ -507,6 +628,7 @@ export class WorldScene extends Phaser.Scene {
       say(this.bar.mode === 'food' ? 'Futter! Zieh es zu einem Tier.' : 'Bauen! Zieh etwas auf die Wiese.');
     } else if (touch.mode === 'bar') {
       this.bar.bounce(touch.slot);
+      this.bar.setGlow(touch.slot, false);
       say((touch.slot.element ?? touch.slot.food).hint);
     } else if (touch.mode === 'element') {
       this.wiggle(touch.item);
@@ -535,6 +657,7 @@ export class WorldScene extends Phaser.Scene {
       touch.mode = 'none'; // Knöpfe kann man nicht herausziehen
       return;
     }
+    if (touch.mode === 'bar') this.bar.setGlow(touch.slot, false);
     if (touch.mode === 'bar' && touch.slot.food) {
       // Futter schwebt etwas über dem Finger, damit man es sieht
       touch.food = touch.slot.food;

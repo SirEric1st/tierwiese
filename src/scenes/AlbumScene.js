@@ -1,18 +1,22 @@
 // Das Tier-Album: eine Seite über der Wiese. Für jedes Tier, das schon
 // einmal eingezogen ist, gibt es ein Bild mit Steckbrief zum Vorlesen.
 // Noch nicht entdeckte Tiere erscheinen als dunkler Schatten.
+// Oben auf jeder Karte sind drei Sticker (gefüttert, gestreichelt,
+// Lieblingsfutter). Jeder schaltet einen Satz im Steckbrief frei.
 // Passen nicht alle Karten auf eine Seite, blättert man mit den Pfeilen
 // oder wischt über die Karten. Der Steckbrief steht in einem Textfeld,
 // das man mit dem Finger nach oben und unten schieben kann.
 // Die WorldScene ist so lange angehalten.
 import { DPR, screenSize, setupCamera, toScreen, uiOrigin } from '../display.js';
 import { ANIMALS } from '../animals.js';
+import { STICKERS, albumLines, stickerTexture } from '../progress.js';
 import { say } from '../speech.js';
 
 const CARD_WIDTH = 170;
-const CARD_HEIGHT = 180;
+const CARD_HEIGHT = 205;
 const CARD_GAP = 16;
-const PICTURE_SIZE = 115; // so groß sind die Tiere auf den Karten (höchstens)
+const PICTURE_SIZE = 105; // so groß sind die Tiere auf den Karten (höchstens)
+const STICKER_RADIUS = 19;
 const CLOSE_RADIUS = 40;
 const ARROW_RADIUS = 34; // Blätter-Pfeile links und rechts
 const ARROW_SPACE = 80; // so viel Platz brauchen die Pfeile am Rand
@@ -29,8 +33,10 @@ export class AlbumScene extends Phaser.Scene {
   }
 
   // data.discovered: Namen der Tiere, die schon einmal eingezogen sind
+  // data.care: pro Tier, welche Sticker es schon gibt ({ fed, petted, favorite })
   init(data) {
     this.discovered = new Set(data.discovered);
+    this.care = data.care || {};
   }
 
   create() {
@@ -91,15 +97,31 @@ export class AlbumScene extends Phaser.Scene {
     background.fillStyle(found ? 0xffffff : 0xe8e0cf);
     background.fillRoundedRect(-CARD_WIDTH / 2, -CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT, 24);
 
-    const picture = this.add.image(0, 40, found ? def.type : this.silhouette(def.type)).setOrigin(0.5, 1);
+    const picture = this.add.image(0, 52, found ? def.type : this.silhouette(def.type)).setOrigin(0.5, 1);
     picture.setScale(PICTURE_SIZE / Math.max(picture.width, picture.height));
-    const label = this.text(found ? def.name : '?', found ? 20 : 34).setPosition(0, 64);
+    const label = this.text(found ? def.name : '?', found ? 20 : 34).setPosition(0, 78);
 
     const card = this.add.container(0, 0, [background, picture, label]);
+    if (found) card.add(this.createStickers(def));
     card.def = def;
     card.found = found;
     this.ui.add(card);
     return card;
+  }
+
+  // Drei runde Sticker: farbig, wenn verdient; blass, solange sie noch fehlen
+  createStickers(def) {
+    const care = this.care[def.type] || {};
+    return STICKERS.map((sticker, i) => {
+      const earned = Boolean(care[sticker.key]);
+      const x = (i - 1) * (STICKER_RADIUS * 2 + 10);
+      const y = -CARD_HEIGHT / 2 + STICKER_RADIUS + 8;
+      const circle = this.add.circle(x, y, STICKER_RADIUS, earned ? 0xfff3c4 : 0xf0ebe0);
+      circle.setStrokeStyle(3, earned ? 0xffc93a : 0xd9d0bd);
+      const icon = this.add.image(x, y, stickerTexture(def, sticker.key));
+      icon.setScale((STICKER_RADIUS * 1.4) / Math.max(icon.width, icon.height)).setAlpha(earned ? 1 : 0.3);
+      return this.add.container(0, 0, [circle, icon]);
+    });
   }
 
   // Ein dunkler Umriss des Tieres – so sieht man, dass hier noch jemand fehlt
@@ -281,8 +303,9 @@ export class AlbumScene extends Phaser.Scene {
       say('Dieses Tier hast du noch nicht entdeckt. Vielleicht kommt es bald zu Besuch!');
       return;
     }
-    this.setInfo(card.def.album.join('\n'));
-    say(card.def.album.join(' '));
+    const lines = albumLines(card.def, this.care[card.def.type]);
+    this.setInfo(lines.join('\n'));
+    say(lines.join(' '));
   }
 
   close() {

@@ -7,6 +7,8 @@
 // Passen nicht alle Knöpfe auf den Bildschirm, wischt man auf der Leiste
 // nach links oder rechts zur nächsten Seite. Punkte über der Leiste zeigen,
 // wie viele Seiten es gibt und auf welcher man gerade ist.
+// Es sind nur Dinge und Futter zu sehen, die schon freigeschaltet sind
+// (siehe progress.js). Neue Knöpfe leuchten, bis man sie benutzt.
 import { screenSize, uiOrigin, uiScale } from './display.js';
 import { ELEMENTS } from './elements.js';
 import { FOODS } from './foods.js';
@@ -36,6 +38,8 @@ export class BuildBar {
 
     this.mode = 'build';
     this.page = 0;
+    this.elementTypes = null; // freigeschaltete Dinge (null = alle)
+    this.foodTypes = null;
     this.highlighted = false;
     this.layout();
   }
@@ -56,7 +60,51 @@ export class BuildBar {
   }
 
   get items() {
-    return this.mode === 'build' ? this.elementSlots : this.foodSlots;
+    if (this.mode === 'build') return this.elementSlots.filter((slot) => !this.elementTypes || this.elementTypes.has(slot.element.type));
+    return this.foodSlots.filter((slot) => !this.foodTypes || this.foodTypes.has(slot.food.type));
+  }
+
+  // Ohne Futter (noch kein Tier eingezogen) gibt es keinen Futterkorb
+  get hasFood() {
+    return !this.foodTypes || this.foodTypes.size > 0;
+  }
+
+  // Was es in der Leiste gibt. Neu Hinzugekommenes leuchtet (außer beim ersten Mal).
+  setAvailable(elementTypes, foodTypes) {
+    const glowNew = (slots, before, after, key) =>
+      slots.forEach((slot) => {
+        const type = slot[key].type;
+        if (before && !before.has(type) && after.has(type)) this.setGlow(slot, true);
+      });
+    glowNew(this.elementSlots, this.elementTypes, elementTypes, 'element');
+    glowNew(this.foodSlots, this.foodTypes, foodTypes, 'food');
+    this.elementTypes = new Set(elementTypes);
+    this.foodTypes = new Set(foodTypes);
+    if (this.mode === 'food' && !this.hasFood) this.mode = 'build';
+    this.layout();
+  }
+
+  // Zur Seite blättern, auf der dieses Ding liegt (z. B. ein neues Geschenk)
+  showElement(type) {
+    if (this.mode !== 'build') this.toggleMode();
+    const index = this.items.findIndex((slot) => slot.element.type === type);
+    if (index < 0) return null;
+    this.page = Math.floor(index / this.perPage);
+    this.layout();
+    return this.items[index];
+  }
+
+  // Ein goldener, pulsierender Ring: „Das ist neu!“
+  setGlow(slot, on) {
+    if (on && !slot.glow) {
+      slot.glow = this.scene.add.circle(0, 0, SLOT_SIZE / 2 + 4).setStrokeStyle(7, 0xffc93a);
+      slot.addAt(slot.glow, 0);
+      this.scene.tweens.add({ targets: slot.glow, alpha: 0.3, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    } else if (!on && slot.glow) {
+      this.scene.tweens.killTweensOf(slot.glow);
+      slot.glow.destroy();
+      slot.glow = null;
+    }
   }
 
   // Die Knöpfe, die gerade zu sehen sind, von links nach rechts
@@ -109,10 +157,12 @@ export class BuildBar {
     const fits = Math.max(4, Math.floor((width - 20) / ((SLOT_SIZE + SLOT_GAP) * MIN_SLOT_SCALE)));
     const items = this.items;
     const perPage = fits - 1; // ein Platz bleibt für den Umschalt-Knopf
-    const pages = Math.ceil(items.length / perPage);
+    const pages = Math.max(1, Math.ceil(items.length / perPage));
     this.pages = pages;
     this.page = ((this.page % pages) + pages) % pages; // nach der letzten Seite kommt wieder die erste
-    const visible = [...items.slice(this.page * perPage, (this.page + 1) * perPage), this.toggleSlot];
+    this.perPage = perPage;
+    const visible = items.slice(this.page * perPage, (this.page + 1) * perPage);
+    if (this.hasFood) visible.push(this.toggleSlot);
     this.visible = visible;
 
     // Beim Blättern bleibt die Leiste gleich breit, der Umschalt-Knopf immer ganz rechts
@@ -127,7 +177,7 @@ export class BuildBar {
     const step = barWidth / places;
     this.step = step;
     this.slotScale = Math.min(1, step / (SLOT_SIZE + SLOT_GAP));
-    [...this.elementSlots, ...this.foodSlots].forEach((slot) => slot.setVisible(false));
+    [...this.elementSlots, ...this.foodSlots, this.toggleSlot].forEach((slot) => slot.setVisible(false));
     visible.forEach((slot, i) => {
       const place = slot.toggle ? places - 1 : i;
       slot.setPosition(this.barLeft + step * (place + 0.5), this.top + BAR_HEIGHT / 2);
