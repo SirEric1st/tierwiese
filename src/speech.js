@@ -22,6 +22,13 @@ function quality(voice) {
   return 2;
 }
 
+// Name für die Auswahl im Eltern-Bereich. Safari nennt mehrere Varianten
+// gleich (z. B. zweimal „Anna“), deshalb kommt die Variante dazu.
+export function voiceLabel(voice) {
+  const variant = ['Roboter', 'einfach', 'normal', 'erweitert', 'Premium'][quality(voice)];
+  return `${voice.name} – ${variant}`;
+}
+
 export function germanVoices() {
   if (!synth) return [];
   return synth

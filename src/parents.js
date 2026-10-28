@@ -4,7 +4,7 @@
 // eine Rechenaufgabe.
 // Name und Foto werden nur im Spielstand auf diesem Gerät gespeichert.
 // Die Stimme gilt für alle Spielstände auf diesem Gerät.
-import { germanVoices, say, setVoice, voiceChoice } from './speech.js';
+import { germanVoices, say, setVoice, voiceChoice, voiceLabel } from './speech.js';
 
 const NAME_LENGTH = 20;
 const PHOTO_SIZE = 192; // das Foto wird quadratisch auf diese Pixelgröße verkleinert
@@ -124,6 +124,7 @@ export function openParentArea(profile, onSave, onCancel) {
     <input type="file" accept="image/*" hidden>
     <label for="eltern-stimme">Stimme</label>
     <select id="eltern-stimme"></select>
+    <div class="eltern-hinweis" data-stimme-technisch></div>
     <div class="eltern-reihe"><button class="leise" data-probe>Probehören</button></div>
     <div class="eltern-hinweis">Bessere Stimmen laden: Einstellungen → Bedienungshilfen → Gesprochene Inhalte →
       Stimmen → Deutsch, dort eine Stimme „Erweitert“ oder „Premium“ laden. Danach das Spiel neu starten.
@@ -149,11 +150,18 @@ export function openParentArea(profile, onSave, onCancel) {
   germanVoices().forEach((voice) => {
     const option = document.createElement('option');
     option.value = voice.voiceURI;
-    option.textContent = `${voice.name} (${voice.lang})`;
+    option.textContent = voiceLabel(voice);
     voiceSelect.appendChild(option);
   });
   const savedChoice = voiceChoice();
   voiceSelect.value = [...voiceSelect.options].some((o) => o.value === savedChoice) ? savedChoice : '';
+  // Kleingedruckt: die genaue Bezeichnung der Stimme (hilft beim Vergleichen)
+  const technical = element.querySelector('[data-stimme-technisch]');
+  const showTechnical = () => {
+    technical.textContent = voiceSelect.value || germanVoices()[0]?.voiceURI || 'keine deutsche Stimme gefunden';
+  };
+  showTechnical();
+  voiceSelect.addEventListener('change', showTechnical);
   element.querySelector('[data-probe]').addEventListener('click', () => {
     say('Hallo, ich bin der Igel! Hier gefällt es mir.', null, voiceSelect.value || germanVoices()[0]?.voiceURI);
   });
