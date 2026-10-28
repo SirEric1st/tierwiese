@@ -9,6 +9,8 @@
 #   python3 tools/sprache.py stimmen            – Stimmen im eigenen Konto mit ID anzeigen
 #   python3 tools/sprache.py probe <Stimmen-ID> – drei Probesätze nach sprachproben/
 #   python3 tools/sprache.py alle                – alle Sätze des Spiels aufnehmen
+#   python3 tools/sprache.py neu <Name> …        – diese Aufnahmen neu machen
+#                                                  (Name = Dateiname ohne .mp3)
 #
 # „alle“ holt die Sätze mit node tools/saetze.mjs, nimmt nur fehlende auf
 # (jede Datei heißt wie die Prüfsumme ihres Satzes), löscht Aufnahmen von
@@ -108,9 +110,14 @@ if __name__ == '__main__':
         list_voices()
     elif len(sys.argv) >= 2 and sys.argv[1] == 'alle':
         record_all()
+    elif len(sys.argv) >= 3 and sys.argv[1] == 'neu':
+        # Alte Aufnahme löschen, dann wird sie wie eine fehlende neu gemacht
+        for name in sys.argv[2:]:
+            (OUT / f'{name}.mp3').unlink(missing_ok=True)
+        record_all()
     elif len(sys.argv) >= 3 and sys.argv[1] == 'probe':
         voice_id = sys.argv[2]
         for i, text in enumerate(PROBE_TEXTE, 1):
             speak(voice_id, text, ROOT / 'sprachproben' / f'{voice_id}-{i}.mp3')
     else:
-        sys.exit('Aufruf: python3 tools/sprache.py stimmen | probe <Stimmen-ID> | alle')
+        sys.exit('Aufruf: python3 tools/sprache.py stimmen | probe <Stimmen-ID> | alle | neu <Name> …')

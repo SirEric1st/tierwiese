@@ -35,6 +35,15 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 | `assets/bilder/fuchs.png` | 28.10.2026 | ChatGPT (Sammelbild 3) |
 | `assets/bilder/dachs.png` | 28.10.2026 | ChatGPT (Sammelbild 3) |
 
+### Sprachaufnahmen
+
+`assets/sprache/*.mp3`: alle Sätze des Spiels, erzeugt von Eric am 28.10.2026
+mit ElevenLabs (Text-to-Speech, Modell „eleven_multilingual_v2“) und der
+Stimme „Bibi Blume – Warm and Soft“ aus der ElevenLabs Voice Library, mit
+bezahltem Abo. Erzeugt mit `tools/sprache.py` aus den Sätzen, die
+`tools/saetze.mjs` sammelt. Es sind keine Namen oder Stimmen der Kinder
+enthalten. Nutzung laut den Bedingungen von ElevenLabs für das gewählte Abo.
+
 ### Weitere
 
 | Datei | Herkunft | Lizenz |
