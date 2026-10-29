@@ -8,7 +8,7 @@ import { ELEMENTS } from './elements.js';
 import { FOODS } from './foods.js';
 
 // Für diese Namen gibt es schon ein KI-Bild
-const PAINTED = ['igel', 'ente', 'ente-schwimmt', 'eichhoernchen', 'frosch', 'marienkaefer', 'zitronenfalter', 'biene', 'amsel', 'specht', 'hase', 'fuchs', 'dachs', 'maulwurf', 'fledermaus', 'waldkauz', 'biber', 'schilf', 'nistkasten', 'insektenhotel'];
+const PAINTED = ['igel', 'ente', 'ente-schwimmt', 'eichhoernchen', 'frosch', 'marienkaefer', 'zitronenfalter', 'biene', 'amsel', 'specht', 'hase', 'fuchs', 'dachs', 'maulwurf', 'fledermaus', 'waldkauz', 'biber', 'schilf', 'nistkasten', 'insektenhotel', 'baum', 'nussbaum', 'obstbaum', 'busch'];
 const PAINTED_SCALE = 2; // KI-Bilder liegen in doppelter Spielgröße vor
 
 export function isPainted(key) {
