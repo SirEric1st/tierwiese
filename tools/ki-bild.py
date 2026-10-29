@@ -28,6 +28,7 @@ SIZES = {
     'ente-schwimmt': (120, 100),
     'eichhoernchen': (115, 125),
     'frosch': (90, 75),
+    'biber': (115, 110),
 }
 RETINA = 2
 # Schwimmende Tiere: aus dem stehenden Bild wird unten so viel abgeschnitten

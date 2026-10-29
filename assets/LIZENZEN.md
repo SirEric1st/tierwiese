@@ -34,6 +34,10 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 | `assets/bilder/hase.png` | 28.10.2026 | ChatGPT (Sammelbild 3) |
 | `assets/bilder/fuchs.png` | 28.10.2026 | ChatGPT (Sammelbild 3) |
 | `assets/bilder/dachs.png` | 28.10.2026 | ChatGPT (Sammelbild 3) |
+| `assets/bilder/maulwurf.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
+| `assets/bilder/fledermaus.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
+| `assets/bilder/waldkauz.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
+| `assets/bilder/biber.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
 
 ### Sprachaufnahmen
 
