@@ -29,11 +29,14 @@ SIZES = {
     'eichhoernchen': (115, 125),
     'frosch': (90, 75),
     'biber': (115, 110),
+    'schilf': (120, 120),
+    'nistkasten': (80, 118),
 }
 RETINA = 2
 # Schwimmende Tiere: aus dem stehenden Bild wird unten so viel abgeschnitten
-# (Anteil der Höhe, der bleibt), dass Beine und Füße „unter Wasser“ sind
-CUT_BOTTOM = {'ente-schwimmt': 0.8}
+# (Anteil der Höhe, der bleibt), dass Beine und Füße „unter Wasser“ sind.
+# Gerade leer: die schwimmende Ente hat ein eigenes Bild (Sammelbild 5)
+CUT_BOTTOM = {}
 CLEAR = 10  # Pixel, die fast durchsichtig sind, werden ganz durchsichtig
 SOLID = 240  # Pixel, die fast deckend sind, werden ganz deckend
 MARGIN = 4  # etwas Luft um das Bild lassen

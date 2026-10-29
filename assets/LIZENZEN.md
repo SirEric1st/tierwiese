@@ -23,7 +23,7 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 |-------|------------|----------|
 | `assets/bilder/igel.png` | 27.10.2026 | ChatGPT |
 | `assets/bilder/ente.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
-| `assets/bilder/ente-schwimmt.png` | 28.10.2026 | ChatGPT (Sammelbild 1, unten abgeschnitten) |
+| `assets/bilder/ente-schwimmt.png` | 29.10.2026 | ChatGPT (Sammelbild 5) |
 | `assets/bilder/eichhoernchen.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
 | `assets/bilder/frosch.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
 | `assets/bilder/marienkaefer.png` | 28.10.2026 | ChatGPT (Sammelbild 1) |
@@ -38,6 +38,9 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 | `assets/bilder/fledermaus.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
 | `assets/bilder/waldkauz.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
 | `assets/bilder/biber.png` | 29.10.2026 | ChatGPT (Sammelbild 4) |
+| `assets/bilder/schilf.png` | 29.10.2026 | ChatGPT (Sammelbild 5) |
+| `assets/bilder/nistkasten.png` | 29.10.2026 | ChatGPT (Sammelbild 5) |
+| `assets/bilder/insektenhotel.png` | 29.10.2026 | ChatGPT (Sammelbild 5) |
 
 ### Sprachaufnahmen
 
