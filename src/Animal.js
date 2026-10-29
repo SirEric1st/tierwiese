@@ -5,7 +5,7 @@ import { getFood } from './foods.js';
 import { isPainted } from './textures.js';
 import { playHappy } from './sound.js';
 import { SAETZE, dislikeText } from './saetze.js';
-import { say } from './speech.js';
+import { say, sayImportant } from './speech.js';
 
 const WALK_SPEED = 170; // Pixel pro Sekunde
 const WANDER_SPEED = 70;
@@ -268,7 +268,7 @@ export class Animal {
       this.hop();
       // Weiter geht es, wenn der Satz zu Ende ist (aber frühestens nach 2 Sekunden)
       const start = this.scene.time.now;
-      say(text, () => this.scene.time.delayedCall(Math.max(0, 2000 - (this.scene.time.now - start)), done));
+      sayImportant(text, () => this.scene.time.delayedCall(Math.max(0, 2000 - (this.scene.time.now - start)), done));
     });
   }
 

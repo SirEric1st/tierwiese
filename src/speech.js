@@ -84,6 +84,7 @@ const buffers = new Map(); // schon geladene Aufnahmen (zuletzt benutzte zuerst 
 const MAX_BUFFERS = 40;
 let source = null; // die Aufnahme, die gerade läuft
 let speaking = 0; // zählt hoch, damit ein neuer Satz alte Rückrufe ungültig macht
+let important = 0; // läuft gerade ein wichtiger Satz (Nummer), darf ihn nichts unterbrechen
 
 // Prüfsumme eines Satzes (FNV-1a, 8 Hex-Zeichen) – genauso in tools/sprache.py
 export function clipName(text) {
@@ -168,17 +169,33 @@ function speakWithVoice(text, voiceURI) {
 //       Sprachausgabe, nach einer geschätzten Sprechzeit.
 // voiceURI (optional): mit dieser iPad-Stimme sprechen (zum Probehören)
 export function say(text, onDone, voiceURI) {
+  if (important && important === speaking) {
+    onDone?.(); // ein wichtiger Satz läuft noch: diesen hier auslassen
+    return;
+  }
+  speak(text, onDone, voiceURI);
+}
+
+// Wie say(), aber Antippen und andere Sätze unterbrechen ihn nicht
+// (z. B. wenn ein Tier einzieht und sein Geschenk überreicht)
+export function sayImportant(text, onDone) {
+  speak(text, onDone, undefined, true);
+}
+
+function speak(text, onDone, voiceURI, isImportant = false) {
   const parts = (Array.isArray(text) ? text : [text]).map((part) => part.trim()).filter(Boolean);
   const id = ++speaking;
+  important = isImportant ? id : 0;
   stopAll();
 
   let finished = false;
   const finish = () => {
     if (finished) return;
     finished = true;
+    if (important === id) important = 0;
     onDone?.();
   };
-  if (onDone) setTimeout(finish, 3000 + parts.join(' ').length * 90);
+  if (onDone || isImportant) setTimeout(finish, 3000 + parts.join(' ').length * 90);
 
   (async () => {
     for (const part of parts) {

@@ -26,7 +26,7 @@ import { playHappy } from '../sound.js';
 import { loadGame, saveGame } from '../save.js';
 import { SAETZE, SEASON_TEXTS } from '../saetze.js';
 import { SEASONS, SeasonView } from '../Seasons.js';
-import { say } from '../speech.js';
+import { say, sayImportant } from '../speech.js';
 
 const WORLD_WIDTH = 2400;
 const WORLD_HEIGHT = 1600;
@@ -452,7 +452,7 @@ export class WorldScene extends Phaser.Scene {
     const finish = () => {
       if (spoken && arrived) done();
     };
-    say(gift.text, () => {
+    sayImportant(gift.text, () => {
       spoken = true;
       finish();
     });
