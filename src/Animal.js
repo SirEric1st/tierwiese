@@ -9,8 +9,8 @@ import { say, sayImportant } from './speech.js';
 
 const WALK_SPEED = 170; // Pixel pro Sekunde
 const WANDER_SPEED = 70;
-const POND_RADIUS_X = 85; // Bereich im Teich, in dem die Ente schwimmt
-const POND_RADIUS_Y = 28;
+const POND_RADIUS_X = 105; // Bereich im Teich, in dem die Ente schwimmt
+const POND_RADIUS_Y = 36;
 const SHORE_RADIUS_X = 145; // vorne am Steinufer des Teich-Bilds (knapp außerhalb)
 const SHORE_RADIUS_Y = 84;
 const HEART_EVERY = 60; // nach so vielen Punkten Streicheln steigt ein Herz auf

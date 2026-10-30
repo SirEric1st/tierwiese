@@ -10,8 +10,8 @@ const MAX_PER_SOURCE = 2; // bei einem Ding höchstens so viel
 const SOURCE_REACH = 150; // so weit gehört Futter noch zu seinem Ding
 const PICKUP_SIZE = 50; // so groß liegt das Futter auf der Wiese
 const COLLECT_DISTANCE = 55; // so nah muss die Figur herankommen
-const POND_X = 70; // Wasserlinsen schwimmen in diesem Bereich des Teichs
-const POND_Y = 26;
+const POND_X = 90; // Wasserlinsen schwimmen in diesem Bereich des Teichs
+const POND_Y = 32;
 
 export class FoodField {
   // getPlaced: alles auf der Wiese; getFoods: Futterarten, die es geben darf

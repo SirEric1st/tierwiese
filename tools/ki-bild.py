@@ -31,6 +31,7 @@ SIZES = {
     'biber': (115, 110),
     'schilf': (120, 120),
     'nistkasten': (80, 118),
+    'teich': (380, 220),
 }
 RETINA = 2
 # Schwimmende Tiere: aus dem stehenden Bild wird unten so viel abgeschnitten

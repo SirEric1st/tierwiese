@@ -45,6 +45,10 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 | `assets/bilder/nussbaum.png` | 29.10.2026 | ChatGPT (Sammelbild 6) |
 | `assets/bilder/obstbaum.png` | 29.10.2026 | ChatGPT (Sammelbild 6) |
 | `assets/bilder/busch.png` | 29.10.2026 | ChatGPT (Sammelbild 6) |
+| `assets/bilder/teich.png` | 30.10.2026 | ChatGPT (Sammelbild 7) |
+| `assets/bilder/hecke.png` | 30.10.2026 | ChatGPT (Sammelbild 7) |
+| `assets/bilder/laubhaufen.png` | 30.10.2026 | ChatGPT (Sammelbild 7) |
+| `assets/bilder/totholz.png` | 30.10.2026 | ChatGPT (Sammelbild 7) |
 
 ### Sprachaufnahmen
 
