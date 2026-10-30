@@ -1,50 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="150" viewBox="0 0 100 150">
   <!-- Spielfigur (Kind). Eigene Zeichnung für das Spiel Tierwiese. -->
   <defs>
-    <radialGradient id="haut" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffe0c4"/><stop offset="1" stop-color="#eab48c"/></radialGradient>
-    <radialGradient id="haare" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#a8693a"/><stop offset="0.6" stop-color="#7a4520"/><stop offset="1" stop-color="#5a3015"/></radialGradient>
-    <linearGradient id="pulli" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8f6b"/><stop offset="1" stop-color="#e2553a"/></linearGradient>
-    <linearGradient id="hose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5476c4"/><stop offset="1" stop-color="#33508f"/></linearGradient>
-    <linearGradient id="schuh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a0603a"/><stop offset="1" stop-color="#6e3a1e"/></linearGradient>
-    <radialGradient id="schatten" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1d3b14" stop-opacity="0.35"/><stop offset="0.7" stop-color="#1d3b14" stop-opacity="0.15"/><stop offset="1" stop-color="#1d3b14" stop-opacity="0"/></radialGradient>
+    <radialGradient id="haut" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffe6d0"/><stop offset="0.7" stop-color="#ffe0c4"/><stop offset="1" stop-color="#d9bea7"/></radialGradient>
+    <radialGradient id="gesicht" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#ffe8d3"/><stop offset="0.65" stop-color="#ffe0c4"/><stop offset="1" stop-color="#ccb39d"/></radialGradient>
+    <radialGradient id="haare" cx="38%" cy="25%" r="80%"><stop offset="0" stop-color="#c69e7f"/><stop offset="0.5" stop-color="#a8693a"/><stop offset="1" stop-color="#6d4426"/></radialGradient>
+    <radialGradient id="locke" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#c69e7f"/><stop offset="0.6" stop-color="#a8693a"/><stop offset="1" stop-color="#764a29"/></radialGradient>
+    <radialGradient id="augapfel" cx="45%" cy="35%" r="70%"><stop offset="0.6" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe3ea"/></radialGradient>
+    <radialGradient id="iris" cx="50%" cy="60%" r="55%"><stop offset="0" stop-color="#a8713c"/><stop offset="0.7" stop-color="#6b4220"/><stop offset="1" stop-color="#3d240f"/></radialGradient>
+    <radialGradient id="schleife" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffb3c4"/><stop offset="1" stop-color="#e35a7c"/></radialGradient>
+    <radialGradient id="schuh" cx="40%" cy="25%" r="80%"><stop offset="0" stop-color="#c07b4c"/><stop offset="0.6" stop-color="#8a4f2b"/><stop offset="1" stop-color="#5c3118"/></radialGradient>
+    <radialGradient id="stern" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#fff2a8"/><stop offset="0.6" stop-color="#ffd84a"/><stop offset="1" stop-color="#e8a91c"/></radialGradient>
+    <radialGradient id="licht" cx="38%" cy="20%" r="70%"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="pulli" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b94630"/><stop offset="0.38" stop-color="#e7705a"/><stop offset="0.65" stop-color="#e2553a"/><stop offset="1" stop-color="#ac412c"/></linearGradient>
+    <linearGradient id="hose" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#344e8a"/><stop offset="0.38" stop-color="#5e79b6"/><stop offset="0.65" stop-color="#3f5fa8"/><stop offset="1" stop-color="#304880"/></linearGradient>
+    <linearGradient id="arm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d1b8a1"/><stop offset="0.38" stop-color="#ffe5cd"/><stop offset="0.65" stop-color="#ffe0c4"/><stop offset="1" stop-color="#c2aa95"/></linearGradient>
+    <filter id="weich" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>
   </defs>
-  <!-- Beine und Schuhe -->
-  <rect x="33" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="#2a4074" stroke-width="1.5"/>
-  <rect x="52" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="#2a4074" stroke-width="1.5"/>
-  <path d="M27,146 Q27,135 39,135 Q48,135 48,142 L48,147 Q38,149 27,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
-  <path d="M73,146 Q73,135 61,135 Q52,135 52,142 L52,147 Q62,149 73,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
-  <!-- Arme -->
-  <path d="M26,78 Q14,92 18,106" stroke="#e2553a" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <path d="M74,78 Q86,92 82,106" stroke="#e2553a" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <circle cx="18.5" cy="108" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <circle cx="81.5" cy="108" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <!-- Pulli -->
-  <path d="M28,74 Q50,64 72,74 Q78,96 74,118 Q50,124 26,118 Q22,96 28,74 Z" fill="url(#pulli)" stroke="#b9432c" stroke-width="1.8"/>
-  <path d="M30,112 Q50,118 70,112" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M33,80 Q40,76 46,78" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <!-- Stern auf dem Pulli -->
-  <path d="M50,86 L53,93 L60.5,93.5 L54.8,98.2 L56.7,105.5 L50,101.5 L43.3,105.5 L45.2,98.2 L39.5,93.5 L47,93 Z" fill="#ffd84a" stroke="#e0a91f" stroke-width="1.2" stroke-linejoin="round"/>
-  <!-- Kopf -->
-  <circle cx="21" cy="47" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <circle cx="79" cy="47" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <circle cx="50" cy="44" r="30" fill="url(#haut)" stroke="#c98e66" stroke-width="1.8"/>
-  <!-- Haare -->
-  <path d="M19,44 Q16,14 46,11 Q74,9 81,36 Q82,44 80,46 Q74,30 60,27 Q52,34 38,30 Q28,32 22,46 Z" fill="url(#haare)" stroke="#4a2810" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M34,18 Q46,12 60,16" stroke="#c98a55" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
-  <!-- Augenbrauen, Augen, Wangen, Mund -->
-  <path d="M33,35 Q38,32 43,34" stroke="#5a3015" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  <path d="M57,34 Q62,32 67,35" stroke="#5a3015" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  <circle cx="39" cy="46" r="8.0" fill="#fff" stroke="#00000022" stroke-width="1"/>
-  <circle cx="40.0" cy="46.6" r="6.4" fill="#5a3a1e"/>
-  <circle cx="40.0" cy="46.6" r="3.5" fill="#0d0704"/>
-  <circle cx="37.7" cy="43.8" r="2.4" fill="#fff"/>
-  <circle cx="42.2" cy="48.9" r="1.1" fill="#fff" opacity="0.9"/>
-  <circle cx="61" cy="46" r="8.0" fill="#fff" stroke="#00000022" stroke-width="1"/>
-  <circle cx="62.0" cy="46.6" r="6.4" fill="#5a3a1e"/>
-  <circle cx="62.0" cy="46.6" r="3.5" fill="#0d0704"/>
-  <circle cx="59.7" cy="43.8" r="2.4" fill="#fff"/>
-  <circle cx="64.2" cy="48.9" r="1.1" fill="#fff" opacity="0.9"/>
-  <ellipse cx="29" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <ellipse cx="71" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <path d="M43,58 Q50,65 57,58" stroke="#9a3d2b" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M34,108 L48,108 L47,138 Q41,141 35,138 Z" fill="url(#hose)" stroke="#293e6d" stroke-opacity="0.4" stroke-width="1"/>
+  <path d="M52,108 L66,108 L65,138 Q59,141 53,138 Z" fill="url(#hose)" stroke="#293e6d" stroke-opacity="0.4" stroke-width="1"/>
+  <path d="M26,145 Q25,134 38,134 Q48,134 48.5,141 L48.5,146 Q38,149.5 26,145 Z" fill="url(#schuh)"/>
+  <path d="M74,145 Q75,134 62,134 Q52,134 51.5,141 L51.5,146 Q62,149.5 74,145 Z" fill="url(#schuh)"/>
+  <path d="M27,145.5 Q38,148.5 48.5,146 M73,145.5 Q62,148.5 51.5,146" stroke="#f3e6d6" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <ellipse cx="34" cy="137.5" rx="4" ry="1.8" fill="#fff" opacity="0.35"/>
+  <ellipse cx="66" cy="137.5" rx="4" ry="1.8" fill="#fff" opacity="0.35"/>
+  
+  <path d="M24,86 Q17,96 19,106" stroke="url(#arm)" stroke-width="10.5" fill="none" stroke-linecap="round"/>
+  <path d="M76,86 Q83,96 81,106" stroke="url(#arm)" stroke-width="10.5" fill="none" stroke-linecap="round"/>
+  <circle cx="19.5" cy="108" r="7" fill="url(#haut)"/>
+  <circle cx="80.5" cy="108" r="7" fill="url(#haut)"/>
+  <path d="M30,73 Q50,65 70,73 Q77,95 73,117 Q50,123 27,117 Q23,95 30,73 Z" fill="url(#pulli)" stroke="#933726" stroke-opacity="0.4" stroke-width="1.2"/>
+  <path d="M30,73 Q50,65 70,73 Q77,95 73,117 Q50,123 27,117 Q23,95 30,73 Z" fill="url(#licht)"/>
+  <path d="M31,74 Q20,79 18.5,90 Q24,94 29,91 Z" fill="url(#pulli)" stroke="#933726" stroke-opacity="0.4" stroke-width="1.2"/>
+  <path d="M69,74 Q80,79 81.5,90 Q76,94 71,91 Z" fill="url(#pulli)" stroke="#933726" stroke-opacity="0.4" stroke-width="1.2"/>
+  <path d="M28,112 Q50,119 72,112" stroke="#933726" stroke-opacity="0.35" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="50" cy="76" rx="15" ry="4.5" fill="#000" opacity="0.22" filter="url(#weich)"/>
+  <path d="M50,86 L53,93 L60.5,93.5 L54.8,98.2 L56.7,105.5 L50,101.5 L43.3,105.5 L45.2,98.2 L39.5,93.5 L47,93 Z" fill="url(#stern)" stroke="#d99a1a" stroke-opacity="0.6" stroke-width="0.8" stroke-linejoin="round"/>
+  <circle cx="20.5" cy="48" r="7" fill="url(#haut)"/>
+  <circle cx="79.5" cy="48" r="7" fill="url(#haut)"/>
+  <circle cx="21.5" cy="48" r="3.2" fill="#bfa893" opacity="0.35"/>
+  <circle cx="78.5" cy="48" r="3.2" fill="#bfa893" opacity="0.35"/>
+  <circle cx="50" cy="44" r="31" fill="url(#gesicht)"/>
+  <path d="M19,44 Q16,14 46,11 Q74,9 81,36 Q82,44 80,46 Q74,30 60,27 Q52,34 38,30 Q28,32 22,46 Z" fill="url(#haare)" stroke="#5c3a20" stroke-opacity="0.45" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M30,22 Q44,13 62,16" stroke="#cfad93" stroke-width="3.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M36,27 Q46,21 56,22" stroke="#cfad93" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <path d="M32,34 Q37,31 43,33" stroke="#764a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M57,33 Q63,31 68,34" stroke="#764a29" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  
+  <ellipse cx="39" cy="46" rx="7.4" ry="8.4" fill="url(#augapfel)"/>
+  <circle cx="39.8" cy="47" r="6" fill="url(#iris)"/>
+  <circle cx="39.8" cy="47" r="2.9" fill="#120a05"/>
+  <ellipse cx="37.4" cy="43.8" rx="2.3" ry="2.6" fill="#fff"/>
+  <circle cx="42" cy="49.4" r="1" fill="#fff" opacity="0.85"/>
+  <path d="M31.4,44 Q39,35.6 46.6,44" stroke="#3a2416" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  
+  <ellipse cx="61" cy="46" rx="7.4" ry="8.4" fill="url(#augapfel)"/>
+  <circle cx="61.8" cy="47" r="6" fill="url(#iris)"/>
+  <circle cx="61.8" cy="47" r="2.9" fill="#120a05"/>
+  <ellipse cx="59.4" cy="43.8" rx="2.3" ry="2.6" fill="#fff"/>
+  <circle cx="64" cy="49.4" r="1" fill="#fff" opacity="0.85"/>
+  <path d="M53.4,44 Q61,35.6 68.6,44" stroke="#3a2416" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <ellipse cx="28" cy="58" rx="6" ry="4" fill="#ff7f7f" opacity="0.45" filter="url(#weich)"/>
+  <ellipse cx="72" cy="58" rx="6" ry="4" fill="#ff7f7f" opacity="0.45" filter="url(#weich)"/>
+  <ellipse cx="50" cy="55.5" rx="2.6" ry="1.9" fill="#bfa893" opacity="0.5"/>
+  <ellipse cx="49.3" cy="54.8" rx="1" ry="0.7" fill="#fff" opacity="0.7"/>
+  <path d="M43,59.5 Q50,61.5 57,59.5 Q55,67 50,67 Q45,67 43,59.5 Z" fill="#8f3426"/>
+  <path d="M46,64.6 Q50,62.6 54,64.6 Q52,67 50,67 Q48,67 46,64.6 Z" fill="#ff8a8a"/>
 </svg>

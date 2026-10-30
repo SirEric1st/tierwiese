@@ -133,50 +133,9 @@ def schatten():
 
 
 # ---------------------------------------------------------------- Figur
-def figur():
-    defs = '\n'.join([
-        radial('haut', st(('0', '#ffe0c4'), ('1', '#eab48c')), cx='40%', cy='35%'),
-        radial('haare', st(('0', '#a8693a'), ('0.6', '#7a4520'), ('1', '#5a3015'))),
-        linear('pulli', st(('0', '#ff8f6b'), ('1', '#e2553a'))),
-        linear('hose', st(('0', '#5476c4'), ('1', '#33508f'))),
-        linear('schuh', st(('0', '#a0603a'), ('1', '#6e3a1e'))),
-        SHADOW_DEF,
-    ])
-    body = f'''  <!-- Beine und Schuhe -->
-  <rect x="33" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="#2a4074" stroke-width="1.5"/>
-  <rect x="52" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="#2a4074" stroke-width="1.5"/>
-  <path d="M27,146 Q27,135 39,135 Q48,135 48,142 L48,147 Q38,149 27,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
-  <path d="M73,146 Q73,135 61,135 Q52,135 52,142 L52,147 Q62,149 73,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
-  <!-- Arme -->
-  <path d="M26,78 Q14,92 18,106" stroke="#e2553a" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <path d="M74,78 Q86,92 82,106" stroke="#e2553a" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <circle cx="18.5" cy="108" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <circle cx="81.5" cy="108" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <!-- Pulli -->
-  <path d="M28,74 Q50,64 72,74 Q78,96 74,118 Q50,124 26,118 Q22,96 28,74 Z" fill="url(#pulli)" stroke="#b9432c" stroke-width="1.8"/>
-  <path d="M30,112 Q50,118 70,112" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M33,80 Q40,76 46,78" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <!-- Stern auf dem Pulli -->
-  <path d="M50,86 L53,93 L60.5,93.5 L54.8,98.2 L56.7,105.5 L50,101.5 L43.3,105.5 L45.2,98.2 L39.5,93.5 L47,93 Z" fill="#ffd84a" stroke="#e0a91f" stroke-width="1.2" stroke-linejoin="round"/>
-  <!-- Kopf -->
-  <circle cx="21" cy="47" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <circle cx="79" cy="47" r="7" fill="url(#haut)" stroke="#c98e66" stroke-width="1.5"/>
-  <circle cx="50" cy="44" r="30" fill="url(#haut)" stroke="#c98e66" stroke-width="1.8"/>
-  <!-- Haare -->
-  <path d="M19,44 Q16,14 46,11 Q74,9 81,36 Q82,44 80,46 Q74,30 60,27 Q52,34 38,30 Q28,32 22,46 Z" fill="url(#haare)" stroke="#4a2810" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M34,18 Q46,12 60,16" stroke="#c98a55" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>
-  <!-- Augenbrauen, Augen, Wangen, Mund -->
-  <path d="M33,35 Q38,32 43,34" stroke="#5a3015" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  <path d="M57,34 Q62,32 67,35" stroke="#5a3015" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-{eye(39, 46, 6.4, '#5a3a1e')}
-{eye(61, 46, 6.4, '#5a3a1e')}
-  <ellipse cx="29" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <ellipse cx="71" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <path d="M43,58 Q50,65 57,58" stroke="#9a3d2b" stroke-width="2.6" fill="none" stroke-linecap="round"/>'''
-    svg('figur', 100, 150, defs, body, 'Spielfigur (Kind).')
+# Die Spielfigur zeichnet src/figure.js; das Ersatzbild erzeugt tools/figur.mjs
 
 
-# ---------------------------------------------------------------- Igel
 def igel():
     cx, cy = 54, 56
     pts = []
@@ -1219,7 +1178,6 @@ blume('blume-gelb', '#fff3a0', '#f2c21c')
 blume('blume-rosa', '#ffd6e6', '#f27aa8')
 blume('blume-weiss', '#ffffff', '#d9dde6')
 schatten()
-figur()
 igel()
 ente('ente', False)
 ente('ente-schwimmt', True)

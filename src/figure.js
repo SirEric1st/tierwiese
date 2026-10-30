@@ -80,29 +80,30 @@ function shade(hex, amount) {
   return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }
 
-function eye(x, y, r) {
+// Ein großes, glänzendes Auge mit Lidstrich
+function eye(x, y) {
   return `
-  <circle cx="${x}" cy="${y}" r="${r * 1.25}" fill="#fff" stroke="#00000022" stroke-width="1"/>
-  <circle cx="${x + r * 0.15}" cy="${y + r * 0.1}" r="${r}" fill="#5a3a1e"/>
-  <circle cx="${x + r * 0.15}" cy="${y + r * 0.1}" r="${r * 0.55}" fill="#0d0704"/>
-  <circle cx="${x - r * 0.2}" cy="${y - r * 0.35}" r="${r * 0.38}" fill="#fff"/>
-  <circle cx="${x + r * 0.5}" cy="${y + r * 0.45}" r="${r * 0.17}" fill="#fff" opacity="0.9"/>`;
+  <ellipse cx="${x}" cy="${y}" rx="7.4" ry="8.4" fill="url(#augapfel)"/>
+  <circle cx="${x + 0.8}" cy="${y + 1}" r="6" fill="url(#iris)"/>
+  <circle cx="${x + 0.8}" cy="${y + 1}" r="2.9" fill="#120a05"/>
+  <ellipse cx="${x - 1.6}" cy="${y - 2.2}" rx="2.3" ry="2.6" fill="#fff"/>
+  <circle cx="${x + 3}" cy="${y + 3.4}" r="1" fill="#fff" opacity="0.85"/>
+  <path d="M${x - 7.6},${y - 2} Q${x},${y - 10.4} ${x + 7.6},${y - 2}" stroke="#3a2416" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
 }
 
 // Haare hinter dem Kopf (lange Haare, Zöpfe)
 function hairBack(style, line) {
   if (style === 'lang') {
-    return `<path d="M18,46 Q12,10 50,9 Q88,10 82,46 L86,84 Q74,92 64,80 L36,80 Q26,92 14,84 Z" fill="url(#haare)" stroke="${line}" stroke-width="1.8" stroke-linejoin="round"/>`;
+    return `<path d="M18,46 Q12,9 50,8 Q88,9 82,46 L85,82 Q76,92 65,82 L35,82 Q24,92 15,82 Z" fill="url(#haare)" stroke="${line}" stroke-opacity="0.45" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M20,60 Q19,72 22,82 M80,60 Q81,72 78,82" stroke="#000" stroke-opacity="0.12" stroke-width="2" fill="none" stroke-linecap="round"/>`;
   }
   if (style === 'zoepfe') {
-    return [
-      [10, 60],
-      [90, 60],
-    ]
+    return [12, 88]
       .map(
-        ([x, y]) => `
-  <ellipse cx="${x}" cy="${y}" rx="10" ry="16" fill="url(#haare)" stroke="${line}" stroke-width="1.8"/>
-  <circle cx="${x > 50 ? x - 6 : x + 6}" cy="${y - 14}" r="4.5" fill="#ff7a9a" stroke="#c94a6a" stroke-width="1.2"/>`
+        (x) => `
+  <ellipse cx="${x}" cy="62" rx="10" ry="16" fill="url(#haare)" stroke="${line}" stroke-opacity="0.45" stroke-width="1.2"/>
+  <path d="M${x - 6},56 Q${x},60 ${x + 6},56 M${x - 6},66 Q${x},70 ${x + 6},66" stroke="#000" stroke-opacity="0.13" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <circle cx="${x > 50 ? x - 6 : x + 6}" cy="47" r="4.8" fill="url(#schleife)"/>`
       )
       .join('');
   }
@@ -116,18 +117,19 @@ function hairFront(style, line, light) {
     for (let i = 0; i <= 10; i++) {
       const a = Math.PI * (1.05 + (i / 10) * 0.9);
       curls.push(
-        `<circle cx="${(50 + Math.cos(a) * 30).toFixed(1)}" cy="${(42 + Math.sin(a) * 30).toFixed(1)}" r="10" fill="url(#haare)" stroke="${line}" stroke-width="1.6"/>`
+        `<circle cx="${(50 + Math.cos(a) * 30).toFixed(1)}" cy="${(42 + Math.sin(a) * 30).toFixed(1)}" r="10" fill="url(#locke)" stroke="${line}" stroke-opacity="0.35" stroke-width="1"/>`
       );
     }
-    curls.push(`<circle cx="40" cy="20" r="10" fill="url(#haare)"/><circle cx="60" cy="20" r="10" fill="url(#haare)"/>`);
+    curls.push(`<circle cx="40" cy="20" r="10" fill="url(#locke)"/><circle cx="60" cy="20" r="10" fill="url(#locke)"/>`);
     return curls.join('\n  ');
   }
   const bangs =
     style === 'kurz'
       ? 'M19,44 Q16,14 46,11 Q74,9 81,36 Q82,44 80,46 Q74,30 60,27 Q52,34 38,30 Q28,32 22,46 Z'
       : 'M20,46 Q16,12 50,11 Q84,12 80,46 Q76,30 64,26 Q56,33 48,27 Q40,34 30,28 Q24,34 20,46 Z';
-  return `<path d="${bangs}" fill="url(#haare)" stroke="${line}" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="M34,18 Q46,12 60,16" stroke="${light}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/>`;
+  return `<path d="${bangs}" fill="url(#haare)" stroke="${line}" stroke-opacity="0.45" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M30,22 Q44,13 62,16" stroke="${light}" stroke-width="3.2" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M36,27 Q46,21 56,22" stroke="${light}" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.5"/>`;
 }
 
 // Der Kopf: gezeichnet mit Frisur – oder das Foto aus dem Eltern-Bereich
@@ -137,20 +139,31 @@ function head(style, skinLine, hair, hairLine, photo) {
   <image href="${photo}" x="20" y="14" width="60" height="60" clip-path="url(#kopf)" preserveAspectRatio="xMidYMid slice"/>
   <circle cx="50" cy="44" r="30" fill="none" stroke="${skinLine}" stroke-width="2.5"/>`;
   }
-  return `<circle cx="21" cy="47" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
-  <circle cx="79" cy="47" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
-  <circle cx="50" cy="44" r="30" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.8"/>
-  ${hairFront(style, hairLine, shade(hair, 0.35))}
-  <path d="M33,35 Q38,32 43,34" stroke="${shade(hair, -0.3)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  <path d="M57,34 Q62,32 67,35" stroke="${shade(hair, -0.3)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-  ${eye(39, 46, 6.4)}
-  ${eye(61, 46, 6.4)}
-  <ellipse cx="29" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <ellipse cx="71" cy="57" rx="5.5" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
-  <path d="M43,58 Q50,65 57,58" stroke="#9a3d2b" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  return `<circle cx="20.5" cy="48" r="7" fill="url(#haut)"/>
+  <circle cx="79.5" cy="48" r="7" fill="url(#haut)"/>
+  <circle cx="21.5" cy="48" r="3.2" fill="${skinLine}" opacity="0.35"/>
+  <circle cx="78.5" cy="48" r="3.2" fill="${skinLine}" opacity="0.35"/>
+  <circle cx="50" cy="44" r="31" fill="url(#gesicht)"/>
+  ${hairFront(style, hairLine, shade(hair, 0.45))}
+  <path d="M32,34 Q37,31 43,33" stroke="${shade(hair, -0.3)}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M57,33 Q63,31 68,34" stroke="${shade(hair, -0.3)}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  ${eye(39, 46)}
+  ${eye(61, 46)}
+  <ellipse cx="28" cy="58" rx="6" ry="4" fill="#ff7f7f" opacity="0.45" filter="url(#weich)"/>
+  <ellipse cx="72" cy="58" rx="6" ry="4" fill="#ff7f7f" opacity="0.45" filter="url(#weich)"/>
+  <ellipse cx="50" cy="55.5" rx="2.6" ry="1.9" fill="${skinLine}" opacity="0.5"/>
+  <ellipse cx="49.3" cy="54.8" rx="1" ry="0.7" fill="#fff" opacity="0.7"/>
+  <path d="M43,59.5 Q50,61.5 57,59.5 Q55,67 50,67 Q45,67 43,59.5 Z" fill="#8f3426"/>
+  <path d="M46,64.6 Q50,62.6 54,64.6 Q52,67 50,67 Q48,67 46,64.6 Z" fill="#ff8a8a"/>`;
+}
+
+// Rund wie ein Zylinder: in der Mitte hell, an den Seiten dunkler
+function roundGradient(id, color) {
+  return `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${shade(color, -0.18)}"/><stop offset="0.38" stop-color="${shade(color, 0.16)}"/><stop offset="0.65" stop-color="${color}"/><stop offset="1" stop-color="${shade(color, -0.24)}"/></linearGradient>`;
 }
 
 // Die ganze Figur als SVG-Text; scale = wie viele Pixel pro Punkt.
+// Weich schattiert ohne harte Umrisse, damit sie zu den gemalten Tieren passt.
 // photo (optional): Foto vom Gesicht als Daten-Adresse, ersetzt den Kopf
 export function figureSvg(figure, scale = 1, photo = null) {
   const f = normalizeFigure(figure);
@@ -161,30 +174,45 @@ export function figureSvg(figure, scale = 1, photo = null) {
   const pants = PANTS_COLORS[f.pants].color;
   const skinLine = shade(skin, -0.25);
   const hairLine = shade(hair, -0.45);
-  const shirtLine = shade(shirt, -0.3);
-  const pantsLine = shade(pants, -0.3);
+  const shirtLine = shade(shirt, -0.35);
+  const pantsLine = shade(pants, -0.35);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${100 * scale}" height="${150 * scale}" viewBox="0 0 100 150">
   <defs>
-    <radialGradient id="haut" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="${shade(skin, 0.15)}"/><stop offset="1" stop-color="${shade(skin, -0.1)}"/></radialGradient>
-    <radialGradient id="haare" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="${shade(hair, 0.25)}"/><stop offset="0.6" stop-color="${hair}"/><stop offset="1" stop-color="${shade(hair, -0.25)}"/></radialGradient>
-    <linearGradient id="pulli" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(shirt, 0.2)}"/><stop offset="1" stop-color="${shirt}"/></linearGradient>
-    <linearGradient id="hose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(pants, 0.15)}"/><stop offset="1" stop-color="${shade(pants, -0.1)}"/></linearGradient>
-    <linearGradient id="schuh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a0603a"/><stop offset="1" stop-color="#6e3a1e"/></linearGradient>
+    <radialGradient id="haut" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="${shade(skin, 0.2)}"/><stop offset="0.7" stop-color="${skin}"/><stop offset="1" stop-color="${shade(skin, -0.15)}"/></radialGradient>
+    <radialGradient id="gesicht" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="${shade(skin, 0.25)}"/><stop offset="0.65" stop-color="${skin}"/><stop offset="1" stop-color="${shade(skin, -0.2)}"/></radialGradient>
+    <radialGradient id="haare" cx="38%" cy="25%" r="80%"><stop offset="0" stop-color="${shade(hair, 0.35)}"/><stop offset="0.5" stop-color="${hair}"/><stop offset="1" stop-color="${shade(hair, -0.35)}"/></radialGradient>
+    <radialGradient id="locke" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="${shade(hair, 0.35)}"/><stop offset="0.6" stop-color="${hair}"/><stop offset="1" stop-color="${shade(hair, -0.3)}"/></radialGradient>
+    <radialGradient id="augapfel" cx="45%" cy="35%" r="70%"><stop offset="0.6" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe3ea"/></radialGradient>
+    <radialGradient id="iris" cx="50%" cy="60%" r="55%"><stop offset="0" stop-color="#a8713c"/><stop offset="0.7" stop-color="#6b4220"/><stop offset="1" stop-color="#3d240f"/></radialGradient>
+    <radialGradient id="schleife" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffb3c4"/><stop offset="1" stop-color="#e35a7c"/></radialGradient>
+    <radialGradient id="schuh" cx="40%" cy="25%" r="80%"><stop offset="0" stop-color="#c07b4c"/><stop offset="0.6" stop-color="#8a4f2b"/><stop offset="1" stop-color="#5c3118"/></radialGradient>
+    <radialGradient id="stern" cx="40%" cy="35%" r="65%"><stop offset="0" stop-color="#fff2a8"/><stop offset="0.6" stop-color="#ffd84a"/><stop offset="1" stop-color="#e8a91c"/></radialGradient>
+    <radialGradient id="licht" cx="38%" cy="20%" r="70%"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    ${roundGradient('pulli', shirt)}
+    ${roundGradient('hose', pants)}
+    ${roundGradient('arm', skin)}
+    <filter id="weich" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>
   </defs>
-  <rect x="33" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="${pantsLine}" stroke-width="1.5"/>
-  <rect x="52" y="110" width="15" height="30" rx="6" fill="url(#hose)" stroke="${pantsLine}" stroke-width="1.5"/>
-  <path d="M27,146 Q27,135 39,135 Q48,135 48,142 L48,147 Q38,149 27,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
-  <path d="M73,146 Q73,135 61,135 Q52,135 52,142 L52,147 Q62,149 73,146 Z" fill="url(#schuh)" stroke="#55301a" stroke-width="1.5"/>
+  <path d="M34,108 L48,108 L47,138 Q41,141 35,138 Z" fill="url(#hose)" stroke="${pantsLine}" stroke-opacity="0.4" stroke-width="1"/>
+  <path d="M52,108 L66,108 L65,138 Q59,141 53,138 Z" fill="url(#hose)" stroke="${pantsLine}" stroke-opacity="0.4" stroke-width="1"/>
+  <path d="M26,145 Q25,134 38,134 Q48,134 48.5,141 L48.5,146 Q38,149.5 26,145 Z" fill="url(#schuh)"/>
+  <path d="M74,145 Q75,134 62,134 Q52,134 51.5,141 L51.5,146 Q62,149.5 74,145 Z" fill="url(#schuh)"/>
+  <path d="M27,145.5 Q38,148.5 48.5,146 M73,145.5 Q62,148.5 51.5,146" stroke="#f3e6d6" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <ellipse cx="34" cy="137.5" rx="4" ry="1.8" fill="#fff" opacity="0.35"/>
+  <ellipse cx="66" cy="137.5" rx="4" ry="1.8" fill="#fff" opacity="0.35"/>
   ${photo ? '' : hairBack(style, hairLine)}
-  <path d="M26,78 Q14,92 18,106" stroke="${shirt}" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <path d="M74,78 Q86,92 82,106" stroke="${shirt}" stroke-width="13" fill="none" stroke-linecap="round"/>
-  <circle cx="18.5" cy="108" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
-  <circle cx="81.5" cy="108" r="7" fill="url(#haut)" stroke="${skinLine}" stroke-width="1.5"/>
-  <path d="M28,74 Q50,64 72,74 Q78,96 74,118 Q50,124 26,118 Q22,96 28,74 Z" fill="url(#pulli)" stroke="${shirtLine}" stroke-width="1.8"/>
-  <path d="M30,112 Q50,118 70,112" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M33,80 Q40,76 46,78" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M50,86 L53,93 L60.5,93.5 L54.8,98.2 L56.7,105.5 L50,101.5 L43.3,105.5 L45.2,98.2 L39.5,93.5 L47,93 Z" fill="#ffd84a" stroke="#e0a91f" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M24,86 Q17,96 19,106" stroke="url(#arm)" stroke-width="10.5" fill="none" stroke-linecap="round"/>
+  <path d="M76,86 Q83,96 81,106" stroke="url(#arm)" stroke-width="10.5" fill="none" stroke-linecap="round"/>
+  <circle cx="19.5" cy="108" r="7" fill="url(#haut)"/>
+  <circle cx="80.5" cy="108" r="7" fill="url(#haut)"/>
+  <path d="M30,73 Q50,65 70,73 Q77,95 73,117 Q50,123 27,117 Q23,95 30,73 Z" fill="url(#pulli)" stroke="${shirtLine}" stroke-opacity="0.4" stroke-width="1.2"/>
+  <path d="M30,73 Q50,65 70,73 Q77,95 73,117 Q50,123 27,117 Q23,95 30,73 Z" fill="url(#licht)"/>
+  <path d="M31,74 Q20,79 18.5,90 Q24,94 29,91 Z" fill="url(#pulli)" stroke="${shirtLine}" stroke-opacity="0.4" stroke-width="1.2"/>
+  <path d="M69,74 Q80,79 81.5,90 Q76,94 71,91 Z" fill="url(#pulli)" stroke="${shirtLine}" stroke-opacity="0.4" stroke-width="1.2"/>
+  <path d="M28,112 Q50,119 72,112" stroke="${shirtLine}" stroke-opacity="0.35" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="50" cy="76" rx="15" ry="4.5" fill="#000" opacity="0.22" filter="url(#weich)"/>
+  <path d="M50,86 L53,93 L60.5,93.5 L54.8,98.2 L56.7,105.5 L50,101.5 L43.3,105.5 L45.2,98.2 L39.5,93.5 L47,93 Z" fill="url(#stern)" stroke="#d99a1a" stroke-opacity="0.6" stroke-width="0.8" stroke-linejoin="round"/>
   ${head(style, skinLine, hair, hairLine, photo)}
 </svg>`;
 }
