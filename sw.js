@@ -115,6 +115,7 @@ const FILES = [
   'assets/bilder/steine.png',
   'assets/bilder/blumen.png',
   'assets/bilder/bau.png',
+  'assets/bilder/reh.png',
   'assets/bilder/marienkaefer.png',
   'src/main.js',
   'src/display.js',

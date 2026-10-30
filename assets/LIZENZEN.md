@@ -52,6 +52,7 @@ werden. Für das Spiel zugeschnitten und verkleinert mit `tools/ki-bild.py`.
 | `assets/bilder/steine.png` | 30.10.2026 | ChatGPT (Sammelbild 8) |
 | `assets/bilder/blumen.png` | 30.10.2026 | ChatGPT (Sammelbild 8) |
 | `assets/bilder/bau.png` | 30.10.2026 | ChatGPT (Sammelbild 8) |
+| `assets/bilder/reh.png` | 30.10.2026 | ChatGPT (Einzelbild) |
 
 ### Sprachaufnahmen
 
